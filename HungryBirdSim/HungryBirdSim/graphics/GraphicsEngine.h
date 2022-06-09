@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "Queues.h"
+
 using std::string;
 using std::vector;
 
@@ -33,6 +35,7 @@ namespace graphics
 		GLFWwindow* window;
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
+		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
 		void initWindow();
 		void initVulkan();
@@ -44,6 +47,9 @@ namespace graphics
 		bool checkValidationLayerSupport();
 		void setupDebugMessenger();
 		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+		void pickPhysicalDevice();
+		bool isDeviceSuitable(VkPhysicalDevice device);
+		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 		void mainLoop();
 		void cleanup();
 
