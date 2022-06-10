@@ -2,13 +2,20 @@
 
 #ifndef GRAPHICSENGINE_H_
 #define GRAPHICSENGINE_H_
-
 #define GLFW_INCLUDE_VULKAN
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_EXPOSE_NATIVE_WIN32
+
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include <string>
 #include <vector>
 
 #include "Queues.h"
+#include "SwapChainSupportDetails.h"
+
+
+
 
 using std::string;
 using std::vector;
@@ -39,6 +46,19 @@ namespace graphics
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+		VkDevice device;
+		VkQueue graphicsQueue;
+		VkQueue presentQueue;
+		VkSurfaceKHR surface;
+		VkSwapchainKHR swapChain;
+		VkFormat swapChainImageFormat;
+		VkExtent2D swapChainExtent;
+
+		std::vector<const char*> deviceExtensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		};
+		std::vector<VkImage> swapChainImages;
+		std::vector<VkImageView> swapChainImageViews;
 
 		void initWindow();
 		void initVulkan();
@@ -78,6 +98,10 @@ namespace graphics
 		 */
 		void pickPhysicalDevice();
 		/**
+		 * Creates a logical device to interface with the selected physical device and retrieves its queries.
+		 */
+		void createLogicalDevice();
+		/**
 		 * Decides if a device is suitable for the application.
 		 * 
 		 * @param device the physical device to be analysed for requirements of the application.
@@ -98,6 +122,56 @@ namespace graphics
 		 * @return the index of the found GPU
 		 */
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+		/**
+		 * Creates the surface used to present rendered images, handling different OS types automatically. 
+		 * 
+		 */
+		void createSurface();
+		/**
+		 * Checks if all the required extensions are supported by a device
+		 * 
+		 * @param device is the device to be checked
+		 * @return True if the device supports all the required extensions
+		 */
+		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+		/**
+		 * Checks if the device supports swap chain related requirements
+		 * 
+		 * @param device is the device to be checked
+		 * @return True if the device supports all the required swap chain properties
+		 */
+		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+		/**
+		 * Chooses the best surface format supported (color depth)
+		 * 
+		 * @param availableFormats the available formats
+		 * @return the chosen surface format
+		 */
+		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+		/**
+		 * Chooses the presentation format. If MailboxKHR is supported is chosen, else FifoKHR is used.
+		 *
+		 * @param availableFormats the available formats
+		 * @return the chosen surface format
+		 */
+		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+		//TODO we may want to choose which presentation format we want or which one we prefer in order
+
+		/**
+		 * Chooses the swap extent to match the previously created window
+		 * 
+		 * @param capabilities the available surface capabilities
+		 * @return the chosen extent
+		 */
+		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+		/**
+		 * Creates the swap chain
+		 */
+		void createSwapChain();
+		/**
+		 * Create the image views
+		 */
+		void createImageViews();
 		void mainLoop();
 		void cleanup();
 
