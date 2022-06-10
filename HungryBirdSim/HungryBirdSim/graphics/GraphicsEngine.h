@@ -47,9 +47,25 @@ namespace graphics
 		void checkSupportedExtensions();
 		void printAvailableExtensions(vector<VkExtensionProperties> extensions);
 		void checkGLFWRequiredExtensions(vector<VkExtensionProperties> extensions);
+		/**
+		 * Checks if all the requested validation layers are supported.
+		 * 
+		 * @return `true` if all the requested validation layers are present, `false` otherwise.
+		 */
 		bool checkValidationLayerSupport();
+		/**
+		 * Setup the debug messenger to be used with validation layers
+		 * 
+		 * @throw runtime_error if the creation of the debug utils wasn't successful
+		 * @see CreateDebugUtilsMessengerEXT
+		 */
 		void setupDebugMessenger();
-		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+		/**
+		 * Builds the struct to create the debug messenger.
+		 * 
+		 * @param createInfo the reference to the create info to fill
+		 */
+		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
 		/**
 		 * Rates all the available devices and choose the best one.
 		 * 
