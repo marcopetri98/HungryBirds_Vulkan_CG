@@ -274,14 +274,23 @@ namespace graphics
 		{
 			vector<VkPhysicalDevice> devices(deviceCount);
 			vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+			std::multimap<int, VkPhysicalDevice> candidates;
 
 			for (const auto &device : devices)
 			{
+				// if it is suitable, we rate it
 				if (isDeviceSuitable(device))
 				{
-					physicalDevice = device;
-					break;
+					int score = rateDeviceSuitability(device);
+					candidates.insert(std::make_pair(score, device));
 				}
+			}
+
+			// rbegin returns an iterator from the highest key to the lowest key
+			// if there is at least one element, rbegin and rend point to different memory areas
+			if (candidates.rbegin() != candidates.rend())
+			{
+				physicalDevice = candidates.rbegin()->second;
 			}
 
 			if (physicalDevice == VK_NULL_HANDLE)
@@ -293,14 +302,28 @@ namespace graphics
 
 	bool GraphicsEngine::isDeviceSuitable(VkPhysicalDevice device)
 	{
-		VkPhysicalDeviceProperties deviceProperties;
+		// TODO: is it not parametric in any way and it should be
 		VkPhysicalDeviceFeatures deviceFeatures;
-		vkGetPhysicalDeviceProperties(device, &deviceProperties);
 		vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
 		QueueFamilyIndices indices = findQueueFamilies(device);
 		
-		return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader && indices.isComplete();
+		return deviceFeatures.geometryShader && indices.isComplete();
+	}
+
+	int GraphicsEngine::rateDeviceSuitability(VkPhysicalDevice device)
+	{
+		// TODO: it is not parametric in any way and it should be
+		int score = 0;
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+		// if the GPU is dedicated, it is much better
+		if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+		{
+			score += 1000;
+		}
+
+		return score;
 	}
 
 	QueueFamilyIndices GraphicsEngine::findQueueFamilies(VkPhysicalDevice device)
