@@ -23,8 +23,9 @@ using std::vector;
 namespace graphics
 {
 	const string DEFAULT_TITLE = "Vulkan application";
-	const int DEFAULT_WIDTH = 1200;
+	const int DEFAULT_WIDTH = 800;
 	const int DEFAULT_HEIGHT = 600;
+	const int MAX_FRAMES_IN_FLIGHT = 2;
 	const vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 	class GraphicsEngine
@@ -53,12 +54,23 @@ namespace graphics
 		VkSwapchainKHR swapChain;
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
+		VkRenderPass renderPass;
+		VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
+		VkCommandPool commandPool;
+		uint32_t currentFrame = 0;
+		std::vector<VkCommandBuffer> commandBuffers;
+		std::vector<VkSemaphore> imageAvailableSemaphores;
+		std::vector<VkSemaphore> renderFinishedSemaphores;
+		std::vector<VkFence> inFlightFences;
+
 
 		std::vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 		std::vector<VkImage> swapChainImages;
 		std::vector<VkImageView> swapChainImageViews;
+		std::vector<VkFramebuffer> swapChainFramebuffers;
 
 		void initWindow();
 		void initVulkan();
@@ -172,6 +184,59 @@ namespace graphics
 		 * Create the image views
 		 */
 		void createImageViews();
+		/**
+		 * Create the graphics pipeline
+		 */
+		void createGraphicsPipeline();
+		/**
+		 * Helper function to load the binary data from a file.
+		 * 
+		 * @param filename Name of the file to read from
+		 * @return The read binary data
+		 */
+		static std::vector<char> readFile(const std::string& filename);
+		/**
+		 * Helper function to wrap the shader code in a VkShaderModule object
+		 * 
+		 * @param code the shader code to be wrapped
+		 * @return the VKShaderModule wrapping the given shader
+		 */
+		VkShaderModule createShaderModule(const std::vector<char>& code);
+		/**
+		 * Creates render pass object
+		 */
+		void createRenderPass();
+		/**
+		 * Create the required frame buffers
+		 */
+		void createFramebuffers();
+		/**
+		 * Create the command pool
+		 * 
+		 */
+		void createCommandPool();
+		/**
+		 * Create the command buffer
+		 * 
+		 */
+		void createCommandBuffer();
+		/**
+		 * Writes the commands into a command buffer for execution
+		 * 
+		 * @param commandBuffer
+		 * @param imageIndex
+		 */
+		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		/**
+		 * Draws the triangle (current test) on screen
+		 * 
+		 */
+		void drawFrame();
+		/**
+		 * Creates two semaphores and a fence to handle synchronization
+		 * 
+		 */
+		void createSyncObjects();
 		void mainLoop();
 		void cleanup();
 
