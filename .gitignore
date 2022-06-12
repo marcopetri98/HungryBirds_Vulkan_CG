@@ -442,3 +442,6 @@ FodyWeavers.xsd
 **/*.sln
 **/*.vcxproj
 **/*.vcxproj.filters
+
+# Ignore header folder
+**/HungryBirdSim/headers/*
