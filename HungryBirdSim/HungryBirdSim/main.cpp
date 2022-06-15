@@ -127,7 +127,7 @@ protected:
 
 		UniformBufferObject ubo{};
 		ubo.model = glm::rotate(glm::mat4(1.0f),
-			time/2 * glm::radians(90.0f),
+			time/20 * glm::radians(90.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 		ubo.view = glm::lookAt(glm::vec3(0.0f, 1.0f, -5.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
