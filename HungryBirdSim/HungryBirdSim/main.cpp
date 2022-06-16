@@ -16,22 +16,47 @@ struct UniformBufferObject {
 	alignas(16) glm::mat4 proj;
 };
 
-
 // MAIN ! 
 class MyProject : public BaseProject {
 protected:
-	// Here you list all the Vulkan objects you need:
 
 	// Descriptor Layouts [what will be passed to the shaders]
+// Pipelines [Shader couples]
 	DescriptorSetLayout DSL1;
-
-	// Pipelines [Shader couples]
 	Pipeline P1;
+	// Etion -- maybe remove dsl as it should be global
+	// implement numInstances
+	// maybe also add a ubo for each object
+		class objectInitializer {
+		public:
+			objectInitializer(
+				std::string model_path,
+				std::string texture_path,
+				Model model = Model(),
+				Texture texture = Texture(),
+				DescriptorSet descriptorSet = DescriptorSet(),
+				int numInstances = 1)
+			{
+				this->model = model;
+				this->texture = texture;
+				this->descriptorSet = descriptorSet;
+				this->model_path = model_path;
+				this->texture_path = texture_path;
+				this->numInstances = numInstances;
+			};
+			Model model;
+			Texture texture;
+			DescriptorSet descriptorSet;
+			std::string model_path;
+			std::string texture_path;
+			int numInstances;
+		};
+	
+	
 
-	// Models, textures and Descriptors (values assigned to the uniforms)
-	Model M1;
-	Texture T1;
-	DescriptorSet DS1;
+	// DescriptorSetLayout DSL1;
+
+	std::vector<objectInitializer> listOfObjects;
 
 	// Here you set the main application parameters
 	void setWindowParameters() {
@@ -40,16 +65,21 @@ protected:
 		windowHeight = 600;
 		windowTitle = "My Project";
 		initialBackgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-
+		listOfObjects = std::vector<objectInitializer>();
+		objectInitializer myObject = objectInitializer(MODEL_PATH, TEXTURE_PATH);
+		
+		listOfObjects.push_back(myObject);
 		// Descriptor pool sizes
-		uniformBlocksInPool = 1;
-		texturesInPool = 1;
-		setsInPool = 1;
+		std::cout << "\n Size ::: " << listOfObjects.size() << "\n";
+		uniformBlocksInPool = listOfObjects.size();
+		texturesInPool = listOfObjects.size();
+		// Etion idk what this is
+		setsInPool = listOfObjects.size();
 	}
 
 	// Here you load and setup all your Vulkan objects
 	void localInit() {
-		// Descriptor Layouts [what will be passed to the shaders]
+		std::cout << "\nLOCAL INIT\n\n";
 		DSL1.init(this, {
 			// this array contains the binding:
 			// first  element : the binding number
@@ -58,92 +88,106 @@ protected:
 			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
 			{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
-
-		// Pipelines [Shader couples]
-		// The last array, is a vector of pointer to the layouts of the sets that will
-		// be used in this pipeline. The first element will be set 0, and so on..
 		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSL1 });
 
-		// Models, textures and Descriptors (values assigned to the uniforms)
-		M1.init(this, MODEL_PATH);
-		T1.init(this, TEXTURE_PATH);
-		DS1.init(this, &DSL1, {
-			// the second parameter, is a pointer to the Uniform Set Layout of this set
-			// the last parameter is an array, with one element per binding of the set.
-			// first  elmenet : the binding number
-			// second element : UNIFORM or TEXTURE (an enum) depending on the type
-			// third  element : only for UNIFORMs, the size of the corresponding C++ object
-			// fourth element : only for TEXTUREs, the pointer to the corresponding texture object
-						{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
-						{1, TEXTURE, 0, &T1}
-			});
-	}
+		// is of type objectInitializer
+		for (objectInitializer objStarter : listOfObjects) {
 
+			objStarter.model.init(this, objStarter.model_path);
+			objStarter.texture.init(this, objStarter.texture_path);
+			objStarter.descriptorSet.init(this, &DSL1, {
+				// the second parameter, is a pointer to the Uniform Set Layout of this set
+				// the last parameter is an array, with one element per binding of the set.
+				// first  elmenet : the binding number
+				// second element : UNIFORM or TEXTURE (an enum) depending on the type
+				// third  element : only for UNIFORMs, the size of the corresponding C++ object
+				// fourth element : only for TEXTUREs, the pointer to the corresponding texture object
+							{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+							{1, TEXTURE, 0, &objStarter.texture}
+				});
+
+		}
+	}
+	Pipeline PP;
 	// Here you destroy all the objects you created!		
 	void localCleanup() {
-		DS1.cleanup();
-		T1.cleanup();
-		M1.cleanup();
 		P1.cleanup();
 		DSL1.cleanup();
+		for (objectInitializer objStarter : listOfObjects) {
+			objStarter.descriptorSet.cleanup();
+			objStarter.texture.cleanup();
+			objStarter.model.cleanup();
+		}
 	}
 
-	// Here it is the creation of the command buffer:
-	// You send to the GPU all the objects you want to draw,
-	// with their buffers and textures
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
 
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			P1.graphicsPipeline);
+		std::cout << "\npopulateCommandBuffer\n\n";
+		for (objectInitializer objStarter : listOfObjects) {
+			
 
-		VkBuffer vertexBuffers[] = { M1.vertexBuffer };
-		// property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
-		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		// property .indexBuffer of models, contains the VkBuffer handle to its index buffer
-		vkCmdBindIndexBuffer(commandBuffer, M1.indexBuffer, 0,
-			VK_INDEX_TYPE_UINT32);
+			std::cout << "\nkCmdBindPipeline\n\n";
+			VkBuffer vertexBuffers[] = { objStarter.model.vertexBuffer };
+			// property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+			std::cout << "\nkCmdBindVertexBuffers\n\n";
+			// property .indexBuffer of models, contains the VkBuffer handle to its index buffer
+			vkCmdBindIndexBuffer(commandBuffer, objStarter.model.indexBuffer, 0,
+				VK_INDEX_TYPE_UINT32);
+			std::cout << "\nkCmdBindIndexBuffer\n\n";
 
-		// property .pipelineLayout of a pipeline contains its layout.
-		// property .descriptorSets of a descriptor set contains its elements.
-		vkCmdBindDescriptorSets(commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			P1.pipelineLayout, 0, 1, &DS1.descriptorSets[currentImage],
-			0, nullptr);
+			// property .pipelineLayout of a pipeline contains its layout.
+			// property .descriptorSets of a descriptor set contains its elements.
+			vkCmdBindDescriptorSets(commandBuffer,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				P1.pipelineLayout, 0, 1, &objStarter.descriptorSet.descriptorSets[currentImage],
+				0, nullptr);
+			std::cout << "\nkCmdBindDescriptorSets\n\n";
 
-		// property .indices.size() of models, contains the number of triangles * 3 of the mesh.
-		vkCmdDrawIndexed(commandBuffer,
-			static_cast<uint32_t>(M1.indices.size()), 1, 0, 0, 0);
+			// property .indices.size() of models, contains the number of triangles * 3 of the mesh.
+			vkCmdDrawIndexed(commandBuffer,
+				static_cast<uint32_t>(objStarter.model.indices.size()), 1, 0, 0, 0);
+			std::cout << "\nkCmdDrawIndexed\n\n";
+
+		}
+		
 	}
 
 	// Here is where you update the uniforms.
 	// Very likely this will be where you will be writing the logic of your application.
 	void updateUniformBuffer(uint32_t currentImage) {
-		static auto startTime = std::chrono::high_resolution_clock::now();
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>
-			(currentTime - startTime).count();
+
+		std::cout << "\nupdateUniformBuffer\n\n";
+		for (objectInitializer objStarter : listOfObjects) {
+			static auto startTime = std::chrono::high_resolution_clock::now();
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float time = std::chrono::duration<float, std::chrono::seconds::period>
+				(currentTime - startTime).count();
 
 
-		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f),
-			time/20 * glm::radians(90.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.view = glm::lookAt(glm::vec3(0.0f, 1.0f, -5.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.proj = glm::perspective(glm::radians(40.0f),
-			swapChainExtent.width / (float)swapChainExtent.height,
-			0.1f, 10.0f);
-		ubo.proj[1][1] *= -1;
+			UniformBufferObject ubo{};
+			ubo.model = glm::rotate(glm::mat4(1.0f),
+				time / 20 * glm::radians(90.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			ubo.view = glm::lookAt(glm::vec3(0.0f, 1.0f, -5.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			ubo.proj = glm::perspective(glm::radians(40.0f),
+				swapChainExtent.width / (float)swapChainExtent.height,
+				0.1f, 10.0f);
+			ubo.proj[1][1] *= -1;
 
-		void* data;
-
+			void* data;
+			vkMapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage], 0,
+				sizeof(ubo), 0, &data);
+			memcpy(data, &ubo, sizeof(ubo));
+			vkUnmapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage]);
+		}
 		// Here is where you actually update your uniforms
-		vkMapMemory(device, DS1.uniformBuffersMemory[0][currentImage], 0,
-			sizeof(ubo), 0, &data);
-		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(device, DS1.uniformBuffersMemory[0][currentImage]);
+		
 	}
 };
 
