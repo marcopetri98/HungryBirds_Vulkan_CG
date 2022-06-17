@@ -5,7 +5,6 @@ const std::string MY_MODEL = "models/birdhead.obj";
 const std::string PROF_MODEL = "models/viking_room.obj";
 const std::string MODEL_PATH = MY_MODEL;
 const std::string MY_TEXTURE = "textures/birdheadTextHead.png";
-
 const std::string PROF_TEXTURE = "textures/viking_room.png"; 
 const std::string TEXTURE_PATH = MY_TEXTURE;
 
@@ -19,44 +18,22 @@ struct UniformBufferObject {
 // MAIN ! 
 class MyProject : public BaseProject {
 protected:
-
-	// Descriptor Layouts [what will be passed to the shaders]
-// Pipelines [Shader couples]
 	DescriptorSetLayout DSL1;
 	Pipeline P1;
-	// Etion -- maybe remove dsl as it should be global
-	// implement numInstances
-	// maybe also add a ubo for each object
-		class objectInitializer {
-		public:
-			objectInitializer(
-				std::string model_path,
-				std::string texture_path,
-				Model model = Model(),
-				Texture texture = Texture(),
-				DescriptorSet descriptorSet = DescriptorSet(),
-				int numInstances = 1)
-			{
-				this->model = model;
-				this->texture = texture;
-				this->descriptorSet = descriptorSet;
-				this->model_path = model_path;
-				this->texture_path = texture_path;
-				this->numInstances = numInstances;
-			};
-			Model model;
-			Texture texture;
-			DescriptorSet descriptorSet;
-			std::string model_path;
-			std::string texture_path;
-			int numInstances;
-		};
-	
-	
-
-	// DescriptorSetLayout DSL1;
+	struct Paths {
+		std::string model_path;
+		std::string texture_path;
+		int numInstances = 1;
+	};
+	struct objectInitializer {
+		Paths paths;
+		Model model = Model();
+		Texture texture = Texture();
+		DescriptorSet descriptorSet = DescriptorSet();
+	};
 
 	std::vector<objectInitializer> listOfObjects;
+	std::vector<Paths> listOfPaths;
 
 	// Here you set the main application parameters
 	void setWindowParameters() {
@@ -66,20 +43,20 @@ protected:
 		windowTitle = "My Project";
 		initialBackgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		listOfObjects = std::vector<objectInitializer>();
-		objectInitializer myObject = objectInitializer(MODEL_PATH, TEXTURE_PATH);
-		
-		listOfObjects.push_back(myObject);
-		// Descriptor pool sizes
-		std::cout << "\n Size ::: " << listOfObjects.size() << "\n";
-		uniformBlocksInPool = listOfObjects.size();
-		texturesInPool = listOfObjects.size();
+
+		Paths bird_paths = Paths{ MODEL_PATH, TEXTURE_PATH };
+		listOfPaths = std::vector<Paths>();
+		listOfPaths.push_back(bird_paths);
+
+		std::cout << "\n Size ::: " << listOfPaths.size() << "\n";
+		uniformBlocksInPool = listOfPaths.size();
+		texturesInPool = listOfPaths.size();
 		// Etion idk what this is
-		setsInPool = listOfObjects.size();
+		setsInPool = listOfPaths.size();
 	}
 
-	// Here you load and setup all your Vulkan objects
+
 	void localInit() {
-		std::cout << "\nLOCAL INIT\n\n";
 		DSL1.init(this, {
 			// this array contains the binding:
 			// first  element : the binding number
@@ -91,24 +68,24 @@ protected:
 		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSL1 });
 
 		// is of type objectInitializer
-		for (objectInitializer objStarter : listOfObjects) {
+		for (Paths objPaths : listOfPaths) {
+			Model model = Model();
+			Texture texture = Texture();
+			DescriptorSet ds = DescriptorSet();
 
-			objStarter.model.init(this, objStarter.model_path);
-			objStarter.texture.init(this, objStarter.texture_path);
-			objStarter.descriptorSet.init(this, &DSL1, {
-				// the second parameter, is a pointer to the Uniform Set Layout of this set
-				// the last parameter is an array, with one element per binding of the set.
-				// first  elmenet : the binding number
-				// second element : UNIFORM or TEXTURE (an enum) depending on the type
-				// third  element : only for UNIFORMs, the size of the corresponding C++ object
-				// fourth element : only for TEXTUREs, the pointer to the corresponding texture object
+			model.init(this, objPaths.model_path);
+			texture.init(this, objPaths.texture_path);
+			ds.init(this, &DSL1, {
 							{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
-							{1, TEXTURE, 0, &objStarter.texture}
+							{1, TEXTURE, 0, &(texture)},
 				});
 
+			objectInitializer myObject = objectInitializer{ objPaths, model, texture, ds };
+			listOfObjects.push_back(myObject);
 		}
+
 	}
-	Pipeline PP;
+
 	// Here you destroy all the objects you created!		
 	void localCleanup() {
 		P1.cleanup();
@@ -121,47 +98,34 @@ protected:
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
-
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
 			P1.graphicsPipeline);
-		std::cout << "\npopulateCommandBuffer\n\n";
 		for (objectInitializer objStarter : listOfObjects) {
-			
-
-			std::cout << "\nkCmdBindPipeline\n\n";
 			VkBuffer vertexBuffers[] = { objStarter.model.vertexBuffer };
 			// property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-			std::cout << "\nkCmdBindVertexBuffers\n\n";
 			// property .indexBuffer of models, contains the VkBuffer handle to its index buffer
 			vkCmdBindIndexBuffer(commandBuffer, objStarter.model.indexBuffer, 0,
 				VK_INDEX_TYPE_UINT32);
-			std::cout << "\nkCmdBindIndexBuffer\n\n";
 
 			// property .pipelineLayout of a pipeline contains its layout.
 			// property .descriptorSets of a descriptor set contains its elements.
 			vkCmdBindDescriptorSets(commandBuffer,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				P1.pipelineLayout, 0, 1, &objStarter.descriptorSet.descriptorSets[currentImage],
+				P1.pipelineLayout, 0, 1, &(objStarter.descriptorSet.descriptorSets[currentImage]),
 				0, nullptr);
-			std::cout << "\nkCmdBindDescriptorSets\n\n";
 
 			// property .indices.size() of models, contains the number of triangles * 3 of the mesh.
 			vkCmdDrawIndexed(commandBuffer,
 				static_cast<uint32_t>(objStarter.model.indices.size()), 1, 0, 0, 0);
-			std::cout << "\nkCmdDrawIndexed\n\n";
-
 		}
 		
 	}
 
-	// Here is where you update the uniforms.
-	// Very likely this will be where you will be writing the logic of your application.
 	void updateUniformBuffer(uint32_t currentImage) {
 
 		std::cout << "\nupdateUniformBuffer\n\n";
-		for (objectInitializer objStarter : listOfObjects) {
 			static auto startTime = std::chrono::high_resolution_clock::now();
 			auto currentTime = std::chrono::high_resolution_clock::now();
 			float time = std::chrono::duration<float, std::chrono::seconds::period>
@@ -179,16 +143,18 @@ protected:
 				swapChainExtent.width / (float)swapChainExtent.height,
 				0.1f, 10.0f);
 			ubo.proj[1][1] *= -1;
-
+		for (objectInitializer objStarter : listOfObjects) {
 			void* data;
 			vkMapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage], 0,
 				sizeof(ubo), 0, &data);
 			memcpy(data, &ubo, sizeof(ubo));
 			vkUnmapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage]);
 		}
-		// Here is where you actually update your uniforms
+
 		
 	}
+
+
 };
 
 // This is the main: probably you do not need to touch this!
