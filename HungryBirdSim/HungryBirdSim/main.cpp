@@ -160,7 +160,6 @@ protected:
 	}
 
 	void updateUniformBuffer(uint32_t currentImage) {
-
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>
@@ -205,28 +204,33 @@ protected:
 			// TODO:: create API for 3d Affine Transformations
 			//glm::mat4 scaling = glm::mat4(1.0f);
 			//glm::mat4 rotation = glm::mat4(1.0f);
-			if (objStarter.paths.model_path.compare(PROF_MODEL) == 0) {
-				// TODO:: understand why we need to rotate 90 degrees.
-				position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, -1.f, 1.5f));
-				glm::mat4 scaledUpHouse = glm::scale(position, glm::vec3(4.5f));
-				ubo.model = glm::rotate(scaledUpHouse, glm::radians(90.0f),
-					glm::vec3(-1.0f, 0.0f, 0.0f));
-			}
-			else {
-				if (!keyPressed) {
-					position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 1.5f));
-					scaledDownBird = glm::scale(position, glm::vec3(0.25f));
-					rotatedBird = glm::rotate(scaledDownBird,
-						time * glm::radians(90.0f),
-						glm::vec3(0.0f, 1.0f, 0.0f));
+
+			for (int i = 0; i < objStarter.paths.numInstances; i++) {
+
+				if (objStarter.paths.model_path.compare(PROF_MODEL) == 0) {
+					// TODO:: understand why we need to rotate 90 degrees.
+					position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, -1.f, 1.5f));
+					glm::mat4 scaledUpHouse = glm::scale(position, glm::vec3(4.5f));
+					ubo.model = glm::rotate(scaledUpHouse, glm::radians(90.0f),
+						glm::vec3(-1.0f, 0.0f, 0.0f));
 				}
-				ubo.model = rotatedBird;
+				else {
+					if (!keyPressed) {
+						position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 1.5f));
+						scaledDownBird = glm::scale(position, glm::vec3(0.25f));
+						rotatedBird = glm::rotate(scaledDownBird,
+							time * glm::radians(90.0f),
+							glm::vec3(0.0f, 1.0f, 0.0f));
+					}
+					ubo.model = rotatedBird;
+				}
+				/// TODO:: descriptorSet[i]
+				vkMapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage], 0,
+					sizeof(ubo), 0, &data);
+				memcpy(data, &ubo, sizeof(ubo));
+				vkUnmapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage]);
+
 			}
-			
-			vkMapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage], 0,
-				sizeof(ubo), 0, &data);
-			memcpy(data, &ubo, sizeof(ubo));
-			vkUnmapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage]);
 		}
 
 		
