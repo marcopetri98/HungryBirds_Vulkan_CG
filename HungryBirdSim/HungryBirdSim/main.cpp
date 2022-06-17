@@ -63,8 +63,10 @@ protected:
 		listOfPaths.push_back(prof_paths);
 
 		// Plus one because one is the camera DS.
+		// formula of the two fields below is : 1 + (numInstances in each Path)
 		uniformBlocksInPool = 1 + listOfPaths.size();
 		setsInPool = 1 + listOfPaths.size();
+		// formula of this field is like above - 1. This because the camera has no texture
 		texturesInPool = listOfPaths.size();
 	}
 
@@ -92,11 +94,15 @@ protected:
 
 			model.init(this, objPaths.model_path);
 			texture.init(this, objPaths.texture_path);
-			ds.init(this, &DSLobj, {
-							{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
-							{1, TEXTURE, 0, &(texture)},
-				});
 
+			for (int i = 0; i < objPaths.numInstances; i++) {
+				// listOfDescriptorSets.push_back( the thing below ); 
+				ds.init(this, &DSLobj, {
+								{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
+								{1, TEXTURE, 0, &(texture)},
+					});
+			}
+			// below here we should put listOfDescriptorSets instead of ds           //|
 			objectInitializer myObject = objectInitializer{ objPaths, model, texture, ds };
 			listOfObjects.push_back(myObject);
 		}
@@ -133,23 +139,22 @@ protected:
 			0, nullptr);
 		for (objectInitializer objStarter : listOfObjects) {
 			VkBuffer vertexBuffers[] = { objStarter.model.vertexBuffer };
-			// property .vertexBuffer of models, contains the VkBuffer handle to its vertex buffer
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-			// property .indexBuffer of models, contains the VkBuffer handle to its index buffer
 			vkCmdBindIndexBuffer(commandBuffer, objStarter.model.indexBuffer, 0,
 				VK_INDEX_TYPE_UINT32);
-
-			// property .pipelineLayout of a pipeline contains its layout.
-			// property .descriptorSets of a descriptor set contains its elements.
-			vkCmdBindDescriptorSets(commandBuffer,
-				VK_PIPELINE_BIND_POINT_GRAPHICS,
-				P1.pipelineLayout, 1, 1, &(objStarter.descriptorSet.descriptorSets[currentImage]),
-				0, nullptr);
-
-			// property .indices.size() of models, contains the number of triangles * 3 of the mesh.
-			vkCmdDrawIndexed(commandBuffer,
-				static_cast<uint32_t>(objStarter.model.indices.size()), 1, 0, 0, 0);
+			for (int i = 0; i < objStarter.paths.numInstances; i++) {
+				/// TODO:: The descriptor set MUST BE a DIFFERENT one for each INSTANCE
+				/// objStarter.descriptorSet is wrong but objStarter.descriptorSet[i] might be right
+				/// iff we have a vector of descriptor sets.
+				vkCmdBindDescriptorSets(commandBuffer,
+					VK_PIPELINE_BIND_POINT_GRAPHICS,
+					P1.pipelineLayout, 1, 1, &(objStarter.descriptorSet.descriptorSets[currentImage]),
+					0, nullptr);
+				vkCmdDrawIndexed(commandBuffer,
+					static_cast<uint32_t>(objStarter.model.indices.size()), 1, 0, 0, 0);
+			}
+			
 		}
 		
 	}
@@ -160,7 +165,16 @@ protected:
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>
 			(currentTime - startTime).count();
-
+		glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
+		bool keyPressed = false;
+		glm::mat4 scaledDownBird;
+		glm::mat4 rotatedBird;
+		if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+			position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.5f));
+			scaledDownBird = glm::scale(position, glm::vec3(2.0f));
+			rotatedBird = scaledDownBird;
+			keyPressed = true;
+		}
 
 		GlobalUniformBufferObject gubo{};
 
@@ -188,10 +202,27 @@ protected:
 			//		}
 			// }
 			// CHANGE FOR EACH OBJECT
-
-			ubo.model = glm::rotate(glm::mat4(1.0f),
-				time * glm::radians(90.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f));
+			// TODO:: create API for 3d Affine Transformations
+			//glm::mat4 scaling = glm::mat4(1.0f);
+			//glm::mat4 rotation = glm::mat4(1.0f);
+			if (objStarter.paths.model_path.compare(PROF_MODEL) == 0) {
+				// TODO:: understand why we need to rotate 90 degrees.
+				position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, -1.f, 1.5f));
+				glm::mat4 scaledUpHouse = glm::scale(position, glm::vec3(4.5f));
+				ubo.model = glm::rotate(scaledUpHouse, glm::radians(90.0f),
+					glm::vec3(-1.0f, 0.0f, 0.0f));
+			}
+			else {
+				if (!keyPressed) {
+					position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 1.5f));
+					scaledDownBird = glm::scale(position, glm::vec3(0.25f));
+					rotatedBird = glm::rotate(scaledDownBird,
+						time * glm::radians(90.0f),
+						glm::vec3(0.0f, 1.0f, 0.0f));
+				}
+				ubo.model = rotatedBird;
+			}
+			
 			vkMapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage], 0,
 				sizeof(ubo), 0, &data);
 			memcpy(data, &ubo, sizeof(ubo));
