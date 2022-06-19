@@ -1,6 +1,7 @@
 // This has been adapted from the Vulkan tutorial
 
 #include "MyProject.hpp"
+#include "map";
 const std::string MY_MODEL = "models/birdhead.obj";
 const std::string PROF_MODEL = "models/viking_room.obj";
 const std::string MODEL_PATH = MY_MODEL;
@@ -20,11 +21,14 @@ struct UniformBufferObject {
 // MAIN ! 
 class MyProject : public BaseProject {
 protected:
+
+	//			GRAPHICS ENGINE OBJECT INITIALIZATION
+	// not important for game design, part of graphics.
+	// 
 	// This describes the layout of the vertex buffer for the gubo object
 	DescriptorSetLayout DSLglobal;
 	// this is the instance of the global camera
 	DescriptorSet DSglobal;
-	
 	// This describes the layout of the vertex buffer for each ubo object
 	DescriptorSetLayout DSLobj;
 	// This is the pipeline where all the commands are passed through
@@ -32,49 +36,82 @@ protected:
 	struct Paths {
 		std::string model_path;
 		std::string texture_path;
-		std::string name;
+		std::vector<std::string> names;
 		int numInstances = 1;
 	};
 	struct objectInitializer {
 		Paths paths;
-		Model model = Model();
-		Texture texture = Texture();
-		DescriptorSet descriptorSet = DescriptorSet();
+		Model model;
+		Texture texture;
 	};
+	std::vector<objectInitializer> listOfObjectInitializers;
+	std::map<std::string, DescriptorSet> descriptorSetMap;
 
-	std::vector<objectInitializer> listOfObjects;
+
+
+	// Begin :				GAME DESIGN Information
+	// INFORMATION USED FOR WHICH OBJECTS TO CREATE ON SCREEN
 	std::vector<Paths> listOfPaths;
+	struct objectDescriptor {
+		glm::mat4 coordinates;
+		// other properties like velocity;
+	};
+	// key-value pair with key := name of object and objectDescriptor containing relevant 
+	// mat4 passed to vertex and frag shader
+	std::map<std::string, objectDescriptor> mapOfObjects;
+	
 
 	// Here you set the main application parameters
 	void setWindowParameters() {
 		// window size, titile and initial background
-		windowWidth = 800;
-		windowHeight = 600;
-		windowTitle = "My Project";
-		initialBackgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
-		listOfPaths = std::vector<Paths>();
-		listOfObjects = std::vector<objectInitializer>();
+		{
+			windowWidth = 800;
+			windowHeight = 600;
+			windowTitle = "My Project";
+			initialBackgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
+		}
 
-		Paths bird_paths = Paths{ MODEL_PATH, TEXTURE_PATH };
-		Paths prof_paths = Paths{ PROF_MODEL, PROF_TEXTURE  };
-		listOfPaths.push_back(bird_paths);
-		listOfPaths.push_back(prof_paths);
+		// HERE: We put all objects' texture and model paths, and we give them a list of names we
+		// want the objects to be called
+		// put all this into a function called loadAllTextures //
+		{
+			listOfPaths = std::vector<Paths>();
+			listOfObjectInitializers = std::vector<objectInitializer>();
+			std::vector bird_name = std::vector<std::string>();
+			bird_name.push_back("main-bird");
+			Paths bird_paths = Paths{ MODEL_PATH, TEXTURE_PATH , bird_name };
+			std::vector bg_name = std::vector<std::string>();
+			bg_name.push_back("background");
+			Paths prof_paths = Paths{ PROF_MODEL, PROF_TEXTURE  , bg_name };
+			std::vector all_names = std::vector<std::string>();
+			all_names.insert(all_names.end(), { "small-bird-one", "small-bird-two", "small-bird-three" });
+			Paths many_instances_obj_path = Paths{ MODEL_PATH, TEXTURE_PATH, all_names, 3 };
 
-		// Plus one because one is the camera DS.
-		// formula of the two fields below is : 1 + (numInstances in each Path)
-		uniformBlocksInPool = 1 + listOfPaths.size();
-		setsInPool = 1 + listOfPaths.size();
-		// formula of this field is like above - 1. This because the camera has no texture
-		texturesInPool = listOfPaths.size();
+
+			listOfPaths.push_back(bird_paths);
+			listOfPaths.push_back(prof_paths);
+			listOfPaths.push_back(many_instances_obj_path);
+		}
+		
+		// Do not change
+		{
+			int numOfAssets = 0;
+			for (Paths paths : listOfPaths) {
+				numOfAssets += paths.numInstances;
+			}
+
+			// Plus one because one is the camera DS.
+			uniformBlocksInPool = 1 + numOfAssets;
+			setsInPool = 1 + numOfAssets;
+			// formula of this field is like above without + 1. This because the camera has no texture
+			texturesInPool = listOfPaths.size();
+		}
 	}
+	// END :					GAME DESIGN INFORMATION
 
-
+	// Initialization of all textures, geometrical models and descriptor sets
 	void localInit() {
 		DSLobj.init(this, {
-			// this array contains the binding:
-			// first  element : the binding number
-			// second element : the time of element (buffer or texture)
-			// third  element : the pipeline stage where it will be used
 			{0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
 			{1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT}
 			});
@@ -83,39 +120,50 @@ protected:
 			});
 		// in pipeline we receive in set 0 the global view and in set 1 the ubo
 		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLglobal, &DSLobj });
-		
-		// is of type objectInitializer
+		descriptorSetMap = std::map<std::string, DescriptorSet>();
 		for (Paths objPaths : listOfPaths) {
 			Model model = Model();
 			Texture texture = Texture();
-			DescriptorSet ds = DescriptorSet(); // every ds is instance of dslOBJ
 
 			model.init(this, objPaths.model_path);
 			texture.init(this, objPaths.texture_path);
-
+			std::map<std::string,DescriptorSet> dsmap = std::map<std::string, DescriptorSet>();
 			for (int i = 0; i < objPaths.numInstances; i++) {
-				// listOfDescriptorSets.push_back( the thing below ); 
+				objectDescriptor objectDescription = objectDescriptor{ 
+													getInitialPosition(objPaths.names[i]) };
+				DescriptorSet ds = DescriptorSet();
 				ds.init(this, &DSLobj, {
 								{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
 								{1, TEXTURE, 0, &(texture)},
-					});
-			}
-			// below here we should put listOfDescriptorSets instead of ds           //|
-			objectInitializer myObject = objectInitializer{ objPaths, model, texture, ds };
-			listOfObjects.push_back(myObject);
-		}
+				});
 
+				// Here we can get the initial position of each object
+				//std::cout << "\n\n" << objPaths.names[i] << "\n\n";
+				mapOfObjects.insert({ objPaths.names[i], objectDescription });
+				dsmap.insert({ objPaths.names[i], ds });
+				descriptorSetMap.insert({ objPaths.names[i], ds });
+			}
+			objectInitializer myObject = objectInitializer{ objPaths, model, texture };
+			listOfObjectInitializers.push_back(myObject);
+		}
 		// after everything is done instance a Descriptor set for the global view
 		DSglobal.init(this, &DSLglobal, {{0, UNIFORM, sizeof(UniformBufferObject), nullptr}});
 
 	}
 
-	// Here you destroy all the objects you created!		
 	void localCleanup() {
-		for (objectInitializer objStarter : listOfObjects) {
-			objStarter.descriptorSet.cleanup();
+		for (objectInitializer objStarter : listOfObjectInitializers) {
+			// clean up of all descriptor sets in the map
+			//for (auto itr = objStarter.descriptorSetMap.begin(); itr != objStarter.descriptorSetMap.end(); ++itr) {
+			//	// itr->first is the key
+			//	itr->second.cleanup();
+			//}
 			objStarter.texture.cleanup();
 			objStarter.model.cleanup();
+		}
+		for (auto itr = descriptorSetMap.begin(); itr != descriptorSetMap.end(); ++itr) {
+			// itr->first is the key
+			itr->second.cleanup();
 		}
 		//constant part
 		P1.cleanup();
@@ -135,106 +183,164 @@ protected:
 			0,
 			1, &(DSglobal.descriptorSets[currentImage]),
 			0, nullptr);
-		for (objectInitializer objStarter : listOfObjects) {
+		for (objectInitializer objStarter : listOfObjectInitializers) {
 			VkBuffer vertexBuffers[] = { objStarter.model.vertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 			vkCmdBindIndexBuffer(commandBuffer, objStarter.model.indexBuffer, 0,
 				VK_INDEX_TYPE_UINT32);
 			for (int i = 0; i < objStarter.paths.numInstances; i++) {
-				/// TODO:: The descriptor set MUST BE a DIFFERENT one for each INSTANCE
-				/// objStarter.descriptorSet is wrong but objStarter.descriptorSet[i] might be right
 				/// iff we have a vector of descriptor sets.
+				// itr->second is the descriptorMap
+				DescriptorSet dedicatedDS = descriptorSetMap[objStarter.paths.names[i]];
 				vkCmdBindDescriptorSets(commandBuffer,
 					VK_PIPELINE_BIND_POINT_GRAPHICS,
-					P1.pipelineLayout, 1, 1, &(objStarter.descriptorSet.descriptorSets[currentImage]),
+					P1.pipelineLayout, 1, 1,
+					&(dedicatedDS.descriptorSets[currentImage]),
 					0, nullptr);
+
 				vkCmdDrawIndexed(commandBuffer,
 					static_cast<uint32_t>(objStarter.model.indices.size()), 1, 0, 0, 0);
 			}
 			
 		}
-		
 	}
 
+	// Main functoin that gets called to draw on screen everything
 	void updateUniformBuffer(uint32_t currentImage) {
+		float time;
+		// Get time
+		{
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>
+		time = std::chrono::duration<float, std::chrono::seconds::period>
 			(currentTime - startTime).count();
-		glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
-		bool keyPressed = false;
-		glm::mat4 scaledDownBird;
-		glm::mat4 rotatedBird;
-		if (glfwGetKey(window, GLFW_KEY_SPACE)) {
-			position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.5f));
-			scaledDownBird = glm::scale(position, glm::vec3(2.0f));
-			rotatedBird = scaledDownBird;
-			keyPressed = true;
 		}
 
-		GlobalUniformBufferObject gubo{};
+		handleKeyPresses(time);
+		handleAutomaticObjectMovement(time);
+		GlobalUniformBufferObject gubo = cameraTransformations();
+		// Here the model of each object is sent to the shaders.
+		{
+			
+			void* data;
+			{
+				vkMapMemory(device, DSglobal.uniformBuffersMemory[0][currentImage], 0,
+					sizeof(gubo), 0, &data);
+				memcpy(data, &gubo, sizeof(gubo));
+				vkUnmapMemory(device, DSglobal.uniformBuffersMemory[0][currentImage]);
+			}
 
-		gubo.view = glm::lookAt(glm::vec3(0.0f, 1.0f, -5.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		gubo.proj = glm::perspective(glm::radians(40.0f),
-			swapChainExtent.width / (float)swapChainExtent.height,
-			0.1f, 10.0f);
-		gubo.proj[1][1] *= -1;
-		void* data;
-		// Put space in device to insert data from the void pointer.
-		vkMapMemory(device, DSglobal.uniformBuffersMemory[0][currentImage], 0,
-			sizeof(gubo), 0, &data);
-		// copy the gubo to the data pointer
-		memcpy(data, &gubo, sizeof(gubo));
-		vkUnmapMemory(device, DSglobal.uniformBuffersMemory[0][currentImage]);
-
-		UniformBufferObject ubo{};
-		for (objectInitializer objStarter : listOfObjects) {
-			// physics(objStarter, ubo.model){
-			//		example::
-			//		if (objStarter.name = 'bird-0'){
-			//			glm::translate(glm::mat4(1.0f), glm::vec3(1.0f,1.0f,0.f));
-			//		}
-			// }
-			// CHANGE FOR EACH OBJECT
-			// TODO:: create API for 3d Affine Transformations
-			//glm::mat4 scaling = glm::mat4(1.0f);
-			//glm::mat4 rotation = glm::mat4(1.0f);
-
-			for (int i = 0; i < objStarter.paths.numInstances; i++) {
-
-				if (objStarter.paths.model_path.compare(PROF_MODEL) == 0) {
-					// TODO:: understand why we need to rotate 90 degrees.
-					position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, -1.f, 1.5f));
-					glm::mat4 scaledUpHouse = glm::scale(position, glm::vec3(4.5f));
-					ubo.model = glm::rotate(scaledUpHouse, glm::radians(90.0f),
-						glm::vec3(-1.0f, 0.0f, 0.0f));
-				}
-				else {
-					if (!keyPressed) {
-						position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 1.5f));
-						scaledDownBird = glm::scale(position, glm::vec3(0.25f));
-						rotatedBird = glm::rotate(scaledDownBird,
-							time * glm::radians(90.0f),
-							glm::vec3(0.0f, 1.0f, 0.0f));
-					}
-					ubo.model = rotatedBird;
-				}
-				/// TODO:: descriptorSet[i]
-				vkMapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage], 0,
+			UniformBufferObject ubo{};
+			for (auto itr = mapOfObjects.begin(); itr != mapOfObjects.end(); ++itr) {
+				// itr->first has the key of the map i.e., the name of this object
+				// itr->second has the value we want of the obj and its details
+				objectDescriptor obj = itr->second;
+				std::string obj_key = itr->first;
+				// assign the mat4 coordinates to this object that  
+				// will be sent to the vertex and frag shader
+				DescriptorSet obj_descriptor_set = descriptorSetMap[obj_key];
+				ubo.model = obj.coordinates;
+				vkMapMemory(device, obj_descriptor_set.uniformBuffersMemory[0][currentImage], 0,
 					sizeof(ubo), 0, &data);
 				memcpy(data, &ubo, sizeof(ubo));
-				vkUnmapMemory(device, objStarter.descriptorSet.uniformBuffersMemory[0][currentImage]);
-
+				vkUnmapMemory(device, obj_descriptor_set.uniformBuffersMemory[0][currentImage]);
 			}
 		}
-
 		
+	
+	}
+	// API (or method calls rather) to be used by the physics engine or game engine IDK.
+	// sets the initial position on the scene of each object 
+	glm::mat4 getInitialPosition(std::string objName) {
+		if (objName.compare("background")) {
+			glm::mat4 scaledUpHouse = glm::scale(glm::translate(glm::mat4(1.0f),
+				glm::vec3(0.f, -2.f, 1.5f)), glm::vec3(6.5f));
+			return glm::rotate(scaledUpHouse, glm::radians(90.0f),
+				glm::vec3(-1.0f, 0.0f, 0.0f));
+		}
+		// we are in C++17 so we do not have the method contains... why is cpp like this?
+		else if (objName.find("small-bird") != std::string::npos) {
+			return glm::mat4(2.0f);
+		}
+		return glm::mat4(0.5f);
+	}
+	
+	// controls the movement of objects inside the scene that can be controlled by the user
+	void handleKeyPresses(float time) {
+
+		glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
+		glm::mat4 scaledDownBird;
+		glm::mat4 rotatedBird;
+		std::string main_object_name = "main-bird";
+		position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 1.2f));
+		scaledDownBird = glm::scale(position, glm::vec3(0.20f));
+		rotatedBird = glm::rotate(scaledDownBird,
+			time * glm::radians(90.0f),
+			glm::vec3(.0f, 1.0f, 0.0f));
+		if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+			scaledDownBird = glm::scale(position, glm::vec3(3.20f));
+			rotatedBird = scaledDownBird;
+				
+		}
+		mapOfObjects[main_object_name].coordinates = rotatedBird;
+
+	}
+	
+	// Controls the camera movement
+	GlobalUniformBufferObject cameraTransformations() {
+		GlobalUniformBufferObject gubo{};
+		gubo.view = glm::lookAt(glm::vec3(0.0f, 1.0f, -6.5f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		gubo.proj = glm::perspective(glm::radians(60.0f),
+			swapChainExtent.width / (float)swapChainExtent.height,
+			0.1f, 100.0f);
+		gubo.proj[1][1] *= -1;
+		return gubo;
 	}
 
-
+	// controls the movement of objects inside the scene that cannot be controlled by the user
+	void handleAutomaticObjectMovement(float time) {
+		// TODO:: Use the initial position
+		glm::mat4 transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
+		glm::mat4 scaledMat4;
+		glm::mat4 finalMat4;
+		for (auto itr = mapOfObjects.begin(); itr != mapOfObjects.end(); ++itr) {
+			if (itr->first.compare("background") == 0) {
+				// TODO:: understand why we need to rotate 90 degrees.
+				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, -1.f, 1.5f));
+				scaledMat4 = glm::scale(transMat4, glm::vec3(4.5f));
+				finalMat4 = glm::rotate(scaledMat4, glm::radians(90.0f),
+					glm::vec3(-1.0f, 0.0f, 0.0f));
+			}
+			else if (itr->first.find("small-bird-one") != std::string::npos) {
+				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.8f));
+				scaledMat4 = glm::scale(transMat4, glm::vec3(0.68f));
+				finalMat4 = glm::rotate(scaledMat4,
+					time / 3 * glm::radians(90.0f),
+					glm::vec3(0.0f, 1.0f, 0.0f));
+			}
+			else if (itr->first.find("small-bird-two") != std::string::npos) {
+				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, -0.5f, 1.2f));
+				scaledMat4 = glm::scale(transMat4, glm::vec3(0.38f));
+				finalMat4 = glm::rotate(scaledMat4,
+					time / 2 * glm::radians(90.0f),
+					glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			else if (itr->first.find("small-bird-three") != std::string::npos) {
+				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, 0.5f, 1.2f));
+				scaledMat4 = glm::scale(transMat4, glm::vec3(0.38f));
+				finalMat4 = glm::rotate(scaledMat4,
+					time * glm::radians(90.0f),
+					glm::vec3(0.0f, 1.0f, 1.0f));
+			}
+			// Main bird is supposed to be the main playable character
+			if (itr->first.compare("main-bird") != 0) {
+				itr->second.coordinates = finalMat4;
+			}
+		}
+	}
 };
 
 // This is the main: probably you do not need to touch this!
