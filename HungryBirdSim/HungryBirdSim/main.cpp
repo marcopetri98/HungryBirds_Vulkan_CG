@@ -53,8 +53,10 @@ protected:
 	// INFORMATION USED FOR WHICH OBJECTS TO CREATE ON SCREEN
 	std::vector<Paths> listOfPaths;
 	struct objectDescriptor {
-		glm::mat4 coordinates;
+		// float acceleration;
 		// other properties like velocity;
+		glm::mat4 coordinates;
+		float velocity = 1;
 	};
 	// key-value pair with key := name of object and objectDescriptor containing relevant 
 	// mat4 passed to vertex and frag shader
@@ -216,7 +218,7 @@ protected:
 		time = std::chrono::duration<float, std::chrono::seconds::period>
 			(currentTime - startTime).count();
 		}
-
+		// These can be put inside the main loop
 		handleKeyPresses(time);
 		handleAutomaticObjectMovement(time);
 		GlobalUniformBufferObject gubo = cameraTransformations();
@@ -263,27 +265,47 @@ protected:
 		else if (objName.find("small-bird") != std::string::npos) {
 			return glm::mat4(2.0f);
 		}
-		return glm::mat4(0.5f);
+		return glm::mat4(1.2f);
 	}
 	
 	// controls the movement of objects inside the scene that can be controlled by the user
 	void handleKeyPresses(float time) {
 
 		glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
-		glm::mat4 scaledDownBird;
-		glm::mat4 rotatedBird;
+		glm::mat4 finalPosition;
 		std::string main_object_name = "main-bird";
-		position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 1.2f));
-		scaledDownBird = glm::scale(position, glm::vec3(0.20f));
-		rotatedBird = glm::rotate(scaledDownBird,
-			time * glm::radians(90.0f),
-			glm::vec3(.0f, 1.0f, 0.0f));
-		if (glfwGetKey(window, GLFW_KEY_SPACE)) {
-			scaledDownBird = glm::scale(position, glm::vec3(3.20f));
-			rotatedBird = scaledDownBird;
-				
+		glm::mat4 currentPosition = mapOfObjects[main_object_name].coordinates;
+		float x = 0, y = 0, z = 0;
+
+		if (glfwGetKey(window, GLFW_KEY_W)) {
+			y = mapOfObjects[main_object_name].velocity;
 		}
-		mapOfObjects[main_object_name].coordinates = rotatedBird;
+		if (glfwGetKey(window, GLFW_KEY_A)) {
+			x = mapOfObjects[main_object_name].velocity;
+		}
+		if (glfwGetKey(window, GLFW_KEY_S)) {
+			y = - mapOfObjects[main_object_name].velocity;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D)) {
+			x = - mapOfObjects[main_object_name].velocity;
+		}
+		if (glfwGetKey(window, GLFW_KEY_R)) {
+			z = mapOfObjects[main_object_name].velocity;
+		}
+		if (glfwGetKey(window, GLFW_KEY_F)) {
+			z = -mapOfObjects[main_object_name].velocity;
+		}
+		float timeInMS = time / 1000 / 10;
+		x = x * timeInMS;
+		y = y * timeInMS;
+		z = z * timeInMS;
+		if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+			finalPosition = glm::scale(position, glm::vec3(2.20f));
+		}
+		else {
+			finalPosition = glm::translate(currentPosition, glm::vec3(x, y, z));
+		}
+		mapOfObjects[main_object_name].coordinates = finalPosition;
 
 	}
 	
