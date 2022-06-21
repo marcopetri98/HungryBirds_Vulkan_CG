@@ -15,7 +15,7 @@ struct GlobalUniformBufferObject {
 };
 // The uniform buffer object used in this example
 struct UniformBufferObject {
-	alignas(16) glm::mat4 model;
+	alignas(128) glm::mat4 model;
 };
 
 // MAIN ! 
