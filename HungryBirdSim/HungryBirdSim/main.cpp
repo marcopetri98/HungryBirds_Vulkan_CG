@@ -2,6 +2,7 @@
 
 #include "MyProject.hpp"
 #include "map";
+using Clock = std::chrono::high_resolution_clock;
 const std::string MY_MODEL = "models/birdhead.obj";
 const std::string PROF_MODEL = "models/viking_room.obj";
 const std::string MODEL_PATH = MY_MODEL;
@@ -46,7 +47,11 @@ protected:
 	};
 	std::vector<objectInitializer> listOfObjectInitializers;
 	std::map<std::string, DescriptorSet> descriptorSetMap;
-
+	float angle1 = 0.f;
+	float angle2 = 0.f;
+	bool launch = false;
+	float t = 0.f;
+	std::chrono::time_point<Clock> launchTime;
 
 
 	// Begin :				GAME DESIGN Information
@@ -82,17 +87,19 @@ protected:
 			std::vector bird_name = std::vector<std::string>();
 			bird_name.push_back("main-bird");
 			Paths bird_paths = Paths{ MODEL_PATH, TEXTURE_PATH , bird_name };
+			/*
 			std::vector bg_name = std::vector<std::string>();
 			bg_name.push_back("background");
 			Paths prof_paths = Paths{ PROF_MODEL, PROF_TEXTURE  , bg_name };
 			std::vector all_names = std::vector<std::string>();
 			all_names.insert(all_names.end(), { "small-bird-one", "small-bird-two", "small-bird-three" });
-			Paths many_instances_obj_path = Paths{ MODEL_PATH, TEXTURE_PATH, all_names, 3 };
-
+			Paths many_instances_obj_path = Paths{ MODEL_PATH, TEXTURE_PATH, all_names, 3 };*/
+			std::vector arrow_name = std::vector<std::string>();
+			arrow_name.push_back("arrow");
+			Paths arrow_paths = Paths{ "models/arrow.obj", "textures/arrow.png", arrow_name};
 
 			listOfPaths.push_back(bird_paths);
-			listOfPaths.push_back(prof_paths);
-			listOfPaths.push_back(many_instances_obj_path);
+			listOfPaths.push_back(arrow_paths);
 		}
 		
 		// Do not change
@@ -213,7 +220,7 @@ protected:
 		float time;
 		// Get time
 		{
-		static auto startTime = std::chrono::high_resolution_clock::now();
+		static auto startTime= std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		time = std::chrono::duration<float, std::chrono::seconds::period>
 			(currentTime - startTime).count();
@@ -255,7 +262,7 @@ protected:
 	// API (or method calls rather) to be used by the physics engine or game engine IDK.
 	// sets the initial position on the scene of each object 
 	glm::mat4 getInitialPosition(std::string objName) {
-		if (objName.compare("background")) {
+		if (!objName.compare("background")) {
 			glm::mat4 scaledUpHouse = glm::scale(glm::translate(glm::mat4(1.0f),
 				glm::vec3(0.f, -2.f, 1.5f)), glm::vec3(6.5f));
 			return glm::rotate(scaledUpHouse, glm::radians(90.0f),
@@ -265,6 +272,14 @@ protected:
 		else if (objName.find("small-bird") != std::string::npos) {
 			return glm::mat4(2.0f);
 		}
+		else if (!objName.compare("main-bird")) {
+			return glm::mat4(1.2f);
+		}
+		else if (!objName.compare("arrow")) {
+			glm::mat4 transl = glm::translate(glm::mat4(1.f), glm::vec3(.4f, 1.2f, 17.f));
+			return glm::rotate(transl, glm::radians(270.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+		}
 		return glm::mat4(1.2f);
 	}
 	
@@ -273,34 +288,62 @@ protected:
 
 		glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 finalPosition;
-		std::string main_object_name = "main-bird";
+		std::string main_object_name = "arrow";
 		glm::mat4 currentPosition = mapOfObjects[main_object_name].coordinates;
 		float x = 0, y = 0, z = 0;
+		float timeInMS = time / 1000 / 10;
+		if (!launch) {
+			if (glfwGetKey(window, GLFW_KEY_W)) {
+				angle1 -= 0.01f;
+			}
+			if (glfwGetKey(window, GLFW_KEY_A)) {
+				angle2 += 0.01f;
+			}
+			if (glfwGetKey(window, GLFW_KEY_S)) {
+				angle1 += 0.01f;
+			}
+			if (glfwGetKey(window, GLFW_KEY_D)) {
+				angle2 -= 0.01f;
+			}
+			if (angle1 >= 0) {
+				angle1 = 0;
+			}
+			if (angle1 <= -25) {
+				angle1 = -25;
+			}
+			if (angle2 >= 25) {
+				angle2 = 25;
+			}
+			if (angle2 <= -25) {
+				angle2 = -25;
+			}
+			if (glfwGetKey(window, GLFW_KEY_SPACE)) {
+				launch = true;
+				launchTime = std::chrono::high_resolution_clock::now();
+			}
+			glm::mat4 initial = getInitialPosition(main_object_name);
+			glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(0.3f, 1.2f, -2.f));
+			glm::mat4 r1 = glm::rotate(glm::mat4(1), glm::radians(angle1), glm::vec3(1, 0, 0));
+			glm::mat4 r2 = glm::rotate(glm::mat4(1), glm::radians(angle2), glm::vec3(0, 1, 0));
+			finalPosition = T * r2 * r1 * glm::inverse(T) * initial;
+		}
+		else {
+			finalPosition = glm::mat4(-500.f);
+		}
+		mapOfObjects[main_object_name].coordinates = finalPosition;
+		return;
 
-		if (glfwGetKey(window, GLFW_KEY_W)) {
-			y = mapOfObjects[main_object_name].velocity;
-		}
-		if (glfwGetKey(window, GLFW_KEY_A)) {
-			x = mapOfObjects[main_object_name].velocity;
-		}
-		if (glfwGetKey(window, GLFW_KEY_S)) {
-			y = - mapOfObjects[main_object_name].velocity;
-		}
-		if (glfwGetKey(window, GLFW_KEY_D)) {
-			x = - mapOfObjects[main_object_name].velocity;
-		}
 		if (glfwGetKey(window, GLFW_KEY_R)) {
 			z = mapOfObjects[main_object_name].velocity;
 		}
 		if (glfwGetKey(window, GLFW_KEY_F)) {
 			z = -mapOfObjects[main_object_name].velocity;
 		}
-		float timeInMS = time / 1000 / 10;
 		x = x * timeInMS;
 		y = y * timeInMS;
 		z = z * timeInMS;
 		if (glfwGetKey(window, GLFW_KEY_SPACE)) {
-			finalPosition = glm::scale(position, glm::vec3(2.20f));
+			finalPosition = glm::scale(position, glm::vec3(0.5f));
 		}
 		else {
 			finalPosition = glm::translate(currentPosition, glm::vec3(x, y, z));
@@ -311,13 +354,13 @@ protected:
 	
 	// Controls the camera movement
 	GlobalUniformBufferObject cameraTransformations() {
-		GlobalUniformBufferObject gubo{};
-		gubo.view = glm::lookAt(glm::vec3(0.0f, 1.0f, -6.5f),
+		GlobalUniformBufferObject gubo{}; 
+		gubo.view = glm::lookAt(glm::vec3(0.f, 10.0f, -30.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 		gubo.proj = glm::perspective(glm::radians(60.0f),
 			swapChainExtent.width / (float)swapChainExtent.height,
-			0.1f, 100.0f);
+			0.1f, 1000.f);
 		gubo.proj[1][1] *= -1;
 		return gubo;
 	}
@@ -336,12 +379,28 @@ protected:
 				finalMat4 = glm::rotate(scaledMat4, glm::radians(90.0f),
 					glm::vec3(-1.0f, 0.0f, 0.0f));
 			}
-			else if (itr->first.find("small-bird-one") != std::string::npos) {
-				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 1.8f));
-				scaledMat4 = glm::scale(transMat4, glm::vec3(0.68f));
+			else if (itr->first.find("main-bird") != std::string::npos) {
+				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, -4.0f));
+				scaledMat4 = glm::scale(transMat4, glm::vec3(2.0f));
 				finalMat4 = glm::rotate(scaledMat4,
-					time / 3 * glm::radians(90.0f),
+					glm::radians(180.0f),
 					glm::vec3(0.0f, 1.0f, 0.0f));
+				if (launch) 
+				{
+					auto currentTime = std::chrono::high_resolution_clock::now();
+					float lTime = std::chrono::duration<float, std::chrono::seconds::period>
+						(currentTime - launchTime).count();
+					float g = 9.81f;
+					float module = 50.f;
+					float angle = -angle1;
+					glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(1.2f));
+					glm::mat4 R = glm::rotate(glm::mat4(1), glm::radians(angle2), glm::vec3(0, 1, 0));
+					float zt = module * cos(glm::radians(angle)) * lTime;
+					float yt = -1.*  1./2. * g * pow(lTime, 2.) + module * sin(glm::radians(angle)) * lTime;
+					glm::mat4 posT = glm::translate(glm::mat4(1), glm::vec3(0.f, yt, zt));
+					finalMat4 =  T * R * posT * glm::inverse(R) * glm::inverse(T)* finalMat4;
+
+				}
 			}
 			else if (itr->first.find("small-bird-two") != std::string::npos) {
 				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, -0.5f, 1.2f));
@@ -358,7 +417,7 @@ protected:
 					glm::vec3(0.0f, 1.0f, 1.0f));
 			}
 			// Main bird is supposed to be the main playable character
-			if (itr->first.compare("main-bird") != 0) {
+			if (itr->first.compare("arrow") != 0) {
 				itr->second.coordinates = finalMat4;
 			}
 		}
