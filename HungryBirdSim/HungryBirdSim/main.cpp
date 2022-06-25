@@ -72,8 +72,8 @@ protected:
 	void setWindowParameters() {
 		// window size, titile and initial background
 		{
-			windowWidth = 800;
-			windowHeight = 600;
+			windowWidth = 1200;
+			windowHeight = 720;
 			windowTitle = "My Project";
 			initialBackgroundColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 		}
@@ -87,6 +87,11 @@ protected:
 			std::vector bird_name = std::vector<std::string>();
 			bird_name.push_back("main-bird");
 			Paths bird_paths = Paths{ MODEL_PATH, TEXTURE_PATH , bird_name };
+			std::vector background_plane = std::vector<std::string>();
+			background_plane.push_back("background");
+			Paths background_plane_paths = Paths{ "models/planar-background.obj",
+												"textures/background-example.jpg",
+												background_plane };
 			/*
 			std::vector bg_name = std::vector<std::string>();
 			bg_name.push_back("background");
@@ -100,6 +105,7 @@ protected:
 
 			listOfPaths.push_back(bird_paths);
 			listOfPaths.push_back(arrow_paths);
+			listOfPaths.push_back(background_plane_paths);
 		}
 		
 		// Do not change
@@ -259,17 +265,14 @@ protected:
 		
 	
 	}
+	
+	
+	
 	// API (or method calls rather) to be used by the physics engine or game engine IDK.
 	// sets the initial position on the scene of each object 
 	glm::mat4 getInitialPosition(std::string objName) {
-		if (!objName.compare("background")) {
-			glm::mat4 scaledUpHouse = glm::scale(glm::translate(glm::mat4(1.0f),
-				glm::vec3(0.f, -2.f, 1.5f)), glm::vec3(6.5f));
-			return glm::rotate(scaledUpHouse, glm::radians(90.0f),
-				glm::vec3(-1.0f, 0.0f, 0.0f));
-		}
 		// we are in C++17 so we do not have the method contains... why is cpp like this?
-		else if (objName.find("small-bird") != std::string::npos) {
+		if (objName.find("small-bird") != std::string::npos) {
 			return glm::mat4(2.0f);
 		}
 		else if (!objName.compare("main-bird")) {
@@ -280,12 +283,28 @@ protected:
 			return glm::rotate(transl, glm::radians(270.0f),
 				glm::vec3(0.0f, 1.0f, 0.0f));
 		}
+		else if (objName.find("background") != std::string::npos) {
+			glm::mat4 scaled_up = glm::translate(
+				//glm::vec3(240.f,160.f,1.f)
+				glm::scale(glm::mat4(1.0f), glm::vec3(900.f, 600.f,1.f)),
+				glm::vec3(0.f, -0.00f, 800.f));
+			// lookat
+			glm::mat4 correct_axis_rotated =  glm::rotate(glm::rotate(scaled_up,
+				glm::radians(90.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f)
+			), glm::radians(90.0f), glm::vec3(1.f,0.f,0.f));
+			return glm::rotate(correct_axis_rotated,
+					glm::radians(4.5f),
+				glm::vec3(0.f,1.f,0.f)
+				);
+				
+				
+		}
 		return glm::mat4(1.2f);
 	}
 	
 	// controls the movement of objects inside the scene that can be controlled by the user
 	void handleKeyPresses(float time) {
-
 		glm::mat4 position = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 1.f, 0.f));
 		glm::mat4 finalPosition;
 		std::string main_object_name = "arrow";
@@ -328,6 +347,10 @@ protected:
 			finalPosition = T * r2 * r1 * glm::inverse(T) * initial;
 		}
 		else {
+			if (glfwGetKey(window, GLFW_KEY_R)) {
+				launch = false;
+				mapOfObjects["main-bird"].coordinates = getInitialPosition("main-bird");
+			}
 			finalPosition = glm::mat4(-500.f);
 		}
 		mapOfObjects[main_object_name].coordinates = finalPosition;
@@ -356,7 +379,7 @@ protected:
 	GlobalUniformBufferObject cameraTransformations() {
 		GlobalUniformBufferObject gubo{}; 
 		gubo.view = glm::lookAt(glm::vec3(0.f, 10.0f, -30.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 0.5f, 200.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 		gubo.proj = glm::perspective(glm::radians(60.0f),
 			swapChainExtent.width / (float)swapChainExtent.height,
@@ -373,11 +396,7 @@ protected:
 		glm::mat4 finalMat4;
 		for (auto itr = mapOfObjects.begin(); itr != mapOfObjects.end(); ++itr) {
 			if (itr->first.compare("background") == 0) {
-				// TODO:: understand why we need to rotate 90 degrees.
-				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, -1.f, 1.5f));
-				scaledMat4 = glm::scale(transMat4, glm::vec3(4.5f));
-				finalMat4 = glm::rotate(scaledMat4, glm::radians(90.0f),
-					glm::vec3(-1.0f, 0.0f, 0.0f));
+				finalMat4 = itr->second.coordinates;
 			}
 			else if (itr->first.find("main-bird") != std::string::npos) {
 				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, -4.0f));
