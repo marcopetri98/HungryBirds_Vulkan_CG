@@ -3,19 +3,13 @@
 #ifndef GRAPHICSENGINE_H_
 #define GRAPHICSENGINE_H_
 #define GLFW_INCLUDE_VULKAN
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_EXPOSE_NATIVE_WIN32
 
 #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 #include <string>
 #include <vector>
 
 #include "Queues.h"
 #include "SwapChainSupportDetails.h"
-
-
-
 
 using std::string;
 using std::vector;
@@ -59,18 +53,18 @@ namespace graphics
 		VkPipeline graphicsPipeline;
 		VkCommandPool commandPool;
 		uint32_t currentFrame = 0;
-		std::vector<VkCommandBuffer> commandBuffers;
-		std::vector<VkSemaphore> imageAvailableSemaphores;
-		std::vector<VkSemaphore> renderFinishedSemaphores;
-		std::vector<VkFence> inFlightFences;
+		vector<VkCommandBuffer> commandBuffers;
+		vector<VkSemaphore> imageAvailableSemaphores;
+		vector<VkSemaphore> renderFinishedSemaphores;
+		vector<VkFence> inFlightFences;
 
 
-		std::vector<const char*> deviceExtensions = {
+		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
-		std::vector<VkImage> swapChainImages;
-		std::vector<VkImageView> swapChainImageViews;
-		std::vector<VkFramebuffer> swapChainFramebuffers;
+		vector<VkImage> swapChainImages;
+		vector<VkImageView> swapChainImageViews;
+		vector<VkFramebuffer> swapChainFramebuffers;
 
 		void initWindow();
 		void initVulkan();
@@ -136,7 +130,6 @@ namespace graphics
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 		/**
 		 * Creates the surface used to present rendered images, handling different OS types automatically. 
-		 * 
 		 */
 		void createSurface();
 		/**
@@ -159,14 +152,14 @@ namespace graphics
 		 * @param availableFormats the available formats
 		 * @return the chosen surface format
 		 */
-		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const vector<VkSurfaceFormatKHR>& availableFormats);
 		/**
 		 * Chooses the presentation format. If MailboxKHR is supported is chosen, else FifoKHR is used.
 		 *
 		 * @param availableFormats the available formats
 		 * @return the chosen surface format
 		 */
-		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+		VkPresentModeKHR chooseSwapPresentMode(const vector<VkPresentModeKHR>& availablePresentModes);
 		//TODO we may want to choose which presentation format we want or which one we prefer in order
 
 		/**
@@ -194,14 +187,14 @@ namespace graphics
 		 * @param filename Name of the file to read from
 		 * @return The read binary data
 		 */
-		static std::vector<char> readFile(const std::string& filename);
+		static std::vector<char> readFile(const string& filename);
 		/**
 		 * Helper function to wrap the shader code in a VkShaderModule object
 		 * 
 		 * @param code the shader code to be wrapped
 		 * @return the VKShaderModule wrapping the given shader
 		 */
-		VkShaderModule createShaderModule(const std::vector<char>& code);
+		VkShaderModule createShaderModule(const vector<char>& code);
 		/**
 		 * Creates render pass object
 		 */
@@ -219,7 +212,7 @@ namespace graphics
 		 * Create the command buffer
 		 * 
 		 */
-		void createCommandBuffer();
+		void createCommandBuffers();
 		/**
 		 * Writes the commands into a command buffer for execution
 		 * 
