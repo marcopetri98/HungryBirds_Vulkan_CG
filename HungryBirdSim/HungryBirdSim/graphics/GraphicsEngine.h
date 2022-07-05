@@ -57,7 +57,7 @@ namespace graphics
 		vector<VkSemaphore> imageAvailableSemaphores;
 		vector<VkSemaphore> renderFinishedSemaphores;
 		vector<VkFence> inFlightFences;
-
+		bool framebuffersResized = false;
 
 		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -230,9 +230,20 @@ namespace graphics
 		 * 
 		 */
 		void createSyncObjects();
+		/**
+		 * Recreate the swap change due to an event that made it invalid, such as window resizing.
+		 * 
+		 */
+		void recreateSwapChain();
+		/**
+		 * Clean up all the swap chain related resources and class members.
+		 * 
+		 */
+		void cleanupSwapChain();
 		void mainLoop();
 		void cleanup();
 
+		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		static VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
 													 const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 													 const VkAllocationCallbacks* pAllocator,

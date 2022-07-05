@@ -67,6 +67,9 @@ namespace errors
 
 			case Error::VULKAN_FAIL_CREATE_SYNCHRONIZATION_OBJECTS:
 				return "Vulkan wasn't able to properly create synchronization objects (VkSemaphore or VkFence)!";
+
+			case Error::VULKAN_FAIL_ACQUIRE_SWAP_CHAIN_IMAGE:
+				return "Vulkan wasn't able to properly acquire the swap chain images (vkAcquireNextImageKHR)!";
 		}
 	}
 }
