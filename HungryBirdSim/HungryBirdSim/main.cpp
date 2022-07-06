@@ -71,6 +71,19 @@ protected:
 	// key-value pair with key := name of object and objectDescriptor containing relevant 
 	// mat4 passed to vertex and frag shader
 	std::map<std::string, objectDescriptor> mapOfObjects;
+	struct guboWrapper {
+		GlobalUniformBufferObject gubo;
+		glm::mat4 coordinates;
+		int position;
+		bool anchored = false;
+	};
+	const int uninitializedFlag = -10101;
+	guboWrapper camera{
+		{},
+		{},
+		uninitializedFlag,
+		true
+	};
 	
 
 	// Here you set the main application parameters
@@ -97,6 +110,11 @@ protected:
 			Paths background_plane_paths = Paths{ "models/planar-background.obj",
 												"textures/background-example.jpg",
 												background_plane };
+			//std::vector background_plane = std::vector<std::string>();
+			//background_plane.push_back("background");
+			//Paths background_plane_paths = Paths{ "models/skybox.obj",
+			//									"textures/skybox-texture.png",
+			//									background_plane };
 			/*
 			std::vector bg_name = std::vector<std::string>();
 			bg_name.push_back("background");
@@ -115,7 +133,7 @@ protected:
 
 			listOfPaths.push_back(bird_paths);
 			listOfPaths.push_back(arrow_paths);
-			//listOfPaths.push_back(background_plane_paths);
+			listOfPaths.push_back(background_plane_paths);
 			listOfPaths.push_back(many_instances_obj_path);
 			listOfPaths.push_back(cube_paths);
 		}
@@ -236,17 +254,21 @@ protected:
 	// Main functoin that gets called to draw on screen everything
 	void updateUniformBuffer(uint32_t currentImage) {
 		float time;
+		float deltaTime;
 		// Get time
 		{
 		static auto startTime= std::chrono::high_resolution_clock::now();
+		static auto lastTime = startTime;
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		time = std::chrono::duration<float, std::chrono::seconds::period>
 			(currentTime - startTime).count();
+		deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+		lastTime = currentTime;
 		}
 		// These can be put inside the main loop
 		handleKeyPresses(time);
 		handleAutomaticObjectMovement(time);
-		GlobalUniformBufferObject gubo = cameraTransformations();
+		GlobalUniformBufferObject gubo = cameraTransformations(time, deltaTime);
 		// Here the model of each object is sent to the shaders.
 		{
 			
@@ -392,16 +414,77 @@ protected:
 	}
 	
 	// Controls the camera movement
-	GlobalUniformBufferObject cameraTransformations() {
-		GlobalUniformBufferObject gubo{}; 
-		gubo.view = glm::lookAt(glm::vec3(100.f, 10.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
+	GlobalUniformBufferObject cameraTransformations(float time,float deltaTime) {
+		
+		GlobalUniformBufferObject gubo{};
+		if (camera.position == uninitializedFlag) {
+			camera.position = 1;
+			camera.anchored = false;
+			camera.gubo.view = glm::lookAt(glm::vec3(0.f, 10.0f, -100.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+		}
+		static float debounce = time;
+		if (glfwGetKey(window, GLFW_KEY_C)) {
+			if (time - debounce > 0.33) {
+				camera.anchored = true;
+				debounce = time;
+			}			
+		}
+
+		moveCamera(deltaTime);
+
 		gubo.proj = glm::perspective(glm::radians(60.0f),
 			swapChainExtent.width / (float)swapChainExtent.height,
 			0.1f, 1000.f);
 		gubo.proj[1][1] *= -1;
-		return gubo;
+		camera.gubo.proj = gubo.proj;
+		return camera.gubo;
+	}
+
+	void moveCamera(float deltaTime) {
+		GlobalUniformBufferObject gubo{};
+		gubo.view = camera.gubo.view;
+
+		if (camera.anchored && camera.position == 0) {
+			// Position 1
+			gubo.view = glm::lookAt(glm::vec3(0.f, 10.0f, -100.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			camera.position = 1;
+			camera.anchored = false;
+		}
+		else if (camera.anchored && camera.position == 1) {
+
+			// Position 0
+			gubo.view = glm::lookAt(glm::vec3(100.f, 10.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
+			camera.position = 0;
+			camera.anchored = false;
+
+		}
+		else {
+
+			float speed = 2.89;
+			float deltaT = deltaTime * speed;
+			if (glfwGetKey(window, GLFW_KEY_UP)) {
+				gubo.view = glm::translate(gubo.view, glm::vec3(0, -deltaT, 0));
+			}
+			else if (glfwGetKey(window, GLFW_KEY_DOWN)) {
+				gubo.view = glm::translate(gubo.view, glm::vec3(0, deltaT, 0));
+			}
+			if (glfwGetKey(window, GLFW_KEY_LEFT)) {
+				gubo.view = glm::translate(gubo.view, glm::vec3(-deltaT, 0, 0));
+			}
+			else if (glfwGetKey(window, GLFW_KEY_RIGHT)) {
+				gubo.view = glm::translate(gubo.view, glm::vec3(deltaT, 0, 0));
+			}
+		}
+		
+		
+		camera.anchored = false;
+		camera.gubo.view = gubo.view;
 	}
 
 	// controls the movement of objects inside the scene that cannot be controlled by the user
