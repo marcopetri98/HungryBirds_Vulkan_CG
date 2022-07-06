@@ -70,6 +70,15 @@ namespace errors
 
 			case Error::VULKAN_FAIL_ACQUIRE_SWAP_CHAIN_IMAGE:
 				return "Vulkan wasn't able to properly acquire the swap chain images (vkAcquireNextImageKHR)!";
+
+			case Error::VULKAN_FAIL_CREATE_VERTEX_BUFFER:
+				return "Vulkan wasn't able to properly create the vertex buffer (VkBuffer)!";
+
+			case Error::VULKAN_FAIL_FIND_SUITABLE_MEMORY_TYPE:
+				return "Vulkan wasn't able to properly find a suitable memory type for the vertex buffer!";
+
+			case Error::VULKAN_FAIL_ALLOCATE_VERTEX_BUFFER_MEMORY:
+				return "Vulkan wasn't able to properly allocate the found memory for the vertex (VkDeviceMemory)!";
 		}
 	}
 }

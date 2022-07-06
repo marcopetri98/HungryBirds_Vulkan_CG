@@ -10,6 +10,7 @@
 
 #include "Queues.h"
 #include "SwapChainSupportDetails.h"
+#include "Vertex.h"
 
 using std::string;
 using std::vector;
@@ -58,6 +59,11 @@ namespace graphics
 		vector<VkSemaphore> renderFinishedSemaphores;
 		vector<VkFence> inFlightFences;
 		bool framebuffersResized = false;
+		// TODO: the triangle is stored in this buffer (I assume that multiple objects will mean multiple vertex buffer)
+		VkBuffer vertexBuffer;
+		VkDeviceMemory vertexBufferMemory;
+		VkBuffer indexBuffer;
+		VkDeviceMemory indexBufferMemory;
 
 		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -240,6 +246,42 @@ namespace graphics
 		 * 
 		 */
 		void cleanupSwapChain();
+		/**
+		 * Creates the vertex buffer to be able to send to shaders vertices from Vulkan.
+		 * 
+		 */
+		void createVertexBuffer();
+		/**
+		 * Find the memory best suiting the application requirements.
+		 * 
+		 * @param typeFilter Memories supporting the vertex buffer requrements.
+		 * @param properties The flags identifying the properties we desire the memory to have.
+		 * @return index of the first memory satisfying all requirements.
+		 */
+		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+		/**
+		 * Creates a buffer with as it is specified in the parameters.
+		 * 
+		 * @param size The dimension of the buffer.
+		 * @param usage Flags stating how the buffer will be used.
+		 * @param properties Properties of the buffer.
+		 * @param buffer The buffer to be filled.
+		 * @param bufferMemory The memory to be used for that buffer.
+		 */
+		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		/**
+		 * Copy the contents of a source buffer to a destination buffer.
+		 * 
+		 * @param srcBuffer The source buffer.
+		 * @param dstBuffer The destination buffer.
+		 * @param size The size of the buffers.
+		 */
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		/**
+		 * Creates the index buffer to optimize memory used by vertices.
+		 * 
+		 */
+		void createIndexBuffer();
 		void mainLoop();
 		void cleanup();
 
