@@ -11,6 +11,7 @@
 #include "Queues.h"
 #include "SwapChainSupportDetails.h"
 #include "Vertex.h"
+#include "UniformObjects.h"
 
 using std::string;
 using std::vector;
@@ -50,6 +51,7 @@ namespace graphics
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		VkRenderPass renderPass;
+		VkDescriptorSetLayout descriptorSetLayout;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 		VkCommandPool commandPool;
@@ -64,6 +66,10 @@ namespace graphics
 		VkDeviceMemory vertexBufferMemory;
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
+		vector<VkBuffer> uniformBuffers;
+		vector<VkDeviceMemory> uniformBuffersMemory;
+		VkDescriptorPool descriptorPool;
+		vector<VkDescriptorSet> descriptorSets;
 
 		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -282,6 +288,32 @@ namespace graphics
 		 * 
 		 */
 		void createIndexBuffer();
+		/**
+		 * Create descriptor set layout to be able to pass uniform objects to shaders.
+		 * 
+		 */
+		void createDescriptorSetLayout();
+		/**
+		 * Creates the uniform buffers to be filled and used with description set layouts.
+		 * 
+		 */
+		void createUniformBuffers();
+		/**
+		 * Updates the current uniform buffer object for rendering..
+		 * 
+		 * @param currentImage The current image on which we need to draw.
+		 */
+		void updateUniformBuffer(uint32_t currentImage);
+		/**
+		 * Creates the descriptor pool to create all the needed descriptor sets.
+		 * 
+		 */
+		void createDescriptorPool();
+		/**
+		 * Create the descriptor sets.
+		 * 
+		 */
+		void createDescriptorSets();
 		void mainLoop();
 		void cleanup();
 

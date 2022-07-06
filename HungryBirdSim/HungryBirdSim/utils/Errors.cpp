@@ -79,6 +79,15 @@ namespace errors
 
 			case Error::VULKAN_FAIL_ALLOCATE_VERTEX_BUFFER_MEMORY:
 				return "Vulkan wasn't able to properly allocate the found memory for the vertex (VkDeviceMemory)!";
+
+			case Error::VULKAN_FAIL_CREATE_DESCRIPTOR_SET_LAYOUT:
+				return "Vulkan wasn't able to properly allocate the descriptor set layout (VkDescriptorSetLayout)!";
+
+			case Error::VULKAN_FAIL_CREATE_DESCRIPTOR_POOL:
+				return "Vulkan wasn't able to properly allocate the descriptor pool (VkDescriptorPool)!";
+
+			case Error::VULKAN_FAIL_ALLOCATE_DESCRIPTOR_SET:
+				return "Vulkan wasn't able to properly allocate the descriptor set (VkDescriptorSet)!";
 		}
 	}
 }
