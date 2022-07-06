@@ -50,8 +50,11 @@ protected:
 	float angle1 = 0.f;
 	float angle2 = 0.f;
 	bool launch = false;
+	std::string lastCollision="None";
 	float t = 0.f;
 	std::chrono::time_point<Clock> launchTime;
+	float module = 50.f;
+	glm::mat4 collisionPoint = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 0.f));
 
 
 	// Begin :				GAME DESIGN Information
@@ -61,6 +64,8 @@ protected:
 		// float acceleration;
 		// other properties like velocity;
 		glm::mat4 coordinates;
+		int colliderType; //TODO use enum to represent e.g. box, sphere...
+		float colliderRadius;
 		float velocity = 1;
 	};
 	// key-value pair with key := name of object and objectDescriptor containing relevant 
@@ -96,16 +101,23 @@ protected:
 			std::vector bg_name = std::vector<std::string>();
 			bg_name.push_back("background");
 			Paths prof_paths = Paths{ PROF_MODEL, PROF_TEXTURE  , bg_name };
+			*/
 			std::vector all_names = std::vector<std::string>();
 			all_names.insert(all_names.end(), { "small-bird-one", "small-bird-two", "small-bird-three" });
-			Paths many_instances_obj_path = Paths{ MODEL_PATH, TEXTURE_PATH, all_names, 3 };*/
+			Paths many_instances_obj_path = Paths{ MODEL_PATH, TEXTURE_PATH, all_names, 3 };
 			std::vector arrow_name = std::vector<std::string>();
 			arrow_name.push_back("arrow");
 			Paths arrow_paths = Paths{ "models/arrow.obj", "textures/arrow.png", arrow_name};
+			
+			std::vector cube_name = std::vector<std::string>();
+			cube_name.push_back("cube");
+			Paths cube_paths = Paths{ "models/cube.obj", "textures/cube.png", cube_name};
 
 			listOfPaths.push_back(bird_paths);
 			listOfPaths.push_back(arrow_paths);
-			listOfPaths.push_back(background_plane_paths);
+			//listOfPaths.push_back(background_plane_paths);
+			listOfPaths.push_back(many_instances_obj_path);
+			listOfPaths.push_back(cube_paths);
 		}
 		
 		// Do not change
@@ -145,7 +157,7 @@ protected:
 			std::map<std::string,DescriptorSet> dsmap = std::map<std::string, DescriptorSet>();
 			for (int i = 0; i < objPaths.numInstances; i++) {
 				objectDescriptor objectDescription = objectDescriptor{ 
-													getInitialPosition(objPaths.names[i]) };
+													getInitialPosition(objPaths.names[i]), 0, 1.0f };
 				DescriptorSet ds = DescriptorSet();
 				ds.init(this, &DSLobj, {
 								{0, UNIFORM, sizeof(UniformBufferObject), nullptr},
@@ -154,7 +166,7 @@ protected:
 
 				// Here we can get the initial position of each object
 				//std::cout << "\n\n" << objPaths.names[i] << "\n\n";
-				mapOfObjects.insert({ objPaths.names[i], objectDescription });
+				mapOfObjects.insert({ objPaths.names[i], objectDescription});
 				dsmap.insert({ objPaths.names[i], ds });
 				descriptorSetMap.insert({ objPaths.names[i], ds });
 			}
@@ -273,7 +285,7 @@ protected:
 	glm::mat4 getInitialPosition(std::string objName) {
 		// we are in C++17 so we do not have the method contains... why is cpp like this?
 		if (objName.find("small-bird") != std::string::npos) {
-			return glm::mat4(2.0f);
+			return glm::mat4(10.0f);
 		}
 		else if (!objName.compare("main-bird")) {
 			return glm::mat4(1.2f);
@@ -282,6 +294,10 @@ protected:
 			glm::mat4 transl = glm::translate(glm::mat4(1.f), glm::vec3(.4f, 1.2f, 17.f));
 			return glm::rotate(transl, glm::radians(270.0f),
 				glm::vec3(0.0f, 1.0f, 0.0f));
+		}
+		else if (!objName.compare("cube")) {
+			glm::mat4 transl = glm::translate(glm::mat4(1.f), glm::vec3(1.2f, 5.f, 50.f));
+			return transl;
 		}
 		else if (objName.find("background") != std::string::npos) {
 			glm::mat4 scaled_up = glm::translate(
@@ -378,8 +394,8 @@ protected:
 	// Controls the camera movement
 	GlobalUniformBufferObject cameraTransformations() {
 		GlobalUniformBufferObject gubo{}; 
-		gubo.view = glm::lookAt(glm::vec3(0.f, 10.0f, -30.0f),
-			glm::vec3(0.0f, 0.5f, 200.0f),
+		gubo.view = glm::lookAt(glm::vec3(100.f, 10.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f));
 		gubo.proj = glm::perspective(glm::radians(60.0f),
 			swapChainExtent.width / (float)swapChainExtent.height,
@@ -398,36 +414,75 @@ protected:
 			if (itr->first.compare("background") == 0) {
 				finalMat4 = itr->second.coordinates;
 			}
+			if (itr->first.compare("cube") == 0) {
+				finalMat4 = itr->second.coordinates;
+			}
 			else if (itr->first.find("main-bird") != std::string::npos) {
 				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, -4.0f));
 				scaledMat4 = glm::scale(transMat4, glm::vec3(2.0f));
 				finalMat4 = glm::rotate(scaledMat4,
 					glm::radians(180.0f),
 					glm::vec3(0.0f, 1.0f, 0.0f));
-				if (launch) 
+				if (launch)
 				{
 					auto currentTime = std::chrono::high_resolution_clock::now();
 					float lTime = std::chrono::duration<float, std::chrono::seconds::period>
 						(currentTime - launchTime).count();
 					float g = 9.81f;
-					float module = 50.f;
 					float angle = -angle1;
 					glm::mat4 T = glm::translate(glm::mat4(1), glm::vec3(1.2f));
 					glm::mat4 R = glm::rotate(glm::mat4(1), glm::radians(angle2), glm::vec3(0, 1, 0));
 					float zt = module * cos(glm::radians(angle)) * lTime;
 					float yt = -1.*  1./2. * g * pow(lTime, 2.) + module * sin(glm::radians(angle)) * lTime;
 					glm::mat4 posT = glm::translate(glm::mat4(1), glm::vec3(0.f, yt, zt));
-					finalMat4 =  T * R * posT * glm::inverse(R) * glm::inverse(T)* finalMat4;
+					finalMat4 = collisionPoint * T * R * posT * glm::inverse(R) * glm::inverse(T)* finalMat4;
+
+					float rayAngle = 0.f;
+					while (rayAngle < 360.f) {
+						//TODO for now 2d game, suppose x is constant
+						float r = itr->second.colliderRadius + 2.f;
+						glm::vec3 rayDir = glm::vec3(0, r * sin(glm::radians(rayAngle)), r * cos(glm::radians(rayAngle)));
+						glm::vec3 rayPos = rayDir + glm::vec3(finalMat4[3][0], finalMat4[3][1], finalMat4[3][2]);
+							for (auto itr2 = mapOfObjects.begin(); itr2 != mapOfObjects.end(); ++itr2) {
+								if (itr2->first.find("small-bird") != std::string::npos || itr2->first.compare("main-bird") == 0 || itr2->first.compare("arrow") == 0 || itr2->first.compare("background") == 0)
+									continue; 
+								//TODO handle different types of colliders
+								glm::mat4 pos = itr2->second.coordinates;
+								float radius = itr2->second.colliderRadius;
+								printf("pos: %f %f %f radius: % f rayPos: % f % f % f \n", 
+									pos[3][0], pos[3][1], pos[3][2], radius, rayPos.x, rayPos.y, rayPos.z);
+								if (pos[3][0] - radius <= rayPos.x && rayPos.x <= pos[3][0] + radius &&
+									pos[3][1] - radius <= rayPos.y && rayPos.y <= pos[3][1] + radius &&
+									pos[3][2] - radius <= rayPos.z && rayPos.z <= pos[3][2] + radius && itr2->first.compare(lastCollision)!=0) {
+									std::cout << "collided on angle: " << rayAngle << " with object: " << itr2->first << "\n";
+									launchTime = std::chrono::high_resolution_clock::now();
+									module = 20.f;
+									angle1 = rayAngle-180;
+									rayAngle = 360;
+									lastCollision = itr->first;
+									collisionPoint = glm::translate(glm::mat4(1), glm::vec3(pos[3][0], pos[3][1], pos[3][2]));
+									break;
+								}
+							}
+							transMat4 = glm::translate(glm::mat4(1.0f), rayPos);
+							scaledMat4 = glm::scale(transMat4, glm::vec3(0.5f));
+							mapOfObjects["small-bird-two"].coordinates = scaledMat4;
+							printf("%f %f %f \n", 
+								mapOfObjects["small-bird-two"].coordinates[3][0],
+								mapOfObjects["small-bird-two"].coordinates[3][1], 
+								mapOfObjects["small-bird-two"].coordinates[3][2]);
+							rayAngle += 45.f;
+					}
 
 				}
 			}
+			/*
 			else if (itr->first.find("small-bird-two") != std::string::npos) {
-				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, -0.5f, 1.2f));
-				scaledMat4 = glm::scale(transMat4, glm::vec3(0.38f));
-				finalMat4 = glm::rotate(scaledMat4,
-					time / 2 * glm::radians(90.0f),
-					glm::vec3(1.0f, 0.0f, 0.0f));
+				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.f));
+				scaledMat4 = glm::scale(transMat4, glm::vec3(1.f));
+				finalMat4 = scaledMat4;
 			}
+			*/
 			else if (itr->first.find("small-bird-three") != std::string::npos) {
 				transMat4 = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, 0.5f, 1.2f));
 				scaledMat4 = glm::scale(transMat4, glm::vec3(0.38f));
@@ -436,7 +491,7 @@ protected:
 					glm::vec3(0.0f, 1.0f, 1.0f));
 			}
 			// Main bird is supposed to be the main playable character
-			if (itr->first.compare("arrow") != 0) {
+			if (itr->first.compare("arrow") != 0 && itr->first.compare("small-bird-two") != 0) {
 				itr->second.coordinates = finalMat4;
 			}
 		}
