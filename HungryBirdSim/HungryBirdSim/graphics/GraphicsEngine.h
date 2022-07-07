@@ -70,6 +70,10 @@ namespace graphics
 		vector<VkDeviceMemory> uniformBuffersMemory;
 		VkDescriptorPool descriptorPool;
 		vector<VkDescriptorSet> descriptorSets;
+		VkImage textureImage;
+		VkDeviceMemory textureImageMemory;
+		VkImageView textureImageView;
+		VkSampler textureSampler;
 
 		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -314,6 +318,72 @@ namespace graphics
 		 * 
 		 */
 		void createDescriptorSets();
+		/**
+		 * Create a texture image.
+		 * 
+		 */
+		void createTextureImage();
+		/**
+		 * Create an image from the specified parameters.
+		 * 
+		 * @param width The width of the image.
+		 * @param height The height of the image.
+		 * @param format The format of the image to be created.
+		 * @param tiling Tiling format.
+		 * @param usage Flags specifying how the image will be used.
+		 * @param properties Properties required for the image.
+		 * @param image The image on which we will store the created image.
+		 * @param imageMemory The image memory to be used for storing.
+		 */
+		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		/**
+		 * Create the command buffer for a single command..
+		 * 
+		 * @return The command buffer to be used for the single command.
+		 */
+		VkCommandBuffer beginSingleTimeCommands();
+		/**
+		 * Send the command and free the command buffer.
+		 * 
+		 * @param commandBuffer The command buffer that is being used for a single time command.
+		 */
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+		/**
+		 * Transition layout for an image to have the right one.
+		 * 
+		 * @param image The image to work on.
+		 * @param format The format of the image.
+		 * @param oldLayout The old layout of the image.
+		 * @param newLayout The new layout of the image.
+		 */
+		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		/**
+		 * Copy the content of a buffer to an image.
+		 * 
+		 * @param buffer The buffer from which contents must be copied.
+		 * @param image The image to which contents must be copied.
+		 * @param width The width of the image.
+		 * @param height The height of the image.
+		 */
+		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+		/**
+		 * Create the image view for the texture image to be able to access it.
+		 * 
+		 */
+		void createTextureImageView();
+		/**
+		 * Create the image view for an image.
+		 * 
+		 * @param image The image from which we want to create the image view.
+		 * @param format The format of the image view.
+		 * @return 
+		 */
+		VkImageView createImageView(VkImage image, VkFormat format);
+		/**
+		 * Create a texture sampler.
+		 * 
+		 */
+		void createTextureSampler();
 		void mainLoop();
 		void cleanup();
 

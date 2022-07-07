@@ -88,6 +88,21 @@ namespace errors
 
 			case Error::VULKAN_FAIL_ALLOCATE_DESCRIPTOR_SET:
 				return "Vulkan wasn't able to properly allocate the descriptor set (VkDescriptorSet)!";
+
+			case Error::STB_FAIL_LOAD_IMAGE:
+				return "The loading of a texture image using STB wasn't successful! Control paths!";
+
+			case Error::VULKAN_FAIL_CREATE_IMAGE:
+				return "Vulkan wasn't able to properly create an image (VkImage)!";
+
+			case Error::VULKAN_FAIL_ALLOCATE_IMAGE:
+				return "Vulkan wasn't able to allocate an image with the specified requirements!";
+
+			case Error::VULKAN_FAIL_DOESNT_SUPPORT_TRANSITION_LAYOUT:
+				return "Vulkan does not support the specified transition layout (VkImageMemoryBarrier)!";
+
+			case Error::VULKAN_FAIL_CREATE_TEXTURE_SAMPLER:
+				return "Vulkan wasn't able to properly create the texture sampler (VkSampler)!";
 		}
 	}
 }
