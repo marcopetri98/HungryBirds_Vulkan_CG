@@ -107,14 +107,12 @@ protected:
 			Paths bird_paths = Paths{ MODEL_PATH, TEXTURE_PATH , bird_name };
 			std::vector background_plane = std::vector<std::string>();
 			background_plane.push_back("background");
-			Paths background_plane_paths = Paths{ "models/planar-background.obj",
-												"textures/background-example.jpg",
-												background_plane };
-			//std::vector background_plane = std::vector<std::string>();
-			//background_plane.push_back("background");
-			//Paths background_plane_paths = Paths{ "models/skybox.obj",
-			//									"textures/skybox-texture.png",
+			//Paths background_plane_paths = Paths{ "models/planar-background.obj",
+			//									"textures/background-example.jpg",
 			//									background_plane };
+			Paths background_plane_paths = Paths{ "models/skybox.obj",
+												"textures/skybox-texture.png",
+												background_plane };
 			/*
 			std::vector bg_name = std::vector<std::string>();
 			bg_name.push_back("background");
@@ -322,10 +320,11 @@ protected:
 			return transl;
 		}
 		else if (objName.find("background") != std::string::npos) {
+			/*
 			glm::mat4 scaled_up = glm::translate(
 				//glm::vec3(240.f,160.f,1.f)
-				glm::scale(glm::mat4(1.0f), glm::vec3(900.f, 600.f,1.f)),
-				glm::vec3(0.f, -0.00f, 800.f));
+				glm::scale(glm::mat4(1.0f), glm::vec3(1100.f, 600.f,1.f)),
+				glm::vec3(0.f, -0.10f, 800.f));
 			// lookat
 			glm::mat4 correct_axis_rotated =  glm::rotate(glm::rotate(scaled_up,
 				glm::radians(90.0f),
@@ -335,8 +334,13 @@ protected:
 					glm::radians(4.5f),
 				glm::vec3(0.f,1.f,0.f)
 				);
-				
-				
+			*/
+			glm::mat4 scaled_up = glm::translate(
+				//glm::vec3(240.f,160.f,1.f)
+				glm::scale(glm::mat4(1.0f), glm::vec3(2100, 2100, 2199.f)),
+				glm::vec3(0.f, -0.15f, 0.f));
+			return scaled_up;
+			
 		}
 		return glm::mat4(1.2f);
 	}
@@ -436,7 +440,7 @@ protected:
 
 		gubo.proj = glm::perspective(glm::radians(60.0f),
 			swapChainExtent.width / (float)swapChainExtent.height,
-			0.1f, 1000.f);
+			0.1f, 10000.f);
 		gubo.proj[1][1] *= -1;
 		camera.gubo.proj = gubo.proj;
 		return camera.gubo;
@@ -466,7 +470,7 @@ protected:
 		}
 		else {
 
-			float speed = 2.89;
+			float speed = 19.89;
 			float deltaT = deltaTime * speed;
 			if (glfwGetKey(window, GLFW_KEY_UP)) {
 				gubo.view = glm::translate(gubo.view, glm::vec3(0, -deltaT, 0));
@@ -480,6 +484,15 @@ protected:
 			else if (glfwGetKey(window, GLFW_KEY_RIGHT)) {
 				gubo.view = glm::translate(gubo.view, glm::vec3(deltaT, 0, 0));
 			}
+
+			/*if (glfwGetKey(window, GLFW_KEY_I)) {
+				mapOfObjects["background"].coordinates =
+					glm::translate(mapOfObjects["background"].coordinates, glm::vec3(0, 0, deltaT));
+			}
+			else if (glfwGetKey(window, GLFW_KEY_K)) {
+				mapOfObjects["background"].coordinates =
+					glm::translate(mapOfObjects["background"].coordinates, glm::vec3(0, 0, -deltaT));
+			}*/
 		}
 		
 		
