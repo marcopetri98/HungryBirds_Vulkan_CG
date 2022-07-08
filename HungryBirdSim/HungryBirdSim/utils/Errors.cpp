@@ -103,6 +103,9 @@ namespace errors
 
 			case Error::VULKAN_FAIL_CREATE_TEXTURE_SAMPLER:
 				return "Vulkan wasn't able to properly create the texture sampler (VkSampler)!";
+
+			case Error::IMAGE_FORMAT_REQUIREMENTS_TOO_STRICT:
+				return "The requirements for the image were too strict and no format can be used!";
 		}
 	}
 }

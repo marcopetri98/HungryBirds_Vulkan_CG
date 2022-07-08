@@ -74,6 +74,9 @@ namespace graphics
 		VkDeviceMemory textureImageMemory;
 		VkImageView textureImageView;
 		VkSampler textureSampler;
+		VkImage depthImage;
+		VkDeviceMemory depthImageMemory;
+		VkImageView depthImageView;
 
 		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -378,12 +381,39 @@ namespace graphics
 		 * @param format The format of the image view.
 		 * @return 
 		 */
-		VkImageView createImageView(VkImage image, VkFormat format);
+		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 		/**
 		 * Create a texture sampler.
 		 * 
 		 */
 		void createTextureSampler();
+		/**
+		 * Create the depth image to perform depth buffering.
+		 * 
+		 */
+		void createDepthResources();
+		/**
+		 * Find the most desirable format for an image.
+		 * 
+		 * @param candidates Formats from which we want to extract the most desirable.
+		 * @param tiling The required tiling for the image.
+		 * @param features The features required for the image.
+		 * @return The selected format.
+		 */
+		VkFormat findSupportedFormat(const vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+		/**
+		 * Find the depth format.
+		 * 
+		 * @return The format for the depth buffering image.
+		 */
+		VkFormat findDepthFormat();
+		/**
+		 * Finds if the format is specified also for a stencil component.
+		 * 
+		 * @param format The format to be analysed.
+		 * @return true if the format contains a stencil component, false otherwise
+		 */
+		bool hasStencilComponent(VkFormat format);
 		void mainLoop();
 		void cleanup();
 
