@@ -1359,25 +1359,25 @@ namespace graphics
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
 		// TODO: some systems do not support VK_FORMAT_R8G8B8A8_SRGB, to be super damn good (oh yes) we should handle this case
-		if (vkCreateImage(device, &imageInfo, nullptr, &textureImage) != VK_SUCCESS)
+		if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS)
 		{
 			throw std::runtime_error(getErrorStr(Error::VULKAN_FAIL_CREATE_IMAGE));
 		}
 
 		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(device, textureImage, &memRequirements);
+		vkGetImageMemoryRequirements(device, image, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-		if (vkAllocateMemory(device, &allocInfo, nullptr, &textureImageMemory) != VK_SUCCESS)
+		if (vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
 		{
 			throw std::runtime_error(getErrorStr(Error::VULKAN_FAIL_ALLOCATE_IMAGE));
 		}
 
-		vkBindImageMemory(device, textureImage, textureImageMemory, 0);
+		vkBindImageMemory(device, image, imageMemory, 0);
 	}
 
 	VkCommandBuffer  GraphicsEngine::beginSingleTimeCommands()
@@ -1520,7 +1520,6 @@ namespace graphics
 		viewInfo.subresourceRange.levelCount = 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
 		viewInfo.subresourceRange.layerCount = 1;
-
 		VkImageView imageView;
 		if (vkCreateImageView(device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
 		{
@@ -1568,7 +1567,7 @@ namespace graphics
 		depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
 		// TODO: for some reasons the tutorial says that the following lines are optional, understand why
-		transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+		//transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	}
 
 	VkFormat GraphicsEngine::findSupportedFormat(const vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
