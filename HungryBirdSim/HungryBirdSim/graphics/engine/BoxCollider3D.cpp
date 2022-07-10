@@ -52,8 +52,7 @@ namespace graphics {
 
 	GameObject BoxCollider3D::getGameObject()
 	{
-		// TODO: implement
-		return GameObject();
+		return this->gameObject;
 	}
 
 	bool BoxCollider3D::checkCollision(vec3 point) {

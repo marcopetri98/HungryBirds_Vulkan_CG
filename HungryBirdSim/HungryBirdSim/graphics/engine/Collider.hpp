@@ -5,6 +5,8 @@
 
 #include "GameObject.hpp"
 
+using glm::vec3;
+
 namespace graphics
 {
 	class Collider
@@ -16,7 +18,7 @@ namespace graphics
 		 * @return The game object to which this collider is attached.
 		 */
 		virtual GameObject getGameObject() = 0;
-		bool checkCollision();
+		virtual bool checkCollision(vec3 point) = 0;
 	};
 }
 
