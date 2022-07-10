@@ -8,6 +8,7 @@
 #include "Collider.hpp"
 
 using std::array;
+using glm::vec3;
 
 namespace graphics
 {
@@ -19,7 +20,7 @@ namespace graphics
 		 * 
 		 * @return An array containing: width, height and depth respectively
 		 */
-		virtual array<float, 3> getBoundingBox() = 0;
+		virtual bool checkCollision(vec3 point) = 0;
 	};
 }
 
