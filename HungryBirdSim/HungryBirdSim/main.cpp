@@ -317,7 +317,7 @@ protected:
 		}
 		else if (!objName.compare("cube")) {
 			glm::mat4 transl = glm::translate(glm::mat4(1.f), glm::vec3(1.2f, 5.f, 50.f));
-			return transl;
+			return glm::scale(transl, glm::vec3(15.f));
 		}
 		else if (objName.find("background") != std::string::npos) {
 			/*
