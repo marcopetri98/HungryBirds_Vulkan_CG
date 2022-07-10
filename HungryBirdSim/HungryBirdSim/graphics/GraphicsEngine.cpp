@@ -1585,6 +1585,7 @@ namespace graphics
 
 		depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
+		// TODO: errors with the pipeline barrier, understand how to resolve
 		// TODO: for some reasons the tutorial says that the following lines are optional, understand why
 		//transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 	}
