@@ -83,6 +83,10 @@ namespace graphics
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;
 		VkImageView depthImageView;
+		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
+		VkImage colorImage;
+		VkDeviceMemory colorImageMemory;
+		VkImageView colorImageView;
 
 		vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -338,6 +342,7 @@ namespace graphics
 		 * @param width The width of the image.
 		 * @param height The height of the image.
 		 * @param mipLevels The number of mipmapping levels.
+		 * @param numSamples The number of samples to be used in MSAA.
 		 * @param format The format of the image to be created.
 		 * @param tiling Tiling format.
 		 * @param usage Flags specifying how the image will be used.
@@ -345,7 +350,7 @@ namespace graphics
 		 * @param image The image on which we will store the created image.
 		 * @param imageMemory The image memory to be used for storing.
 		 */
-		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		/**
 		 * Create the command buffer for a single command..
 		 * 
@@ -437,6 +442,17 @@ namespace graphics
 		 * @param mipLevels The number of mipmapping levels to generate.
 		 */
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+		/**
+		 * Gets the maximum MSAA supported for the application by the GPU.
+		 * 
+		 * @return flags specifying the maximum MSAA.
+		 */
+		VkSampleCountFlagBits getMaximumMSAA();
+		/**
+		 * Create texture images to be used for MSAA.
+		 * 
+		 */
+		void createColorResources();
 		void mainLoop();
 		void cleanup();
 
