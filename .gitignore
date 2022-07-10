@@ -11,6 +11,7 @@
 *.lo
 *.o
 *.obj
+!HungryBirdSim/HungryBirdSim/objects/*.obj
 
 # Precompiled Headers
 *.gch

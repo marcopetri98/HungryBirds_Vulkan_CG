@@ -23,6 +23,8 @@ namespace graphics
 	const int DEFAULT_HEIGHT = 600;
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 	const vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
+	const string MODEL_PATH = "objects/viking_room.obj";
+	const string TEXTURE_PATH = "textures/viking_room.png";
 
 	class GraphicsEngine
 	{
@@ -62,6 +64,8 @@ namespace graphics
 		vector<VkFence> inFlightFences;
 		bool framebuffersResized = false;
 		// TODO: the triangle is stored in this buffer (I assume that multiple objects will mean multiple vertex buffer)
+		vector<Vertex> vertices;
+		vector<uint32_t> indices;
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
 		VkBuffer indexBuffer;
@@ -414,6 +418,11 @@ namespace graphics
 		 * @return true if the format contains a stencil component, false otherwise
 		 */
 		bool hasStencilComponent(VkFormat format);
+		/**
+		 * Load the models to be shown in the world.
+		 * 
+		 */
+		void loadModels();
 		void mainLoop();
 		void cleanup();
 
