@@ -106,6 +106,9 @@ namespace errors
 
 			case Error::IMAGE_FORMAT_REQUIREMENTS_TOO_STRICT:
 				return "The requirements for the image were too strict and no format can be used!";
+
+			case Error::VULKAN_FAIL_IMAGE_BLITTING:
+				return "Vulkan wasn't able to properly perform blitting on the image since it is not supported!";
 		}
 	}
 }

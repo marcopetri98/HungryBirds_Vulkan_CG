@@ -74,6 +74,8 @@ namespace graphics
 		vector<VkDeviceMemory> uniformBuffersMemory;
 		VkDescriptorPool descriptorPool;
 		vector<VkDescriptorSet> descriptorSets;
+		// TODO: each image will have its own possible number of mipmapping levels that can be computed when they are loaded
+		uint32_t mipLevels;
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
 		VkImageView textureImageView;
@@ -335,6 +337,7 @@ namespace graphics
 		 * 
 		 * @param width The width of the image.
 		 * @param height The height of the image.
+		 * @param mipLevels The number of mipmapping levels.
 		 * @param format The format of the image to be created.
 		 * @param tiling Tiling format.
 		 * @param usage Flags specifying how the image will be used.
@@ -342,7 +345,7 @@ namespace graphics
 		 * @param image The image on which we will store the created image.
 		 * @param imageMemory The image memory to be used for storing.
 		 */
-		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		void createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		/**
 		 * Create the command buffer for a single command..
 		 * 
@@ -362,8 +365,9 @@ namespace graphics
 		 * @param format The format of the image.
 		 * @param oldLayout The old layout of the image.
 		 * @param newLayout The new layout of the image.
+		 * @param mipLevels The number of mipmapping levels.
 		 */
-		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 		/**
 		 * Copy the content of a buffer to an image.
 		 * 
@@ -383,9 +387,10 @@ namespace graphics
 		 * 
 		 * @param image The image from which we want to create the image view.
 		 * @param format The format of the image view.
+		 * @param mipLevels The number of mipmapping levels.
 		 * @return 
 		 */
-		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 		/**
 		 * Create a texture sampler.
 		 * 
@@ -423,6 +428,15 @@ namespace graphics
 		 * 
 		 */
 		void loadModels();
+		/**
+		 * Generate all the mipmapping levels.
+		 * 
+		 * @param image The image from which we generate the mipmapping levels.
+		 * @param texWidth The width of the texture.
+		 * @param texHeight The height of the texture.
+		 * @param mipLevels The number of mipmapping levels to generate.
+		 */
+		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 		void mainLoop();
 		void cleanup();
 
