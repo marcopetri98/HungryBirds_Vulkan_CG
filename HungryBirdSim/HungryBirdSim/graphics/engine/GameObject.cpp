@@ -3,7 +3,7 @@
 
 namespace graphics
 {
-	GameObject::GameObject(string name = "none", int tag = 0, string objectPath = "none", string texturePath = "none", mat4 initialTransform = mat4(1), int layer = 0)
+	GameObject::GameObject(string name, int tag, string objectPath, string texturePath, mat4 initialTransform, int layer)
 	{
 		this->name = string(name);
 		this->tag = tag;
