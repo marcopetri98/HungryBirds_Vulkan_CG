@@ -3,17 +3,15 @@
 
 namespace graphics
 {
-	GameObject::GameObject(string name, int tag, string objectPath, string texturePath, vec3 initialPos, vec3 initialRot, int layer)
+	GameObject::GameObject(string name = "none", int tag = 0, string objectPath = "none", string texturePath = "none", mat4 initialTransform = mat4(1), int layer = 0)
 	{
 		this->name = string(name);
 		this->tag = tag;
 		this->layer = layer;
 		this->objectPath = string(objectPath);
 		this->texturePath = string(texturePath);
-		this->initialPos = vec3(initialPos);
-		this->initialRot = vec3(initialRot);
-		this->currentPos = vec3(initialPos);
-		this->currentRot = vec3(initialRot);
+		this->initialTransform = initialTransform;
+		this->currentTransform = initialTransform;
 		this->collider = NULL;
 	}
 
@@ -22,14 +20,9 @@ namespace graphics
 		this->collider = collider;
 	}
 
-	void GameObject::setCurrentPos(vec3 pos)
+	void GameObject::setCurrentTransform(mat4 transform)
 	{
-		this->currentPos = vec3(pos);
-	}
-
-	void GameObject::setCurrentRot(vec3 rot)
-	{
-		this->currentRot = vec3(rot);
+		this->currentTransform = transform;
 	}
 
 	string GameObject::getName()
@@ -47,34 +40,24 @@ namespace graphics
 		return this->layer;
 	}
 
-	vec3 GameObject::getInitialPos()
+	mat4 GameObject::getInitialTransform()
 	{
-		return vec3(this->initialPos);
+		return this->initialTransform;
 	}
 
-	vec3 GameObject::getInitialRot()
+	mat4 GameObject::getCurrentTransform()
 	{
-		return vec3(this->initialRot);
-	}
-
-	vec3 GameObject::getCurrentPos()
-	{
-		return vec3(this->currentPos);
-	}
-
-	vec3 GameObject::getCurrentRot()
-	{
-		return vec3(this->currentRot);
+		return this->currentTransform;
 	}
 
 	string GameObject::getObjectPath()
 	{
-		return string(this->objectPath);
+		return this->objectPath;
 	}
 
 	string GameObject::getTexturePath()
 	{
-		return string(this->texturePath);
+		return this->texturePath;
 	}
 
 	Collider* GameObject::getCollider()

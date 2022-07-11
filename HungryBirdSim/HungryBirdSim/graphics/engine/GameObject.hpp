@@ -12,6 +12,7 @@
 
 using std::string;
 using glm::vec3;
+using glm::mat4;
 
 namespace graphics
 {
@@ -25,11 +26,10 @@ namespace graphics
 		 * @param tag The tag of the object.
 		 * @param objectPath The path to the object file of the object.
 		 * @param texturePath The path to the texture of the object.
-		 * @param initialPos The initial position of the object.
-		 * @param initialRot The initial rotation of the object expressed as (degrees on x, degrees on y, degrees on z).
+		 * @param initialTransform The initial transform of the object expressed as matrix-on-the-left.
 		 * @param layer The layer of the object.
 		 */
-		GameObject(string name = "none", int tag = 0, string objectPath = "none", string texturePath = "none", vec3 initialPos = vec3(1), vec3 initialRot = vec3(1), int layer = 0);
+		GameObject(string name = "none", int tag = 0, string objectPath = "none", string texturePath = "none", mat4 initialTransform = mat4(1), int layer = 0);
 		/**
 		 * Gets the name of the object.
 		 * 
@@ -49,29 +49,17 @@ namespace graphics
 		 */
 		int getLayer();
 		/**
-		 * Gets the initial position of the object.
-		 * 
-		 * @return Initial position of the object.
-		 */
-		vec3 getInitialPos();
-		/**
 		 * Gets the initial rotation of the object expressed as (degrees on x, degrees on y, degrees on z).
 		 * 
 		 * @return Initial rotation of the object.
 		 */
-		vec3 getInitialRot();
-		/**
-		 * Gets the current position.
-		 * 
-		 * @return Current position of the object.
-		 */
-		vec3 getCurrentPos();
+		mat4 getInitialTransform();
 		/**
 		 * Gets the current rotation.
 		 * 
 		 * @return Current rotation of the object.
 		 */
-		vec3 getCurrentRot();
+		mat4 getCurrentTransform();
 		/**
 		 * Gets the string representing the path to the object file.
 		 * 
@@ -91,17 +79,11 @@ namespace graphics
 		 */
 		Collider* getCollider();
 		/**
-		 * Chnges the current position of the object.
+		 * Changes the current rotation of the object expressed as matrix-on-the-left.
 		 * 
-		 * @param pos The new position of the object.
+		 * @param rot New rotation of the object expressed as matrix-on-the-left.
 		 */
-		void setCurrentPos(vec3 pos);
-		/**
-		 * Changes the current rotation of the object expressed as (degrees on x, degrees on y, degrees on z).
-		 * 
-		 * @param rot New rotation of the object expressed as (degrees on x, degrees on y, degrees on z).
-		 */
-		void setCurrentRot(vec3 rot);
+		void setCurrentTransform(mat4 transform);
 		/**
 		 * Sets the collider of this GameObject.
 		 * 
@@ -123,21 +105,13 @@ namespace graphics
 		 */
 		int layer;
 		/**
-		 * The initial position of the GameObject.
+		 * The initial rotation of the GameObject expressed as matrix-on-the-left.
 		 */
-		vec3 initialPos;
+		mat4 initialTransform;
 		/**
-		 * The initial rotation of the GameObject expressed as (degrees on x, degrees on y, degrees on z).
+		 * The current rotation of the GameObject expressed as matrix-on-the-left.
 		 */
-		vec3 initialRot;
-		/**
-		 * The current position of the GameObject.
-		 */
-		vec3 currentPos;
-		/**
-		 * The current rotation of the GameObject expressed as (degrees on x, degrees on y, degrees on z).
-		 */
-		vec3 currentRot;
+		mat4 currentTransform;
 		/**
 		 * The path of the obj file identifying the object structure.
 		 */
