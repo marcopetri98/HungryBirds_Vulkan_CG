@@ -61,6 +61,12 @@ namespace graphics
 		 */
 		mat4 getCurrentTransform();
 		/**
+		 * Gets the current position of the object.
+		 * 
+		 * @return Position of the object specified as xyz. 
+		 */
+		vec3 getCurrentPos();
+		/**
 		 * Gets the string representing the path to the object file.
 		 * 
 		 * @return Path to object file.
