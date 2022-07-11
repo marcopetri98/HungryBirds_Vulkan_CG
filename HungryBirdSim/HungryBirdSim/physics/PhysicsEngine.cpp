@@ -2,12 +2,18 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "RayCast2D.hpp"
+#include "RayCast3D.hpp"
+#include "../graphics/engine/Collider.hpp"
 
-using std::array;
+using std::array, std::pair;
 using glm::vec3, glm::mat4, glm::radians, glm::translate, glm::rotate, glm::scale, glm::inverse;
+using graphics::Collider;
 
 namespace physics {
-	
+	PhysicsEngine::PhysicsEngine(bool raycast3d) {
+		this->raycast3d = raycast3d;
+	}
 	mat4 PhysicsEngine::translateObject(GameObject gameobject, vec3 translation) {
 		return translate(gameobject.getCurrentTransform(), translation);
 	}
@@ -43,6 +49,27 @@ namespace physics {
 		gameobject.setCurrentTransform(scaleObject(gameobject, scales));
 	}
 	CollisionInfo PhysicsEngine::checkCollisions(GameObject gameobject, vector<GameObject> others){
+		Collider* collider = gameobject.getCollider();
+		CollisionInfo collision = CollisionInfo();
+		RayCast* raycast;
+		if (this->raycast3d) {
+			//for now assume gameobject is only spherical and others are boxes
+			RayCast3D raycastObj = RayCast3D(36.0f, (*collider).getSize(), 0.5f);
+			raycast = &raycastObj;
+		}
+		else {
+			RayCast2D raycastObj = RayCast2D(36.0f, vec3(0, 0, 1), (*collider).getSize(), 0.5f);
+			raycast = &raycastObj;
+		}
+		while ((*raycast).hasNext() && !collision.collided) {
+			pair<vec3, vec3> rayResult = (*raycast).nextRay(gameobject.getCurrentPos());
+			for (GameObject go : others) {
+				if ((*go.getCollider()).checkCollision(rayResult.second)) {
+					collision = CollisionInfo(true, go, gameobject.getCurrentPos(), rayResult.first);
+					break;
+				}
+			}
+		}
 		return CollisionInfo();
 	}
 }

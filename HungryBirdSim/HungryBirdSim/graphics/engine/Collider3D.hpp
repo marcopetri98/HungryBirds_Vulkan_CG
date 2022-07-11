@@ -12,15 +12,10 @@ using glm::vec3;
 
 namespace graphics
 {
-	class Collider3D : Collider
+	class Collider3D : public Collider
 	{
 		public:
-		/**
-		 * Gets the bounding box of the collider.
-		 * 
-		 * @return An array containing: width, height and depth respectively
-		 */
-		virtual bool checkCollision(vec3 point) = 0;
+		
 	};
 }
 

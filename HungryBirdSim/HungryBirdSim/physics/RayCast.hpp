@@ -6,10 +6,12 @@
 #include "glm/glm.hpp"
 
 using glm::vec3;
+using std::pair;
 
 namespace physics {
 	class RayCast {
-		virtual vec3 nextRay(vec3 pos) = 0;
+		public:
+		virtual pair<vec3, vec3> nextRay(vec3 pos) = 0;
 		virtual bool hasNext() = 0;
 	};
 }

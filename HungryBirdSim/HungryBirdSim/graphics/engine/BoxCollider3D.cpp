@@ -22,6 +22,10 @@ namespace graphics {
 		BoxCollider3D(gameObject, side, side, side);
 	}
 
+	float BoxCollider3D::getSize() {
+		//TODO for now we assume cube
+		return this->size_x / 2.0f;
+	}
 
 	array<vec3, 8> BoxCollider3D::getBoundingBox()
 	{

@@ -19,6 +19,8 @@ namespace graphics
 		 * @return The game object to which this collider is attached.
 		 */
 		virtual GameObject getGameObject() = 0;
+		virtual float getSize() = 0;
+		virtual bool checkCollision(vec3 point) = 0;
 	};
 }
 

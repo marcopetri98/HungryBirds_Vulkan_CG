@@ -13,7 +13,7 @@ using std::array;
 
 namespace graphics
 {
-	class BoxCollider3D : Collider3D
+	class BoxCollider3D : public Collider3D
 	{
 		public:
 		/**
@@ -47,6 +47,7 @@ namespace graphics
 		 */
 		array<vec3, 8> getBoundingBox();
 		GameObject getGameObject();
+		float getSize();
 		/**
 		 * Check if the given point collides with this box collider.
 		 * 

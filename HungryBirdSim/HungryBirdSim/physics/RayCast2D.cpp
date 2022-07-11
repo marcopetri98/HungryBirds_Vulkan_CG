@@ -9,6 +9,14 @@ using glm::vec3, glm::radians;
 
 
 namespace physics{
+	RayCast2D::RayCast2D() {
+		this->numRays = 0;
+		this->axis = vec3(0, 0, 0);
+		this->length = 0;
+		this->objRadius = 0;
+		this->currAngle = 0.f;
+		this->anglePerStep = 0;
+	}
 	RayCast2D::RayCast2D(float numRays, vec3 axis, float objRadius, float length) {
 		this->numRays = numRays;
 		this->axis = axis;
@@ -18,7 +26,7 @@ namespace physics{
 		this->anglePerStep = 360 / numRays;
 	}
 
-	vec3 RayCast2D::nextRay(vec3 pos) {
+	pair<vec3, vec3> RayCast2D::nextRay(vec3 pos) {
 		float r = this->objRadius + this->length;
 		vec3 rayDir;
 		if (this->axis[0] == 1) {
@@ -32,7 +40,7 @@ namespace physics{
 		}
 		vec3 rayPos = rayDir + pos;
 		this->currAngle += this->anglePerStep;
-		return rayPos;
+		return pair<vec3, vec3>(rayDir, rayPos);
 	}
 
 	bool RayCast2D::hasNext() {

@@ -11,8 +11,21 @@ using glm::vec3;
 using graphics::GameObject;
 
 namespace physics {
+	/**
+	 * A struct containing info about a collision, if happened.
+	 */
 	struct CollisionInfo{
-		bool collided = false;
+		public:
+		CollisionInfo(bool collided, GameObject collidedObject, vec3 collisionPoint, vec3 collisionDir) {
+			this->collided = false;
+			this->collidedObject = collidedObject;
+			this->collisionPoint = collisionPoint;
+			this->collisionDir = collisionDir;
+		}
+		CollisionInfo() {
+			this->collided = false;
+		}
+		bool collided;
 		GameObject collidedObject;
 		vec3 collisionPoint;
 		vec3 collisionDir;

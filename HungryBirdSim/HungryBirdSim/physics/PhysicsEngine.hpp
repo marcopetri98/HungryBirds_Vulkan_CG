@@ -10,7 +10,7 @@
 #include "../graphics/engine/DummyRecursionSolver.hpp"
 #include "../graphics/engine/GameObject.hpp"
 #include "CollisionInfo.hpp"
-
+#include "RayCast.hpp"
 using std::array, std::vector;
 using glm::vec3, glm::mat4;
 using graphics::GameObject;
@@ -18,13 +18,10 @@ using graphics::GameObject;
 
 namespace physics
 {
-	struct {
-
-	};
 
 	class PhysicsEngine {
 		public:
-
+		PhysicsEngine(bool raycast3d);
 		/**
 		 * Translate an object by the given vector of displacements.
 		 * 
@@ -94,6 +91,7 @@ namespace physics
 		CollisionInfo checkCollisions(GameObject gameobject, vector<GameObject> others);
 
 		private:
+		bool raycast3d;
 	};
 }
 

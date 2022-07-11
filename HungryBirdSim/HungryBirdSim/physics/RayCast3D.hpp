@@ -9,10 +9,22 @@
 using glm::vec3;
 
 namespace physics {
-	class RayCast3D : RayCast {
+	class RayCast3D : public RayCast {
 		public:
+		RayCast3D();
 		RayCast3D(float numRays, float objRadius, float length);
-		vec3 nextRay(vec3 pos);
+		/**
+		 * Get the direction and position of the next ray.
+		 * 
+		 * @param pos The position of the center of the object to start raycasting from.
+		 * @return A pair containing the direction and the position of the next ray.
+		 */
+		pair<vec3, vec3> nextRay(vec3 pos);
+		/**
+		 * Check if the raycasting has explored all available raycasts.
+		 * 
+		 * @return true if there is at least another ray to cast. 
+		 */
 		bool hasNext();
 
 		private:
