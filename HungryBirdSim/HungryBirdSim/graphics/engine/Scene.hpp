@@ -25,12 +25,13 @@ namespace graphics
 		 * Creates the scene.
 		 * 
 		 * @param gameObjects List of all the game objects to be included in the scene.
-		 * @param camera Camera of the scene.
+		 * @param camera Initial camera for the scene.
+		 * @param availableCameras All the available cameras for the scene
 		 * @param background Background of the scene.
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject> gameObjects, Camera camera, Background background, string name, int id);
+		Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id);
 		/**
 		 * Gets a game object by its name.
 		 * 
@@ -44,6 +45,12 @@ namespace graphics
 		 * @return Camera of the scene.
 		 */
 		Camera getCamera();
+		/**
+		 * Gets all the available cameras in the scene.
+		 * 
+		 * @return All the available cameras for the scene.
+		 */
+		vector<Camera> getAvailableCameras();
 		/**
 		 * Gets the background of the scene.
 		 * 
@@ -66,9 +73,16 @@ namespace graphics
 		/**
 		 * Set the camera for the scene.
 		 * 
-		 * @param camera The camera to be set.
+		 * @param cameraPos The position of the available camera to be used.
 		 */
-		void setCamera(Camera camera);
+		void setCamera(int cameraPos);
+		/**
+		 * Modify the available camera at the specified index.
+		 * 
+		 * @param camera The new camera that will substitute the old one.
+		 * @param pos The position of the camera to modify.
+		 */
+		void modifyCamera(Camera camera, unsigned int pos);
 		/**
 		 * Set the background for the scene.
 		 * 
@@ -93,6 +107,10 @@ namespace graphics
 		 * The camera defining the view.
 		 */
 		Camera camera;
+		/**
+		 * The list of all the camera that can be used.
+		 */
+		vector<Camera> availableCameras;
 		/**
 		 * The background for the scene.
 		 */

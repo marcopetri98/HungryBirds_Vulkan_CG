@@ -8,7 +8,7 @@ using collectionutils::vectorContains;
 
 namespace graphics
 {
-	Scene::Scene(vector<GameObject> gameObjects, Camera camera, Background background, string name, int id)
+	Scene::Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id)
 	{
 		this->gameObjectsNames.resize(gameObjects.size());
 		this->gameObjects.resize(gameObjects.size());
@@ -27,7 +27,8 @@ namespace graphics
 			}
 		}
 
-		this->camera = camera;
+		this->camera = availableCameras[camera];
+		this->availableCameras = availableCameras;
 		this->background = background;
 		this->name = name;
 		this->id = id;
@@ -48,6 +49,11 @@ namespace graphics
 	Camera Scene::getCamera()
 	{
 		return this->camera;
+	}
+
+	vector<Camera> Scene::getAvailableCameras()
+	{
+		return this->availableCameras;
 	}
 
 	Background Scene::getBackground()
@@ -83,9 +89,19 @@ namespace graphics
 		}
 	}
 
-	void Scene::setCamera(Camera camera)
+	void Scene::setCamera(int cameraPos)
 	{
-		this->camera = camera;
+		this->camera = this->availableCameras[cameraPos];
+	}
+
+	void Scene::modifyCamera(Camera camera, unsigned int pos)
+	{
+		if (pos < this->availableCameras.size())
+		{
+			throw std::runtime_error("The position of the camera is invalid");
+		}
+
+		this->availableCameras[pos] = camera;
 	}
 
 	void Scene::setBackground(Background background)
