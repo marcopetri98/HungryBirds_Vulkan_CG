@@ -3,6 +3,7 @@
 #include "BoxCollider3D.hpp"
 
 using std::copy, std::begin, std::end, std::vector;
+using graphics::GameObject;
 
 namespace graphics {
 	BoxCollider3D::BoxCollider3D(GameObject gameObject, float size_x, float size_y, float size_z) {
@@ -29,7 +30,7 @@ namespace graphics {
 	}
 
 	void BoxCollider3D::createBoundingBox() {
-		vec3 goPos = vec3(1.0f);//this->gameObject.getCurrentPos();
+		vec3 goPos = this->gameObject.getCurrentPos();
 		vector<vec3> vertices;
 		for (int x = -1; x <= 1; x+=2) {
 			for (int y = -1; y <= 1; y+=2) {
