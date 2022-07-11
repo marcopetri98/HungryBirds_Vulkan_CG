@@ -3,6 +3,7 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
+#include <string>
 #include <vector>
 #include <map>
 
@@ -11,6 +12,7 @@
 #include "Camera.hpp"
 #include "Background.hpp"
 
+using std::string;
 using std::vector;
 using std::map;
 
