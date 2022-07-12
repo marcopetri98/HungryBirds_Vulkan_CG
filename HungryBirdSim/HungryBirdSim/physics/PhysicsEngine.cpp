@@ -8,13 +8,14 @@
 #include "../graphics/engine/Collider.hpp"
 
 using std::array, std::pair, std::find;
-using glm::vec3, glm::mat4, glm::radians, glm::translate, glm::rotate, glm::scale, glm::inverse;
+using glm::vec3, glm::mat4, glm::radians, glm::translate, glm::rotate, glm::scale, glm::inverse, glm::normalize, glm::length;
 using graphics::Collider;
 
 namespace physics {
-	PhysicsEngine::PhysicsEngine(bool raycast3d, float acceleration_g = -9.81f) {
+	PhysicsEngine::PhysicsEngine(bool raycast3d, vec3 ambient_acc = vec3(0, -9.81f, 0), float collisionDamping=0.1) {
 		this->raycast3d = raycast3d;
-		this->g = acceleration_g;
+		this->ambient_acc = ambient_acc;
+		this->collisionDamping = collisionDamping;
 	}
 	mat4 PhysicsEngine::translateObject(GameObject gameobject, vec3 translation) {
 		return translate(gameobject.getCurrentTransform(), translation);
@@ -66,8 +67,9 @@ namespace physics {
 		while ((*raycast).hasNext() && !collision.collided) {
 			pair<vec3, vec3> rayResult = (*raycast).nextRay(gameobject.getCurrentPos());
 			for (GameObject go : others) {
-				if ((*go.getCollider()).checkCollision(rayResult.second)) {
+				if ((*go.getCollider()).checkCollision(rayResult.second) && gameobject.getCollider()->getLastCollision()!=go.getName()) {
 					collision = CollisionInfo(true, go, gameobject.getCurrentPos(), rayResult.first);
+					gameobject.getCollider()->setLastCollision(go.getName());
 					break;
 				}
 			}
@@ -113,5 +115,27 @@ namespace physics {
 
 	void PhysicsEngine::untrackAll() {
 		this->trackedObjects.clear();
+	}
+
+	void PhysicsEngine::update(float deltaTime) {
+		for (int i = 0; i < this->trackedObjects.size(); i++) {
+			GameObject go = this->trackedObjects[i];
+			if (go.getVelocity() != vec3(0.f, 0.f, 0.f)) {
+				vec3 velocity = go.getVelocity();
+				go.setVelocity(velocity);
+				vec3 movement = deltaTime * velocity;
+				mat4 newPosition = translateObject(go, movement);
+				vec3 currAcceleration = go.getAcceleration();
+				currAcceleration = currAcceleration + this->ambient_acc;
+				go.setAcceleration(currAcceleration);
+				vector<GameObject> others = this->trackedObjects;
+				others.erase(others.begin() + i);
+				CollisionInfo collision = checkCollisions(go, others);
+				if (collision.collided) {
+					vec3 newVel = (normalize(velocity) + collision.collisionDir) * length(velocity) * this->collisionDamping;
+					go.setVelocity(newVel);
+				}
+			}
+		}
 	}
 }

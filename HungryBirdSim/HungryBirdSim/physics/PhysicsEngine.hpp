@@ -21,7 +21,7 @@ namespace physics
 
 	class PhysicsEngine {
 		public:
-		PhysicsEngine(bool raycast3d, float acceleration_g);
+		PhysicsEngine(bool raycast3d, vec3 ambient_acc, float collisionDamping);
 		/**
 		 * Translate an object by the given vector of displacements.
 		 * 
@@ -118,11 +118,17 @@ namespace physics
 		 * 
 		 */
 		void untrackAll();
+		/**
+		 * Updates the physics for all the tracked objects.
+		 * 
+		 */
+		void update(float deltaTime);
 
 		private:
 		vector<GameObject> trackedObjects;
 		bool raycast3d;
-		float g;
+		vec3 ambient_acc;
+		float collisionDamping;
 	};
 }
 
