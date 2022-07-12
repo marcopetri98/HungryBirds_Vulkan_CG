@@ -30,6 +30,10 @@ namespace graphics
 		 * @param layer The layer of the object.
 		 */
 		GameObject(string name = "none", int tag = 0, string objectPath = "none", string texturePath = "none", mat4 initialTransform = mat4(1), int layer = 0);
+		bool operator == (GameObject const& obj) {
+			return this->name == obj.name;
+		}
+		
 		/**
 		 * Gets the name of the object.
 		 * 
@@ -96,6 +100,30 @@ namespace graphics
 		 * @param collider Pointer to the collider of this object.
 		 */
 		void setCollider(Collider* collider);
+		/**
+		 * Sets the velocity of the object.
+		 *
+		 * @param velocity the velocity to set.
+		 */
+		void setVelocity(vec3 velocity);
+		/**
+		 * Sets the acceleration of the object.
+		 *
+		 * @param acceleration the acceleration to set.
+		 */
+		void setAcceleration(vec3 acceleration);
+		/**
+		 * Gets the velocity of the object.
+		 *
+		 * @return The velocity of the object.
+		 */
+		vec3 getVelocity();
+		/**
+		 * Gets the acceleration of the object.
+		 *
+		 * @return The acceleration of the object.
+		 */
+		vec3 getAcceleration();
 
 		private:
 		/**
@@ -130,6 +158,14 @@ namespace graphics
 		 * The collider of the object.
 		 */
 		Collider* collider;
+		/**
+		 * The velocity of the object.
+		 */
+		vec3 velocity;
+		/**
+		 * The acceleration of the object.
+		 */
+		vec3 acceleration;
 	};
 }
 

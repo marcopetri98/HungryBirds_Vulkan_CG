@@ -25,6 +25,14 @@ namespace graphics
 		this->currentTransform = transform;
 	}
 
+	void GameObject::setVelocity(vec3 velocity) {
+		this->velocity = velocity;
+	}
+
+	void GameObject::setAcceleration(vec3 acceleration) {
+		this->acceleration = acceleration;
+	}
+
 	string GameObject::getName()
 	{
 		return string(this->name);
@@ -68,5 +76,13 @@ namespace graphics
 	Collider* GameObject::getCollider()
 	{
 		return this->collider;
+	}
+	
+	vec3 GameObject::getVelocity() {
+		return this->velocity;
+	}
+
+	vec3 GameObject::getAcceleration() {
+		return this->acceleration;
 	}
 }

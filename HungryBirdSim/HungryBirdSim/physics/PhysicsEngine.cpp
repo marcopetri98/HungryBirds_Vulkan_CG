@@ -1,4 +1,5 @@
 #include "PhysicsEngine.hpp"
+#include <algorithm>
 #include <array>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,13 +7,14 @@
 #include "RayCast3D.hpp"
 #include "../graphics/engine/Collider.hpp"
 
-using std::array, std::pair;
+using std::array, std::pair, std::find;
 using glm::vec3, glm::mat4, glm::radians, glm::translate, glm::rotate, glm::scale, glm::inverse;
 using graphics::Collider;
 
 namespace physics {
-	PhysicsEngine::PhysicsEngine(bool raycast3d) {
+	PhysicsEngine::PhysicsEngine(bool raycast3d, float acceleration_g = -9.81f) {
 		this->raycast3d = raycast3d;
+		this->g = acceleration_g;
 	}
 	mat4 PhysicsEngine::translateObject(GameObject gameobject, vec3 translation) {
 		return translate(gameobject.getCurrentTransform(), translation);
@@ -71,5 +73,45 @@ namespace physics {
 			}
 		}
 		return CollisionInfo();
+	}
+	
+	void PhysicsEngine::track(GameObject gameobject) {
+		vector<GameObject> go;
+		go.push_back(gameobject);
+		track(go);
+	}
+
+	void PhysicsEngine::track(vector<GameObject> gameobjects) {
+		vector<string> names;
+		for (GameObject go : this->trackedObjects) {
+			names.push_back(go.getName());
+		}
+		for (int i = 0; i < gameobjects.size(); i++) {
+			if (find(names.begin(), names.end(), gameobjects[i].getName()) == names.end()) {
+				this->trackedObjects.push_back(gameobjects[i]);
+			}
+		}
+	}
+
+	void PhysicsEngine::untrack(GameObject gameobject) {
+		vector<GameObject> go;
+		go.push_back(gameobject);
+		untrack(go);
+	}
+
+	void PhysicsEngine::untrack(vector<GameObject> gameobjects) {
+		vector<string> names;
+		for (GameObject go : gameobjects) {
+			names.push_back(go.getName());
+		}
+		for (int i = 0; i < this->trackedObjects.size(); i++) {
+			if (find(names.begin(), names.end(), this->trackedObjects[i].getName()) != names.end()) {
+				this->trackedObjects.erase(this->trackedObjects.begin()+i);
+			}
+		}
+	}
+
+	void PhysicsEngine::untrackAll() {
+		this->trackedObjects.clear();
 	}
 }

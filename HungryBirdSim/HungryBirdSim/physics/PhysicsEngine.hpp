@@ -21,7 +21,7 @@ namespace physics
 
 	class PhysicsEngine {
 		public:
-		PhysicsEngine(bool raycast3d);
+		PhysicsEngine(bool raycast3d, float acceleration_g);
 		/**
 		 * Translate an object by the given vector of displacements.
 		 * 
@@ -89,9 +89,40 @@ namespace physics
 		 * @return a struct containing info about the collision. If there is no collision a CollisionInfo object is still returned, containing a false value in the 'collided' field.
 		 */
 		CollisionInfo checkCollisions(GameObject gameobject, vector<GameObject> others);
+		/**
+		 * Start tracking a gameobject in order to update its position automatically when updates are called.
+		 * 
+		 * @param gameobject The gameobject to be tracked.
+		 */
+		void track(GameObject gameobject);
+		/**
+		 * Start tracking all the specified gameobject in order to update their position automatically when updates are called.
+		 *
+		 * @param gameobjects The gameobjects to be tracked.
+		 */
+		void track(vector<GameObject> gameobjects);
+		/**
+		 * Stop tracking a gameobject.
+		 *
+		 * @param gameobject The gameobject to be untracked.
+		 */
+		void untrack(GameObject gameobject);
+		/**
+		 * Stop tracking all the specified gameobjects.
+		 *
+		 * @param gameobjects The gameobjects to be untracked.
+		 */
+		void untrack(vector<GameObject> gameobjects);
+		/**
+		 * Clear all the tracked gameobjects.
+		 * 
+		 */
+		void untrackAll();
 
 		private:
+		vector<GameObject> trackedObjects;
 		bool raycast3d;
+		float g;
 	};
 }
 
