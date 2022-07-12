@@ -34,6 +34,7 @@ protected:
 	DescriptorSetLayout DSLobj;
 	// This is the pipeline where all the commands are passed through
 	Pipeline P1;
+	Pipeline P_Sky;
 	struct Paths {
 		std::string model_path;
 		std::string texture_path;
@@ -113,11 +114,12 @@ protected:
 			Paths background_plane_paths = Paths{ "models/skybox.obj",
 												"textures/skybox-texture.png",
 												background_plane };
-			/*
-			std::vector bg_name = std::vector<std::string>();
-			bg_name.push_back("background");
-			Paths prof_paths = Paths{ PROF_MODEL, PROF_TEXTURE  , bg_name };
-			*/
+			std::vector background_skyline_names = std::vector<std::string>();
+			background_skyline_names.push_back("background-skyline");
+			Paths background_skyline = Paths{ "models/MountainSkybox.obj",
+												"textures/SkyBoxes/mountain.png",
+												background_skyline_names
+			};
 			std::vector all_names = std::vector<std::string>();
 			all_names.insert(all_names.end(), { "small-bird-one", "small-bird-two", "small-bird-three" });
 			Paths many_instances_obj_path = Paths{ MODEL_PATH, TEXTURE_PATH, all_names, 3 };
@@ -129,9 +131,10 @@ protected:
 			cube_name.push_back("cube");
 			Paths cube_paths = Paths{ "models/cube.obj", "textures/cube.png", cube_name};
 
+			listOfPaths.push_back(background_plane_paths);
+			listOfPaths.push_back(background_skyline);
 			listOfPaths.push_back(bird_paths);
 			listOfPaths.push_back(arrow_paths);
-			listOfPaths.push_back(background_plane_paths);
 			listOfPaths.push_back(many_instances_obj_path);
 			listOfPaths.push_back(cube_paths);
 		}
@@ -163,6 +166,7 @@ protected:
 			});
 		// in pipeline we receive in set 0 the global view and in set 1 the ubo
 		P1.init(this, "shaders/vert.spv", "shaders/frag.spv", { &DSLglobal, &DSLobj });
+		P_Sky.init(this, "shaders/vert.spv", "shaders/frag_sky.spv", { &DSLglobal, &DSLobj });
 		descriptorSetMap = std::map<std::string, DescriptorSet>();
 		for (Paths objPaths : listOfPaths) {
 			Model model = Model();
@@ -210,6 +214,7 @@ protected:
 		}
 		//constant part
 		P1.cleanup();
+		P_Sky.cleanup();
 		DSLglobal.cleanup();
 		DSLobj.cleanup();
 		DSglobal.cleanup();
@@ -217,15 +222,27 @@ protected:
 	}
 
 	void populateCommandBuffer(VkCommandBuffer commandBuffer, int currentImage) {
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-			P1.graphicsPipeline);
-		vkCmdBindDescriptorSets(commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			P1.pipelineLayout, 
-			// global view camera is bound in set 0 
-			0,
-			1, &(DSglobal.descriptorSets[currentImage]),
-			0, nullptr);
+		// Binding different pipelines (for skybox is different and for other objects is different)
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+				P1.graphicsPipeline);
+			vkCmdBindDescriptorSets(commandBuffer,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				P1.pipelineLayout, 
+				// global view camera is bound in set 0 
+				0,
+				1, &(DSglobal.descriptorSets[currentImage]),
+				0, nullptr);
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+				P_Sky.graphicsPipeline);
+			vkCmdBindDescriptorSets(commandBuffer,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				P_Sky.pipelineLayout,
+				// global view camera is bound in set 0 
+				0,
+				1, &(DSglobal.descriptorSets[currentImage]),
+				0, nullptr);
+		}
 		for (objectInitializer objStarter : listOfObjectInitializers) {
 			VkBuffer vertexBuffers[] = { objStarter.model.vertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
@@ -236,11 +253,23 @@ protected:
 				/// iff we have a vector of descriptor sets.
 				// itr->second is the descriptorMap
 				DescriptorSet dedicatedDS = descriptorSetMap[objStarter.paths.names[i]];
-				vkCmdBindDescriptorSets(commandBuffer,
-					VK_PIPELINE_BIND_POINT_GRAPHICS,
-					P1.pipelineLayout, 1, 1,
-					&(dedicatedDS.descriptorSets[currentImage]),
-					0, nullptr);
+				if (objStarter.paths.names[i].find("background") == std::string::npos) {
+					printf("Is not background\n");
+					vkCmdBindDescriptorSets(commandBuffer,
+						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						P1.pipelineLayout, 1, 1,
+						&(dedicatedDS.descriptorSets[currentImage]),
+						0, nullptr);
+				}
+				else {
+					printf("Is background\n");
+					vkCmdBindDescriptorSets(commandBuffer,
+						VK_PIPELINE_BIND_POINT_GRAPHICS,
+						P_Sky.pipelineLayout, 1, 1,
+						&(dedicatedDS.descriptorSets[currentImage]),
+						0, nullptr);
+				}
+				
 
 				vkCmdDrawIndexed(commandBuffer,
 					static_cast<uint32_t>(objStarter.model.indices.size()), 1, 0, 0, 0);
@@ -320,25 +349,22 @@ protected:
 			return glm::scale(transl, glm::vec3(15.f));
 		}
 		else if (objName.find("background") != std::string::npos) {
-			/*
-			glm::mat4 scaled_up = glm::translate(
-				//glm::vec3(240.f,160.f,1.f)
-				glm::scale(glm::mat4(1.0f), glm::vec3(1100.f, 600.f,1.f)),
-				glm::vec3(0.f, -0.10f, 800.f));
-			// lookat
-			glm::mat4 correct_axis_rotated =  glm::rotate(glm::rotate(scaled_up,
-				glm::radians(90.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f)
-			), glm::radians(90.0f), glm::vec3(1.f,0.f,0.f));
-			return glm::rotate(correct_axis_rotated,
-					glm::radians(4.5f),
-				glm::vec3(0.f,1.f,0.f)
-				);
-			*/
-			glm::mat4 scaled_up = glm::translate(
-				//glm::vec3(240.f,160.f,1.f)
-				glm::scale(glm::mat4(1.0f), glm::vec3(2100, 2100, 2199.f)),
-				glm::vec3(0.f, -0.15f, 0.f));
+			if (camera.position == uninitializedFlag) {
+				cameraTransformations(0, 0);
+			}
+			glm::mat4 scaled_up;
+			// if not background
+			if (objName.compare("background")) {
+				scaled_up = glm::translate(
+					glm::scale(camera.gubo.view, glm::vec3(4000.f)),
+					glm::vec3(0.f, -0.15f, 0.f));
+			}
+			else {
+				scaled_up = glm::translate(
+					glm::scale(camera.gubo.view, glm::vec3(8000.f)),
+					glm::vec3(0.f, -0.15f, 0.f));
+			}
+			
 			return scaled_up;
 			
 		}
@@ -461,8 +487,8 @@ protected:
 		else if (camera.anchored && camera.position == 1) {
 
 			// Position 0
-			gubo.view = glm::lookAt(glm::vec3(100.f, 10.0f, 0.0f),
-				glm::vec3(0.0f, 0.0f, 0.0f),
+			gubo.view = glm::lookAt(glm::vec3(100.f, 0.0f, 0.0f),
+				glm::vec3(25.0f, 0.0f, -2.0f),
 				glm::vec3(0.0f, 1.0f, 0.0f));
 			camera.position = 0;
 			camera.anchored = false;
@@ -472,6 +498,13 @@ protected:
 
 			float speed = 19.89;
 			float deltaT = deltaTime * speed;
+
+			glm::mat4 _skyboxScaledDown = glm::scale(
+											glm::translate(mapOfObjects["background"].coordinates, glm::vec3(0.f, 0.15f, 0.f)),
+											glm::vec3(1/8000.f));
+
+			int leftOrRight = ( camera.position);
+			int upOrDown = (1 - camera.position);
 			if (glfwGetKey(window, GLFW_KEY_UP)) {
 				gubo.view = glm::translate(gubo.view, glm::vec3(0, -deltaT, 0));
 			}
@@ -479,10 +512,10 @@ protected:
 				gubo.view = glm::translate(gubo.view, glm::vec3(0, deltaT, 0));
 			}
 			if (glfwGetKey(window, GLFW_KEY_LEFT)) {
-				gubo.view = glm::translate(gubo.view, glm::vec3(-deltaT, 0, 0));
+				gubo.view = glm::translate(gubo.view, glm::vec3(-deltaT * leftOrRight, 0, -upOrDown*deltaT));
 			}
 			else if (glfwGetKey(window, GLFW_KEY_RIGHT)) {
-				gubo.view = glm::translate(gubo.view, glm::vec3(deltaT, 0, 0));
+				gubo.view = glm::translate(gubo.view, glm::vec3(deltaT * leftOrRight, 0, upOrDown * deltaT));
 			}
 
 			/*if (glfwGetKey(window, GLFW_KEY_I)) {
@@ -493,9 +526,11 @@ protected:
 				mapOfObjects["background"].coordinates =
 					glm::translate(mapOfObjects["background"].coordinates, glm::vec3(0, 0, -deltaT));
 			}*/
+			_skyboxScaledDown = gubo.view;
+			mapOfObjects["background"].coordinates = glm::translate(glm::scale(_skyboxScaledDown, 
+				glm::vec3(8000.f)), glm::vec3(-0.f, -0.15f, 0.f));
+
 		}
-		
-		
 		camera.anchored = false;
 		camera.gubo.view = gubo.view;
 	}
@@ -507,7 +542,7 @@ protected:
 		glm::mat4 scaledMat4;
 		glm::mat4 finalMat4;
 		for (auto itr = mapOfObjects.begin(); itr != mapOfObjects.end(); ++itr) {
-			if (itr->first.compare("background") == 0) {
+			if (itr->first.find("background") != std::string::npos) {
 				finalMat4 = itr->second.coordinates;
 			}
 			if (itr->first.compare("cube") == 0) {
