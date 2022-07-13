@@ -1,8 +1,6 @@
 #version 450
 
-layout(binding = 1) uniform sampler2D texSampler;
-
-layout(binding = 2) uniform UniformBufferObjectLight {
+layout(binding = 1) uniform GlobalUniformBufferObjectLight {
     vec3 directionalDir;
 	vec3 directionalColor;
 	vec3 pointDir;
@@ -19,6 +17,14 @@ layout(binding = 2) uniform UniformBufferObjectLight {
 	float spotCosineInnerAngle;
     int selectorDiffuse;
     int selectorSpecular;
+} guboLight;
+
+layout(binding = 2) uniform sampler2D texSampler;
+
+layout(binding = 4) uniform UniformBufferObjectLight {
+	int selectorDirectional;
+	int selectorPoint;
+	int selectorSpot;
 } uboLight;
 
 layout(location = 0) in vec3 fragColor;

@@ -15,7 +15,6 @@ namespace graphics
 {
 	struct GlobalUniformBufferObject
 	{
-		alignas(16) mat4 model;
 		alignas(16) mat4 view;
 		alignas(16) mat4 proj;
 	};
@@ -42,7 +41,8 @@ namespace graphics
 
 	struct UniformBufferObject
 	{
-		alignas(16) mat4 model;
+		alignas(16) mat4 modelVertices;
+		alignas(16) mat4 modelNormal;
 	};
 
 	struct UniformBufferObjectLight
