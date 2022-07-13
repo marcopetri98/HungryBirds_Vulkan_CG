@@ -64,6 +64,12 @@ namespace graphics
 		 */
 		string getName();
 		/**
+		 * Gets the id of the scene.
+		 * 
+		 * @return Ids of the scene.
+		 */
+		int getId();
+		/**
 		 * Updates the game object by using its name as indexer.
 		 * 
 		 * @param gameObject The new GameObject that will replace the old one.

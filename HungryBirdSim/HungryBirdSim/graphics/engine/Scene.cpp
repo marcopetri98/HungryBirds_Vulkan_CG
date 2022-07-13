@@ -66,6 +66,11 @@ namespace graphics
 		return this->name;
 	}
 
+	int Scene::getId()
+	{
+		return this->id;
+	}
+
 	void Scene::setGameObjectByName(GameObject gameObject, string name)
 	{
 		if (gameObject.getName() != name)

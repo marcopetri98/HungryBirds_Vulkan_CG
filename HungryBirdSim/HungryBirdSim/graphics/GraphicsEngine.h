@@ -7,14 +7,18 @@
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>
+#include <map>
 
+#include "engine/DummyRecursionSolver.hpp"
 #include "Queues.h"
 #include "SwapChainSupportDetails.h"
 #include "Vertex.h"
 #include "UniformObjects.h"
+#include "engine/Scene.hpp"
 
 using std::string;
 using std::vector;
+using std::map;
 
 namespace graphics
 {
@@ -32,8 +36,18 @@ namespace graphics
 		GraphicsEngine(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT);
 		void run();
 		void setUseValidationLayers(bool val);
+		void addScenes(vector<Scene> scenes);
+		void selectScene(string sceneName);
+		void selectScene(int sceneId);
 
 		private:
+		Scene* activeScene;
+		vector<Scene> allScenes;
+		vector<string> sceneNames;
+		vector<int> sceneIds;
+		map<string, int> mapSceneNamesIds;
+		map<int, int> mapSceneIdsToPos;
+
 		// TODO: insert a parametrized way to handle required queues by using attributes
 		// TODO: insert a parametrized way to choose which are the requirements for a GPU to be suitable
 		// TODO: insert a parametrized wat to manage scoring of GPUs
@@ -70,8 +84,9 @@ namespace graphics
 		VkDeviceMemory vertexBufferMemory;
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
-		vector<VkBuffer> uniformBuffers;
-		vector<VkDeviceMemory> uniformBuffersMemory;
+		// vectors are organized as buffers[ubo type][frame]
+		vector<VkBuffer> globalUniformBuffers;
+		vector<VkDeviceMemory> globalUniformBuffersMemory;
 		VkDescriptorPool descriptorPool;
 		vector<VkDescriptorSet> descriptorSets;
 		// TODO: each image will have its own possible number of mipmapping levels that can be computed when they are loaded

@@ -29,12 +29,14 @@
 
 #include "GraphicsEngine.h"
 #include "../utils/Errors.h"
+#include "../utils/CollectionUtils.hpp"
 
 using std::vector;
 using std::cout;
 using std::endl;
 using errors::getErrorStr;
 using errors::Error;
+using collectionutils::vectorContains;
 
 namespace graphics
 {
@@ -43,6 +45,7 @@ namespace graphics
 		this->title = title;
 		this->width = width;
 		this->height = height;
+		this->activeScene = NULL;
 		useValidationLayers = true;
 	}
 	
@@ -59,6 +62,67 @@ namespace graphics
 		useValidationLayers = val;
 	}
 
+	void GraphicsEngine::addScenes(vector<Scene> scenes)
+	{
+		for (Scene scene : scenes)
+		{
+			if (vectorContains(this->sceneNames, scene.getName()))
+			{
+				throw std::runtime_error("A scene with name " + scene.getName() + " already exists!");
+			}
+			else if (vectorContains(this->sceneIds, scene.getId()))
+			{
+				throw std::runtime_error("A scene with id " + std::to_string(scene.getId()) + " already exists!");
+			}
+			else
+			{
+				this->allScenes.push_back(scene);
+				this->sceneNames.push_back(scene.getName());
+				this->sceneIds.push_back(scene.getId());
+				this->mapSceneNamesIds.insert(std::pair<string, int>(scene.getName(), scene.getId()));
+				this->mapSceneIdsToPos.insert(std::pair<int, int>(scene.getId(), this->allScenes.size()));
+			}
+		}
+	}
+
+	void GraphicsEngine::selectScene(string sceneName)
+	{
+		if (!vectorContains(this->sceneNames, sceneName))
+		{
+			throw std::runtime_error("There isn't a scene with name " + sceneName);
+		}
+		else
+		{
+			if (activeScene == NULL)
+			{
+				activeScene = &allScenes[this->mapSceneIdsToPos[this->mapSceneNamesIds[sceneName]]];
+			}
+			else
+			{
+
+			}
+		}
+	}
+
+	void GraphicsEngine::selectScene(int sceneId)
+	{
+		if (!vectorContains(this->sceneIds, sceneId))
+		{
+			throw std::runtime_error("There isn't a scene with id " + std::to_string(sceneId));
+		}
+		else
+		{
+			if (activeScene == NULL)
+			{
+				activeScene = &allScenes[this->mapSceneIdsToPos[sceneId]];
+			}
+			else
+			{
+
+			}
+		}
+	}
+
 	void GraphicsEngine::initWindow()
 	{
 		glfwInit();
@@ -72,30 +136,43 @@ namespace graphics
 
 	void GraphicsEngine::initVulkan()
 	{
+		// instance creation
 		createInstance();
 		setupDebugMessenger();
 		createSurface();
+
+		// device creation
 		pickPhysicalDevice();
 		createLogicalDevice();
+
+		// creation of the swap chain
 		createSwapChain();
 		createImageViews();
-		createRenderPass();
-		createDescriptorSetLayout();
-		createGraphicsPipeline();
+
+		// creation of command pools and image resources for rendering
 		createCommandPool();
+		createCommandBuffers();
 		createColorResources();
 		createDepthResources();
-		createFramebuffers();
-		createTextureImage();
-		createTextureImageView();
-		createTextureSampler();
+
+		// creation of models and their representation
+		createDescriptorSetLayout();
 		loadModels();
 		createVertexBuffer();
 		createIndexBuffer();
+		createTextureImage();
+		createTextureImageView();
+		createTextureSampler();
 		createUniformBuffers();
 		createDescriptorPool();
 		createDescriptorSets();
-		createCommandBuffers();
+
+		// creation of the graphics pipeline with render passes
+		createRenderPass();
+		createFramebuffers();
+		createGraphicsPipeline();
+
+		// create uniform buffers to pass to the shaders
 		createSyncObjects();
 	}
 
@@ -684,7 +761,6 @@ namespace graphics
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		// XXXXXXXXXXX: line
 		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
@@ -1169,6 +1245,7 @@ namespace graphics
 		throw std::runtime_error(getErrorStr(Error::VULKAN_FAIL_FIND_SUITABLE_MEMORY_TYPE));
 	}
 
+	// TODO: each object must have one index buffer
 	void GraphicsEngine::createIndexBuffer()
 	{
 		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
@@ -1190,9 +1267,9 @@ namespace graphics
 		vkFreeMemory(device, stagingBufferMemory, nullptr);
 	}
 
+	// TODO: here uniform buffer objects are created as descriptor set to be passed to shaders
 	void GraphicsEngine::createDescriptorSetLayout()
 	{
-		// TODO: each binding must be described by one VkDescriptorSetLayoutBinding
 		VkDescriptorSetLayoutBinding uboLayoutBinding{};
 		uboLayoutBinding.binding = 0;
 		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1207,7 +1284,14 @@ namespace graphics
 		samplerLayoutBinding.pImmutableSamplers = nullptr;
 		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+		/*VkDescriptorSetLayoutBinding uboLightLayoutBinding{};
+		uboLayoutBinding.binding = 2;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr;*/
+
+		std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding/*, uboLightLayoutBinding*/};
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
@@ -1221,35 +1305,47 @@ namespace graphics
 
 	void GraphicsEngine::createUniformBuffers()
 	{
-		VkDeviceSize bufferSize = sizeof(UniformBufferObject);
-		
-		uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-		uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
-		
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		vector<uint64_t> uboSizes = { sizeof(GlobalUniformBufferObject)/*, sizeof(GlobalUniformBufferObjectLight)*/ };
+
+		globalUniformBuffers.resize(uboSizes.size());
+		globalUniformBuffersMemory.resize(uboSizes.size());
+
+		for (int i = 0; i < uboSizes.size(); i++)
 		{
-			createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+			VkDeviceSize bufferSize = uboSizes[i];
+
+			globalUniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+			globalUniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+
+			for (size_t j = 0; j < MAX_FRAMES_IN_FLIGHT; j++)
+			{
+				createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, globalUniformBuffers[j], globalUniformBuffersMemory[j]);
+			}
 		}
 	}
 
 	void GraphicsEngine::updateUniformBuffer(uint32_t currentImage)
 	{
 		static auto startTime = std::chrono::high_resolution_clock::now();
+		static auto lastFrameTime = std::chrono::high_resolution_clock::now();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+		lastFrameTime = currentTime;
+
+		// TODO: handle game objects update
 
 		// TODO: since here transformations are computed, here publish-subscribe must be implemented
-		UniformBufferObject ubo{};
+		GlobalUniformBufferObject ubo{};
 		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
 		ubo.proj[1][1] *= -1;
 
 		void* data;
-		vkMapMemory(device, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
+		vkMapMemory(device, globalUniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
 		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(device, uniformBuffersMemory[currentImage]);
+		vkUnmapMemory(device, globalUniformBuffersMemory[currentImage]);
 	}
 
 	void GraphicsEngine::createDescriptorPool()
@@ -1290,9 +1386,9 @@ namespace graphics
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = uniformBuffers[i];
+			bufferInfo.buffer = globalUniformBuffers[i];
 			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(UniformBufferObject);
+			bufferInfo.range = sizeof(GlobalUniformBufferObject);
 
 			VkDescriptorImageInfo imageInfo{};
 			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -1845,10 +1941,10 @@ namespace graphics
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		for (size_t j = 0; j < MAX_FRAMES_IN_FLIGHT; j++)
 		{
-			vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-			vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+			vkDestroyBuffer(device, globalUniformBuffers[j], nullptr);
+			vkFreeMemory(device, globalUniformBuffersMemory[j], nullptr);
 		}
 
 		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
