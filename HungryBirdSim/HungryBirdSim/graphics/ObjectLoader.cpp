@@ -8,6 +8,7 @@
 #include "ObjectLoader.hpp"
 
 using errors::getErrorStr;
+using errors::getVulkanErrorStr;
 using errors::Error;
 
 namespace graphics
@@ -270,9 +271,10 @@ namespace graphics
 		allocInfo.pSetLayouts = layouts.data();
 
 		descriptorSets.resize(this->maximumFramesInFlight);
-		if (vkAllocateDescriptorSets(graphicsEngine->device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+		auto result = vkAllocateDescriptorSets(graphicsEngine->device, &allocInfo, descriptorSets.data());
+		if (result != VK_SUCCESS)
 		{
-			throw std::runtime_error(getErrorStr(Error::VULKAN_FAIL_ALLOCATE_DESCRIPTOR_SET));
+			throw std::runtime_error(getVulkanErrorStr(result) + getErrorStr(Error::VULKAN_FAIL_ALLOCATE_DESCRIPTOR_SET));
 		}
 
 		for (size_t i = 0; i < this->maximumFramesInFlight; i++)

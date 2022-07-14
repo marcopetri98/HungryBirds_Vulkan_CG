@@ -111,4 +111,25 @@ namespace errors
 				return "Vulkan wasn't able to properly perform blitting on the image since it is not supported!";
 		}
 	}
+
+	string getVulkanErrorStr(VkResult result)
+	{
+		switch (result)
+		{
+			case VK_ERROR_OUT_OF_HOST_MEMORY:
+				return "[ERROR OUT OF HOST MEMORY]: ";
+
+			case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+				return "[ERROR OUT OF DEVICE MEMORY]: ";
+
+			case VK_ERROR_FRAGMENTED_POOL:
+				return "[ERROR FRAGMENTED POOL]: ";
+
+			case VK_ERROR_OUT_OF_POOL_MEMORY:
+				return "[ERROR OUT OF POOL MEMORY]: ";
+
+			default:
+				return "[VULKAN ERROR NOT MAPPED IN FUNCTION] ";
+		}
+	}
 }

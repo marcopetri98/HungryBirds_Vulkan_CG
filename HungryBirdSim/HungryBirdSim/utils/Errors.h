@@ -3,6 +3,9 @@
 #ifndef ERRORS_H_
 #define ERRORS_H_
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 #include <string>
 
 using std::string;
@@ -48,6 +51,8 @@ namespace errors
 	};
 
 	string getErrorStr(Error type);
+
+	string getVulkanErrorStr(VkResult result);
 }
 
 #endif
