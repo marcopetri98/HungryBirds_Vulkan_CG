@@ -29,7 +29,7 @@ namespace graphics
 		 * @param eyePos The position of the eyes of the camera.
 		 * @param vectorUp The direction of the up vector.
 		 */
-		Camera(GameObject followedObject, vec3 eyePos, vec3 vectorUp);
+		Camera(GameObject* followedObject, vec3 eyePos, vec3 vectorUp);
 		/**
 		 * Gets the initial transformation of the camera.
 		 * 
@@ -55,7 +55,7 @@ namespace graphics
 		 * @param eyePos The position of the eyes of the camera.
 		 * @param vectorUp The direction of the up vector.
 		 */
-		void lookAtGameObject(GameObject gameObject, vec3 eyePos, vec3 vectorUp);
+		void lookAtGameObject(GameObject* gameObject, vec3 eyePos, vec3 vectorUp);
 		/**
 		 * Set the current tranform of the camera.
 		 * 

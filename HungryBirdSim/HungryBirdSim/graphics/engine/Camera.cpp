@@ -14,7 +14,7 @@ namespace graphics
 		this->initialTransform = initialTransform;
 	}
 
-	Camera::Camera(GameObject followedObject, vec3 eyePos, vec3 vectorUp)
+	Camera::Camera(GameObject* followedObject, vec3 eyePos, vec3 vectorUp)
 	{
 		lookAtGameObject(followedObject, eyePos, vectorUp);
 	}
@@ -39,8 +39,8 @@ namespace graphics
 		this->currentTransform = transform;
 	}
 
-	void Camera::lookAtGameObject(GameObject gameObject, vec3 eyePos, vec3 vectorUp)
+	void Camera::lookAtGameObject(GameObject* gameObject, vec3 eyePos, vec3 vectorUp)
 	{
-		this->currentTransform = glm::lookAt(eyePos, gameObject.getCurrentPos(), glm::normalize(vectorUp));
+		this->currentTransform = glm::lookAt(eyePos, gameObject->getCurrentPos(), glm::normalize(vectorUp));
 	}
 }

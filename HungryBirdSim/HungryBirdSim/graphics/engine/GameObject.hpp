@@ -34,10 +34,15 @@ namespace graphics
 		 * @param layer The layer of the object.
 		 */
 		GameObject(string name, vector<Tag> tags, string objectPath, string texturePath, mat4 initialTransform = mat4(1), int layer = 0);
+		/**
+		 * Verifies if two objects are identical.
+		 * 
+		 * @param obj other GameObject to check for equality
+		 * @return true if the game objects are identical
+		 */
 		bool operator == (GameObject const& obj) {
 			return this->name == obj.name;
 		}
-		
 		/**
 		 * Gets the name of the object.
 		 * 

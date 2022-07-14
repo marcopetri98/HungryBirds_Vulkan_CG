@@ -6,7 +6,7 @@ using std::copy, std::begin, std::end, std::vector;
 using graphics::GameObject;
 
 namespace graphics {
-	BoxCollider3D::BoxCollider3D(GameObject gameObject, float size_x, float size_y, float size_z) {
+	BoxCollider3D::BoxCollider3D(GameObject* gameObject, float size_x, float size_y, float size_z) {
 		this->gameObject = gameObject;
 		this->size_x = size_x;
 		this->size_y = size_y;
@@ -14,11 +14,11 @@ namespace graphics {
 		createBoundingBox();
 	}
 
-	BoxCollider3D::BoxCollider3D(GameObject gameObject, float side, float height) {
+	BoxCollider3D::BoxCollider3D(GameObject* gameObject, float side, float height) {
 		BoxCollider3D(gameObject, side, height, side);
 	}
 
-	BoxCollider3D::BoxCollider3D(GameObject gameObject, float side) {
+	BoxCollider3D::BoxCollider3D(GameObject* gameObject, float side) {
 		BoxCollider3D(gameObject, side, side, side);
 	}
 
@@ -34,7 +34,7 @@ namespace graphics {
 	}
 
 	void BoxCollider3D::createBoundingBox() {
-		vec3 goPos = this->gameObject.getCurrentPos();
+		vec3 goPos = this->gameObject->getCurrentPos();
 		vector<vec3> vertices;
 		for (int x = -1; x <= 1; x+=2) {
 			for (int y = -1; y <= 1; y+=2) {
@@ -55,9 +55,14 @@ namespace graphics {
 		this->z_high = this->boundingBox[7].z;
 	}
 
+	void BoxCollider3D::setGameObject(GameObject* gameObject)
+	{
+		this->gameObject = gameObject;
+	}
+
 	GameObject BoxCollider3D::getGameObject()
 	{
-		return this->gameObject;
+		return *this->gameObject;
 	}
 
 	bool BoxCollider3D::checkCollision(vec3 point) {

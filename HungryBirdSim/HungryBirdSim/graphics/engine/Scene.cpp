@@ -13,20 +13,20 @@ namespace graphics
 
 	}
 
-	Scene::Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id)
+	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id)
 	{
 
-		for (GameObject gameObject : gameObjects)
+		for (GameObject* gameObject : gameObjects)
 		{
-			if (this->gameObjectsNames.size() != 0 && vectorContains(this->gameObjectsNames, gameObject.getName()))
+			if (this->gameObjectsNames.size() != 0 && vectorContains(this->gameObjectsNames, gameObject->getName()))
 			{
 				throw std::runtime_error("Two objects have the same name, objects ids must be unique");
 			}
 			else
 			{
-				this->gameObjectsNames.push_back(gameObject.getName());
+				this->gameObjectsNames.push_back(gameObject->getName());
 				this->gameObjects.push_back(gameObject);
-				this->mapNamesGameObjects.insert(std::pair<string, GameObject>(gameObject.getName(), gameObject));
+				this->mapNamesGameObjects.insert(std::pair<string, GameObject*>(gameObject->getName(), gameObject));
 			}
 		}
 
@@ -37,6 +37,16 @@ namespace graphics
 		this->id = id;
 	}
 
+	GameObject* Scene::getGameObjectPointerByPos(unsigned int pos)
+	{
+		if (pos >= this->gameObjects.size())
+		{
+			throw std::runtime_error("There isn't a game object with position " + std::to_string(pos));
+		}
+
+		return this->gameObjects[pos];
+	}
+
 	GameObject Scene::getGameObjectByName(string name)
 	{
 		if (!vectorContains(this->gameObjectsNames, name))
@@ -45,21 +55,26 @@ namespace graphics
 		}
 		else
 		{
-			return this->mapNamesGameObjects[name];
+			return *this->mapNamesGameObjects[name];
 		}
 	}
 
-	vector<GameObject> Scene::getAllGameObjects()
+	int Scene::getNumOfGameObjects()
+	{
+		return this->gameObjects.size();
+	}
+
+	vector<GameObject*> Scene::getAllGameObjects()
 	{
 		return this->gameObjects;
 	}
 
-	Camera Scene::getCamera()
+	Camera* Scene::getCamera()
 	{
 		return this->camera;
 	}
 
-	vector<Camera> Scene::getAvailableCameras()
+	vector<Camera*> Scene::getAvailableCameras()
 	{
 		return this->availableCameras;
 	}
@@ -90,13 +105,11 @@ namespace graphics
 		}
 		else
 		{
-			this->mapNamesGameObjects[name] = gameObject;
-
 			for (int i = 0; i < this->gameObjects.size(); i++)
 			{
-				if (this->gameObjects[i].getName() == name)
+				if (this->gameObjects[i]->getName() == name)
 				{
-					this->gameObjects[i] = gameObject;
+					*this->gameObjects[i] = gameObject;
 				}
 			}
 		}
@@ -114,7 +127,7 @@ namespace graphics
 			throw std::runtime_error("The position of the camera is invalid");
 		}
 
-		this->availableCameras[pos] = camera;
+		*this->availableCameras[pos] = camera;
 	}
 
 	void Scene::setBackground(Background background)

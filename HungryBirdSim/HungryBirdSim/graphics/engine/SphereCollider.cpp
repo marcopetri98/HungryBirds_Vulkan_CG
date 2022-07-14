@@ -9,8 +9,7 @@ using std::copy, std::begin, std::end, std::vector;
 using graphics::GameObject;
 
 namespace graphics {
-	SphereCollider::SphereCollider(GameObject gameObject, float radius) {
-		this->gameObject = gameObject;
+	SphereCollider::SphereCollider(float radius) {
 		this->radius = radius;
 	}
 
@@ -20,11 +19,16 @@ namespace graphics {
 
 	GameObject SphereCollider::getGameObject()
 	{
-		return this->gameObject;
+		return *this->gameObject;
+	}
+
+	void SphereCollider::setGameObject(GameObject* gameObject)
+	{
+		this->gameObject = gameObject;
 	}
 
 	bool SphereCollider::checkCollision(vec3 point) {
-		vec3 diff = point - this->gameObject.getCurrentPos();
+		vec3 diff = point - this->gameObject->getCurrentPos();
 		return	pow(diff.x, 2) + 
 			    pow(diff.y, 2) +
 				pow(diff.z, 2) >= 0;

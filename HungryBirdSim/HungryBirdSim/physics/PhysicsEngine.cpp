@@ -14,7 +14,12 @@ using graphics::Collider;
 using tags::Tag, tags::getTags;
 
 namespace physics {
-	PhysicsEngine::PhysicsEngine(bool raycast3d, vec3 ambient_acc = vec3(0, -9.81f, 0), float collisionDamping=0.1) {
+	PhysicsEngine::PhysicsEngine()
+	{
+
+	}
+
+	PhysicsEngine::PhysicsEngine(bool raycast3d, vec3 ambient_acc, float collisionDamping) {
 		this->raycast3d = raycast3d;
 		this->ambient_acc = ambient_acc;
 		this->collisionDamping = collisionDamping;
@@ -140,10 +145,9 @@ namespace physics {
 				currAcceleration = currAcceleration + this->ambient_acc;
 				go->setAcceleration(currAcceleration);
 				vector<GameObject> others;
-				for (int j = 0; j < this->trackedObjects.size(); j++) {
+				for (int j = 0; j < this->trackedObjects.size() && i!=j; j++) {
 					others.push_back(*(this->trackedObjects[i]));
 				}
-				others.erase(others.begin() + i);
 				CollisionInfo collision = checkCollisions(*go, others);
 				if (collision.collided) {
 					if (collision.collidedObject.getTag() & this->collisionTags) {

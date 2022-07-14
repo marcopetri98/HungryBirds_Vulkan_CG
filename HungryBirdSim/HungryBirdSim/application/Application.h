@@ -7,12 +7,14 @@
 
 #include "../graphics/DummyRecursionSolver.hpp"
 #include "../graphics/GraphicsEngine.h"
+#include "../physics/PhysicsEngine.hpp"
 
 using std::string;
 using graphics::DEFAULT_TITLE;
 using graphics::DEFAULT_WIDTH;
 using graphics::DEFAULT_HEIGHT;
 using graphics::GraphicsEngine;
+using physics::PhysicsEngine;
 
 namespace app
 {
@@ -31,6 +33,7 @@ namespace app
 
 		private:
 		GraphicsEngine graphicsEngine;
+		PhysicsEngine physicsEngine;
 	};
 }
 

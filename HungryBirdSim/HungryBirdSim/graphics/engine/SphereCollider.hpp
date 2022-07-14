@@ -17,20 +17,18 @@ namespace graphics
 	{
 		public:
 		/**
-		 * Create a 3D box collider with the specified dimensions.
+		 * Create a 3D sphere collider with the specified dimensions.
 		 *
-		 * @param gameObject the gameObject object to which this collider has to be attached to.
-		 * @param size_x the length of the x side of the collider.
-		 * @param size_y the length of the y side of the collider.
-		 * @param size_z the length of the z side of the collider.
+		 * @param radius the radius of the sphere.
 		 */
-		SphereCollider(GameObject gameObject, float radius);
+		SphereCollider(float radius = 0.0f);
 		/**
 		 * Returns the bounding box of the collider, formed by the 8 vertices of the box.
 		 *
 		 * @return the coordinates of the 8 vertices of the bounding box.
 		 */
 		GameObject getGameObject();
+		void setGameObject(GameObject* gameObject);
 		float getSize();
 		/**
 		 * Check if the given point collides with this box collider.
@@ -41,7 +39,7 @@ namespace graphics
 		bool checkCollision(vec3 point);
 
 		private:
-		GameObject gameObject;
+		GameObject* gameObject;
 		float radius;
 	};
 }

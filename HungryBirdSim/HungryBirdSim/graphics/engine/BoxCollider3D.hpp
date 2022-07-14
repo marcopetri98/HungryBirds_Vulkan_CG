@@ -24,7 +24,7 @@ namespace graphics
 		 * @param size_y the length of the y side of the collider.
 		 * @param size_z the length of the z side of the collider.
 		 */
-		BoxCollider3D(GameObject gameObject, float size_x, float size_y = 0, float size_z = 0);
+		BoxCollider3D(GameObject* gameObject, float size_x, float size_y = 0, float size_z = 0);
 		/**
 		 * Create a 3D box collider with a square base of with the given side and a given height.
 		 * 
@@ -32,14 +32,14 @@ namespace graphics
 		 * @param side the side of the square base.
 		 * @param height the height of the collider.
 		 */
-		BoxCollider3D(GameObject gameObject, float side, float height);
+		BoxCollider3D(GameObject* gameObject, float side, float height);
 		/**
 		 * Create a cube 3D box collider.
 		 * 
 		 * @param gameObject the gameObject object to which this collider has to be attached to.
 		 * @param side the side of the cube.
 		 */
-		BoxCollider3D(GameObject gameObject, float side);
+		BoxCollider3D(GameObject* gameObject, float side);
 		/**
 		 * Returns the bounding box of the collider, formed by the 8 vertices of the box.
 		 * 
@@ -47,6 +47,7 @@ namespace graphics
 		 */
 		array<vec3, 8> getBoundingBox();
 		GameObject getGameObject();
+		void setGameObject(GameObject* gameObject);
 		float getSize();
 		/**
 		 * Check if the given point collides with this box collider.
@@ -57,7 +58,7 @@ namespace graphics
 		bool checkCollision(vec3 point);
 
 		private:
-		GameObject gameObject;
+		GameObject* gameObject;
 		float size_x, size_y, size_z;
 		float x_low, x_high, y_low, y_high, z_low, z_high;
 		array<vec3, 8> boundingBox;

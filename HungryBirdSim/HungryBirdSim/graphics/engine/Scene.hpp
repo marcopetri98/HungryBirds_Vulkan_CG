@@ -32,7 +32,14 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id);
+		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id);
+		/**
+		 * Get the pointer to the game object by its position.
+		 * 
+		 * @param pos position of the game object
+		 * @return pointer to GameObject
+		 */
+		GameObject* getGameObjectPointerByPos(unsigned int pos);
 		/**
 		 * Gets a game object by its name.
 		 * 
@@ -45,19 +52,25 @@ namespace graphics
 		 * 
 		 * @return vector of GameObject of the scene.
 		 */
-		vector<GameObject> getAllGameObjects();
+		vector<GameObject*> getAllGameObjects();
+		/**
+		 * Computes the number of game objects in the scene.
+		 * 
+		 * @return number of stored GameObject
+		 */
+		int getNumOfGameObjects();
 		/**
 		 * Gets the scene camera.
 		 * 
 		 * @return Camera of the scene.
 		 */
-		Camera getCamera();
+		Camera* getCamera();
 		/**
 		 * Gets all the available cameras in the scene.
 		 * 
 		 * @return All the available cameras for the scene.
 		 */
-		vector<Camera> getAvailableCameras();
+		vector<Camera*> getAvailableCameras();
 		/**
 		 * Gets the background of the scene.
 		 * 
@@ -111,19 +124,19 @@ namespace graphics
 		/**
 		 * Map between names and game objects.
 		 */
-		map<string, GameObject> mapNamesGameObjects;
+		map<string, GameObject*> mapNamesGameObjects;
 		/**
 		 * Vector of all the game objects in the scene.
 		 */
-		vector<GameObject> gameObjects;
+		vector<GameObject*> gameObjects;
 		/**
 		 * The camera defining the view.
 		 */
-		Camera camera;
+		Camera* camera;
 		/**
 		 * The list of all the camera that can be used.
 		 */
-		vector<Camera> availableCameras;
+		vector<Camera*> availableCameras;
 		/**
 		 * The background for the scene.
 		 */

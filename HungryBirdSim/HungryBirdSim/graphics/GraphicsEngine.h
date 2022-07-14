@@ -18,9 +18,13 @@
 #include "ObjectLoader.hpp"
 #include "SceneLoader.hpp"
 
+#include "../physics/PhysicsEngine.hpp"
+
 using std::string;
 using std::vector;
 using std::map;
+
+using physics::PhysicsEngine;
 
 namespace graphics
 {
@@ -38,7 +42,8 @@ namespace graphics
 		GraphicsEngine(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT, float nearPlane = 0.01f, float farPlane = 1000.0f);
 		void run();
 		void setUseValidationLayers(bool val);
-		void addScenes(vector<Scene> scenes);
+		void setPhysicsEngine(PhysicsEngine* engine);
+		void addScenes(vector<Scene*> scenes);
 		void selectScene(string sceneName);
 		void selectScene(int sceneId);
 
@@ -46,8 +51,9 @@ namespace graphics
 		friend class ObjectLoader;
 		friend class SceneLoader;
 
+		PhysicsEngine* physicsEngine;
 		Scene* activeScene;
-		vector<Scene> allScenes;
+		vector<Scene*> allScenes;
 		vector<string> sceneNames;
 		vector<int> sceneIds;
 		map<string, int> mapSceneNamesIds;
@@ -55,6 +61,8 @@ namespace graphics
 		SceneLoader sceneLoader;
 		float nearPlane;
 		float farPlane;
+
+		void updatePhysicsEngine();
 
 		// TODO: insert a parametrized way to handle required queues by using attributes
 		// TODO: insert a parametrized way to choose which are the requirements for a GPU to be suitable

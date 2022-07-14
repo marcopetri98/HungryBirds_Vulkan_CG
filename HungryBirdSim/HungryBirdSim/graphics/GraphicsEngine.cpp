@@ -73,25 +73,30 @@ namespace graphics
 		useValidationLayers = val;
 	}
 
-	void GraphicsEngine::addScenes(vector<Scene> scenes)
+	void GraphicsEngine::setPhysicsEngine(PhysicsEngine* engine)
 	{
-		for (Scene scene : scenes)
+		this->physicsEngine = engine;
+	}
+
+	void GraphicsEngine::addScenes(vector<Scene*> scenes)
+	{
+		for (Scene* scene : scenes)
 		{
-			if (vectorContains(this->sceneNames, scene.getName()))
+			if (vectorContains(this->sceneNames, scene->getName()))
 			{
-				throw std::runtime_error("A scene with name " + scene.getName() + " already exists!");
+				throw std::runtime_error("A scene with name " + scene->getName() + " already exists!");
 			}
-			else if (vectorContains(this->sceneIds, scene.getId()))
+			else if (vectorContains(this->sceneIds, scene->getId()))
 			{
-				throw std::runtime_error("A scene with id " + std::to_string(scene.getId()) + " already exists!");
+				throw std::runtime_error("A scene with id " + std::to_string(scene->getId()) + " already exists!");
 			}
 			else
 			{
 				this->allScenes.push_back(scene);
-				this->sceneNames.push_back(scene.getName());
-				this->sceneIds.push_back(scene.getId());
-				this->mapSceneNamesIds.insert(std::pair<string, int>(scene.getName(), scene.getId()));
-				this->mapSceneIdsToPos.insert(std::pair<int, int>(scene.getId(), this->allScenes.size() - 1));
+				this->sceneNames.push_back(scene->getName());
+				this->sceneIds.push_back(scene->getId());
+				this->mapSceneNamesIds.insert(std::pair<string, int>(scene->getName(), scene->getId()));
+				this->mapSceneIdsToPos.insert(std::pair<int, int>(scene->getId(), this->allScenes.size() - 1));
 			}
 		}
 	}
@@ -104,18 +109,7 @@ namespace graphics
 		}
 		else
 		{
-			if (activeScene == NULL)
-			{
-				activeScene = &allScenes[this->mapSceneIdsToPos[this->mapSceneNamesIds[sceneName]]];
-				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
-			}
-			else
-			{
-				activeScene = &allScenes[this->mapSceneIdsToPos[this->mapSceneNamesIds[sceneName]]];
-				sceneLoader.cleanup();
-				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
-				sceneLoader.createDescriptorPoolsAndObjects();
-			}
+			selectScene(this->mapSceneNamesIds[sceneName]);
 		}
 	}
 
@@ -129,17 +123,32 @@ namespace graphics
 		{
 			if (activeScene == NULL)
 			{
-				activeScene = &allScenes[this->mapSceneIdsToPos[sceneId]];
+				activeScene = allScenes[this->mapSceneIdsToPos[sceneId]];
+				this->updatePhysicsEngine();
 				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 			}
 			else
 			{
-				activeScene = &allScenes[this->mapSceneIdsToPos[sceneId]];
+				activeScene = allScenes[this->mapSceneIdsToPos[sceneId]];
+				this->updatePhysicsEngine();
 				sceneLoader.cleanup();
 				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 				sceneLoader.createDescriptorPoolsAndObjects();
 			}
 		}
+	}
+
+	void GraphicsEngine::updatePhysicsEngine()
+	{
+		vector<GameObject*> gameObjectPointers;
+
+		gameObjectPointers.clear();
+		for (int i = 0; i < activeScene->getNumOfGameObjects(); i++)
+		{
+			gameObjectPointers.push_back(activeScene->getGameObjectPointerByPos(i));
+		}
+
+		physicsEngine->track(gameObjectPointers);
 	}
 
 	void GraphicsEngine::initWindow()
@@ -1237,16 +1246,16 @@ namespace graphics
 		static auto lastFrameTime = std::chrono::high_resolution_clock::now();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+		float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 		lastFrameTime = currentTime;
 
-		// TODO: handle game objects update
+		physicsEngine->update(deltaTime);
 
 		void* data;
 
 		// load gubo of positions
 		GlobalUniformBufferObject gubo{};
-		gubo.view = activeScene->getCamera().getCurrentTransform();
+		gubo.view = activeScene->getCamera()->getCurrentTransform();
 		gubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, nearPlane, farPlane);
 		gubo.proj[1][1] *= -1;
 
@@ -1266,10 +1275,10 @@ namespace graphics
 		for (int i = 0; i < sceneLoader.getNumOfObjects(); i++)
 		{
 			ObjectLoader* renderedObject = sceneLoader.getIthObject(i);
-			GameObject gameObject = activeScene->getAllGameObjects()[i];
+			GameObject* gameObject = activeScene->getAllGameObjects()[i];
 
-			ubo.modelVertices = gameObject.getCurrentTransform();
-			ubo.modelNormal = gameObject.getCurrentTransform();
+			ubo.modelVertices = gameObject->getCurrentTransform();
+			ubo.modelNormal = gameObject->getCurrentTransform();
 
 			// TODO: implement object light
 

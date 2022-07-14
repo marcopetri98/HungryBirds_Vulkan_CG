@@ -1,6 +1,8 @@
+#include <vector>
 
 #include "GameObject.hpp"
-#include <vector>
+#include "Tags.hpp"
+
 using std::vector;
 
 namespace graphics
@@ -24,6 +26,7 @@ namespace graphics
 
 	void GameObject::setCollider(Collider* collider)
 	{
+		collider->setGameObject(this);
 		this->collider = collider;
 	}
 
