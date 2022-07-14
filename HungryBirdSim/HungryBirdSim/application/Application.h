@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include "../graphics/DummyRecursionSolver.hpp"
 #include "../graphics/GraphicsEngine.h"
 
 using std::string;

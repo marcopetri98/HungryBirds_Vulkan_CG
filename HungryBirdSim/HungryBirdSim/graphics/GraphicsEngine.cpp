@@ -89,7 +89,7 @@ namespace graphics
 				this->sceneNames.push_back(scene.getName());
 				this->sceneIds.push_back(scene.getId());
 				this->mapSceneNamesIds.insert(std::pair<string, int>(scene.getName(), scene.getId()));
-				this->mapSceneIdsToPos.insert(std::pair<int, int>(scene.getId(), this->allScenes.size()));
+				this->mapSceneIdsToPos.insert(std::pair<int, int>(scene.getId(), this->allScenes.size() - 1));
 			}
 		}
 	}
@@ -105,9 +105,11 @@ namespace graphics
 			if (activeScene == NULL)
 			{
 				activeScene = &allScenes[this->mapSceneIdsToPos[this->mapSceneNamesIds[sceneName]]];
+				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 			}
 			else
 			{
+				activeScene = &allScenes[this->mapSceneIdsToPos[this->mapSceneNamesIds[sceneName]]];
 				sceneLoader.cleanup();
 				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 				sceneLoader.createDescriptorPoolsAndObjects();
@@ -126,9 +128,11 @@ namespace graphics
 			if (activeScene == NULL)
 			{
 				activeScene = &allScenes[this->mapSceneIdsToPos[sceneId]];
+				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 			}
 			else
 			{
+				activeScene = &allScenes[this->mapSceneIdsToPos[sceneId]];
 				sceneLoader.cleanup();
 				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 				sceneLoader.createDescriptorPoolsAndObjects();

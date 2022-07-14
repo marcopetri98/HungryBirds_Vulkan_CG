@@ -2,8 +2,8 @@
 
 #ifndef GRAPHICSENGINE_H_
 #define GRAPHICSENGINE_H_
-#define GLFW_INCLUDE_VULKAN
 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <string>
 #include <vector>

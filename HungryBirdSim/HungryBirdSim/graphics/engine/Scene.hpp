@@ -21,6 +21,7 @@ namespace graphics
 	class Scene
 	{
 		public:
+		Scene();
 		/**
 		 * Creates the scene.
 		 * 
@@ -31,7 +32,7 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject> gameObjects = {}, int camera = 0, vector<Camera> availableCameras = {}, Background background = Background(), string name = "none", int id = 0);
+		Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id);
 		/**
 		 * Gets a game object by its name.
 		 * 

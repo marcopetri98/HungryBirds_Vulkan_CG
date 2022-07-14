@@ -8,6 +8,11 @@ using collectionutils::vectorContains;
 
 namespace graphics
 {
+	Scene::Scene()
+	{
+
+	}
+
 	Scene::Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id)
 	{
 		this->gameObjectsNames.resize(gameObjects.size());

@@ -89,10 +89,10 @@ namespace graphics
 		vector<tinyobj::shape_t> shapes;
 		vector<tinyobj::material_t> materials;
 		string warn, err;
-
+		
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, gameObject.getObjectPath().c_str()))
 		{
-			throw std::runtime_error(warn + err);
+			throw std::runtime_error("ObjectLoader: " + warn + err);
 		}
 
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};

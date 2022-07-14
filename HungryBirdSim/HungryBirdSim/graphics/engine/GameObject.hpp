@@ -19,6 +19,7 @@ namespace graphics
 	class GameObject
 	{
 		public:
+		GameObject();
 		/**
 		 * Creates a game object.
 		 * 
@@ -29,7 +30,7 @@ namespace graphics
 		 * @param initialTransform The initial transform of the object expressed as matrix-on-the-left.
 		 * @param layer The layer of the object.
 		 */
-		GameObject(string name = "none", int tag = 0, string objectPath = "none", string texturePath = "none", mat4 initialTransform = mat4(1), int layer = 0);
+		GameObject(string name, int tag, string objectPath, string texturePath, mat4 initialTransform = mat4(1), int layer = 0);
 		bool operator == (GameObject const& obj) {
 			return this->name == obj.name;
 		}
