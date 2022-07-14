@@ -1,6 +1,7 @@
 #version 450
 
 layout(binding = 1) uniform GlobalUniformBufferObjectLight {
+	vec3 eyePos;
     vec3 directionalDir;
 	vec3 directionalColor;
 	vec3 pointDir;
