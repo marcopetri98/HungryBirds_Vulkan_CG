@@ -1,5 +1,7 @@
 
 #include "GameObject.hpp"
+#include <vector>
+using std::vector;
 
 namespace graphics
 {
@@ -7,11 +9,11 @@ namespace graphics
 	{
 
 	}
-
-	GameObject::GameObject(string name, int tag, string objectPath, string texturePath, mat4 initialTransform, int layer)
+	
+	GameObject::GameObject(string name, vector<Tag> tags, string objectPath, string texturePath, mat4 initialTransform, int layer)
 	{
 		this->name = string(name);
-		this->tag = tag;
+		this->tag = getTags(tags);
 		this->layer = layer;
 		this->objectPath = string(objectPath);
 		this->texturePath = string(texturePath);

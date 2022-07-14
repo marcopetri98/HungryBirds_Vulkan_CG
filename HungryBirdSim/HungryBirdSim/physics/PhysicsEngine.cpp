@@ -27,13 +27,14 @@ namespace physics {
 
 	}
 	mat4 PhysicsEngine::translateObject(GameObject gameobject, vec3 translation) {
-		return translate(gameobject.getCurrentTransform(), translation);
+		mat4 T = translate(mat4(1.0f), translation);
+		return T * gameobject.getCurrentTransform();
 	}
 	mat4 PhysicsEngine::rotateObject(GameObject gameobject, vec3 angles_xyz) {
-		mat4 rotated = rotate(gameobject.getCurrentTransform(), radians(angles_xyz[0]), vec3(1, 0, 0));
-		rotated = rotate(rotated, radians(angles_xyz[1]), vec3(0, 1, 0));
-		rotated = rotate(rotated, radians(angles_xyz[2]), vec3(0, 0, 1));
-		return rotated;
+		mat4 R1 = rotate(mat4(1.0f), radians(angles_xyz[0]), vec3(1, 0, 0));
+		mat4 R2 = rotate(mat4(1.0f), radians(angles_xyz[1]), vec3(0, 1, 0));
+		mat4 R3 = rotate(mat4(1.0f), radians(angles_xyz[2]), vec3(0, 0, 1));
+		return R3 * R2 * R1 * gameobject.getCurrentTransform();
 	}
 	mat4 PhysicsEngine::rotateAroundAxis(GameObject gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
 		mat4 current = gameobject.getCurrentTransform();
@@ -45,20 +46,21 @@ namespace physics {
 		return T * R2 * R1 * R * inverse(R1) * inverse(R2) * inverse(T) * current;
 	}
 	mat4 PhysicsEngine::scaleObject(GameObject gameobject, vec3 scales) {
-		return scale(gameobject.getCurrentTransform(), scales);
+		mat4 S = scale(mat4(1.0f), scales);
+		return S * gameobject.getCurrentTransform();
 	}
 
-	void PhysicsEngine::translateObjectInPlace(GameObject gameobject, vec3 translation) {
-		gameobject.setCurrentTransform(translateObject(gameobject, translation));
+	void PhysicsEngine::translateObjectInPlace(GameObject* gameobject, vec3 translation) {
+		gameobject->setCurrentTransform(translateObject(*gameobject, translation));
 	}
-	void PhysicsEngine::rotateObjectInPlace(GameObject gameobject, vec3 angles_xyz) {
-		gameobject.setCurrentTransform(rotateObject(gameobject, angles_xyz));
+	void PhysicsEngine::rotateObjectInPlace(GameObject* gameobject, vec3 angles_xyz) {
+		gameobject->setCurrentTransform(rotateObject(*gameobject, angles_xyz));
 	}
-	void PhysicsEngine::rotateAroundAxisInPlace(GameObject gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
-		gameobject.setCurrentTransform(rotateAroundAxis(gameobject, rotationPoint, angle, alignedAxis, alignmentAngles, alignmentRotationAxis));
+	void PhysicsEngine::rotateAroundAxisInPlace(GameObject* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
+		gameobject->setCurrentTransform(rotateAroundAxis(*gameobject, rotationPoint, angle, alignedAxis, alignmentAngles, alignmentRotationAxis));
 	}
-	void PhysicsEngine::scaleObjectInPlace(GameObject gameobject, vec3 scales) {
-		gameobject.setCurrentTransform(scaleObject(gameobject, scales));
+	void PhysicsEngine::scaleObjectInPlace(GameObject* gameobject, vec3 scales) {
+		gameobject->setCurrentTransform(scaleObject(*gameobject, scales));
 	}
 	CollisionInfo PhysicsEngine::checkCollisions(GameObject gameobject, vector<GameObject> others){
 		Collider* collider = gameobject.getCollider();
@@ -86,37 +88,37 @@ namespace physics {
 		return CollisionInfo();
 	}
 	
-	void PhysicsEngine::track(GameObject gameobject) {
-		vector<GameObject> go;
+	void PhysicsEngine::track(GameObject* gameobject) {
+		vector<GameObject*> go;
 		go.push_back(gameobject);
 		track(go);
 	}
 
-	void PhysicsEngine::track(vector<GameObject> gameobjects) {
+	void PhysicsEngine::track(vector<GameObject*> gameobjects) {
 		vector<string> names;
-		for (GameObject go : this->trackedObjects) {
-			names.push_back(go.getName());
+		for (GameObject* go : this->trackedObjects) {
+			names.push_back(go->getName());
 		}
 		for (int i = 0; i < gameobjects.size(); i++) {
-			if (find(names.begin(), names.end(), gameobjects[i].getName()) == names.end()) {
+			if (find(names.begin(), names.end(), gameobjects[i]->getName()) == names.end()) {
 				this->trackedObjects.push_back(gameobjects[i]);
 			}
 		}
 	}
 
-	void PhysicsEngine::untrack(GameObject gameobject) {
-		vector<GameObject> go;
+	void PhysicsEngine::untrack(GameObject* gameobject) {
+		vector<GameObject*> go;
 		go.push_back(gameobject);
 		untrack(go);
 	}
 
-	void PhysicsEngine::untrack(vector<GameObject> gameobjects) {
+	void PhysicsEngine::untrack(vector<GameObject*> gameobjects) {
 		vector<string> names;
-		for (GameObject go : gameobjects) {
-			names.push_back(go.getName());
+		for (GameObject* go : gameobjects) {
+			names.push_back(go->getName());
 		}
 		for (int i = 0; i < this->trackedObjects.size(); i++) {
-			if (find(names.begin(), names.end(), this->trackedObjects[i].getName()) != names.end()) {
+			if (find(names.begin(), names.end(), this->trackedObjects[i]->getName()) != names.end()) {
 				this->trackedObjects.erase(this->trackedObjects.begin()+i);
 			}
 		}
@@ -128,26 +130,29 @@ namespace physics {
 
 	void PhysicsEngine::update(float deltaTime) {
 		for (int i = 0; i < this->trackedObjects.size(); i++) {
-			GameObject go = this->trackedObjects[i];
-			if (go.getVelocity() != vec3(0.f, 0.f, 0.f)) {
-				vec3 velocity = go.getVelocity();
-				go.setVelocity(velocity);
+			GameObject* go = this->trackedObjects[i];
+			if (go->getVelocity() != vec3(0.f, 0.f, 0.f)) {
+				vec3 velocity = go->getVelocity();
+				go->setVelocity(velocity);
 				vec3 movement = deltaTime * velocity;
-				mat4 newPosition = translateObject(go, movement);
-				vec3 currAcceleration = go.getAcceleration();
+				mat4 newPosition = translateObject(*go, movement);
+				vec3 currAcceleration = go->getAcceleration();
 				currAcceleration = currAcceleration + this->ambient_acc;
-				go.setAcceleration(currAcceleration);
-				vector<GameObject> others = this->trackedObjects;
+				go->setAcceleration(currAcceleration);
+				vector<GameObject> others;
+				for (int j = 0; j < this->trackedObjects.size(); j++) {
+					others.push_back(*(this->trackedObjects[i]));
+				}
 				others.erase(others.begin() + i);
-				CollisionInfo collision = checkCollisions(go, others);
+				CollisionInfo collision = checkCollisions(*go, others);
 				if (collision.collided) {
 					if (collision.collidedObject.getTag() & this->collisionTags) {
-						vec3 newVel = (normalize(velocity) + collision.collisionDir) * length(velocity) * this->collisionDamping;
-						go.setVelocity(newVel);
+						vec3 newVel = (normalize(velocity) + collision.collisionDir) * length(velocity) * (1-this->collisionDamping);
+						go->setVelocity(newVel);
 					}
 					else if ((collision.collidedObject.getTag() & this->groundTags)) {
-						go.setVelocity(vec3(0, 0, 0));
-						go.setAcceleration(vec3(0, 0, 0));
+						go->setVelocity(vec3(0, 0, 0));
+						go->setAcceleration(vec3(0, 0, 0));
 					}
 				}
 			}

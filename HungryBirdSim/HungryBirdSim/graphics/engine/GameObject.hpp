@@ -6,11 +6,14 @@
 #include <glm/glm.hpp>
 
 #include <string>
+#include <vector>
 
 #include "DummyRecursionSolver.hpp"
 #include "Collider.hpp"
+#include "Tags.hpp"
 
-using std::string;
+using tags::Tag, tags::getTags;
+using std::string, std::vector;
 using glm::vec3;
 using glm::mat4;
 
@@ -30,7 +33,7 @@ namespace graphics
 		 * @param initialTransform The initial transform of the object expressed as matrix-on-the-left.
 		 * @param layer The layer of the object.
 		 */
-		GameObject(string name, int tag, string objectPath, string texturePath, mat4 initialTransform = mat4(1), int layer = 0);
+		GameObject(string name, vector<Tag> tags, string objectPath, string texturePath, mat4 initialTransform = mat4(1), int layer = 0);
 		bool operator == (GameObject const& obj) {
 			return this->name == obj.name;
 		}

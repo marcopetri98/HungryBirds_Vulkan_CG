@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef ERRORS_H_
-#define ERRORS_H_
+#ifndef TAGS_H_
+#define TAGS_H_
 
 #include <vector>
 using std::vector;

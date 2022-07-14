@@ -9,12 +9,14 @@
 #include "../graphics/engine/GameObject.hpp"
 #include "../graphics/engine/Camera.hpp"
 #include "../graphics/engine/Background.hpp"
+#include "../graphics/engine/Tags.hpp"
 
 using graphics::Scene;
 using graphics::GameObject;
 using graphics::Camera;
 using graphics::Background;
 using std::vector;
+using tags::Tag;
 
 namespace app
 {
@@ -22,7 +24,7 @@ namespace app
 	{
 		graphicsEngine = GraphicsEngine(title, width, height);
 
-		GameObject bird = GameObject("bird", 0, "objects/bird.obj", "textures/bird.png");
+		GameObject bird = GameObject("bird", vector<Tag>{}, "objects/bird.obj", "textures/bird.png");
 		Camera camera = Camera();
 		camera.lookAtGameObject(bird, vec3(10, 0, 10), vec3(0, 1, 0));
 		vector<GameObject> gameObjects = { bird };

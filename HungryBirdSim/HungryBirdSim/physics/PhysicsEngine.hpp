@@ -62,25 +62,25 @@ namespace physics
 		/**
 		 * Wrapper for translateObject which operates in place.
 		 */
-		void translateObjectInPlace(GameObject gameobject, vec3 translation);
+		void translateObjectInPlace(GameObject* gameobject, vec3 translation);
 		/**
 		 * Wrapper for rotateObject which operates in place.
 		 */
-		void rotateObjectInPlace(GameObject gameobject, vec3 angles_xyz);
+		void rotateObjectInPlace(GameObject* gameobject, vec3 angles_xyz);
 		/**
 		 * Wrapper for rotateAroundAxis which operates in place.
 		 */
-		void rotateAroundAxisInPlace(GameObject gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis);
+		void rotateAroundAxisInPlace(GameObject* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis);
 		/**
 		 * Wrapper for scaleObject which operates in place.
 		 */
-		void scaleObjectInPlace(GameObject gameobject, vec3 scales);
+		void scaleObjectInPlace(GameObject* gameobject, vec3 scales);
 		/**
 		 * Remove the object from the frustum.
 		 * 
 		 * @param gameobject The gameobject to hide.
 		 */
-		void hideObject(GameObject gameobject);
+		void hideObject(GameObject* gameobject);
 		/**
 		 * Check if the given object is colliding with one of the other gameobjects specified.
 		 * 
@@ -94,25 +94,25 @@ namespace physics
 		 * 
 		 * @param gameobject The gameobject to be tracked.
 		 */
-		void track(GameObject gameobject);
+		void track(GameObject* gameobject);
 		/**
 		 * Start tracking all the specified gameobject in order to update their position automatically when updates are called.
 		 *
 		 * @param gameobjects The gameobjects to be tracked.
 		 */
-		void track(vector<GameObject> gameobjects);
+		void track(vector<GameObject*> gameobjects);
 		/**
 		 * Stop tracking a gameobject.
 		 *
 		 * @param gameobject The gameobject to be untracked.
 		 */
-		void untrack(GameObject gameobject);
+		void untrack(GameObject* gameobject);
 		/**
 		 * Stop tracking all the specified gameobjects.
 		 *
 		 * @param gameobjects The gameobjects to be untracked.
 		 */
-		void untrack(vector<GameObject> gameobjects);
+		void untrack(vector<GameObject*> gameobjects);
 		/**
 		 * Clear all the tracked gameobjects.
 		 * 
@@ -125,7 +125,7 @@ namespace physics
 		void update(float deltaTime);
 
 		private:
-		vector<GameObject> trackedObjects;
+		vector<GameObject*> trackedObjects;
 		bool raycast3d;
 		vec3 ambient_acc;
 		float collisionDamping;
