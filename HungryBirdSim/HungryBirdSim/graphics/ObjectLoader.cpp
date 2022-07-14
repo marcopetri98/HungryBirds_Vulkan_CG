@@ -12,7 +12,7 @@ using errors::Error;
 
 namespace graphics
 {
-	ObjectLoader::ObjectLoader(GraphicsEngine* graphicsEngine, VkDescriptorPool descriptorPool, SceneLoader* sceneLoader, int maximumFramesInFlight, GameObject gameObject)
+	ObjectLoader::ObjectLoader(GraphicsEngine* graphicsEngine, VkDescriptorPool* descriptorPool, SceneLoader* sceneLoader, int maximumFramesInFlight, GameObject gameObject)
 	{
 		this->gameObject = gameObject;
 		this->graphicsEngine = graphicsEngine;
@@ -56,7 +56,7 @@ namespace graphics
 
 	int ObjectLoader::getNumDescriptorSets()
 	{
-		return descriptorSets.size();
+		return this->maximumFramesInFlight;
 	}
 
 	void ObjectLoader::cleanup()
@@ -265,7 +265,7 @@ namespace graphics
 		vector<VkDescriptorSetLayout> layouts(this->maximumFramesInFlight, graphicsEngine->descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = descriptorPool;
+		allocInfo.descriptorPool = *descriptorPool;
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(this->maximumFramesInFlight);
 		allocInfo.pSetLayouts = layouts.data();
 

@@ -36,7 +36,7 @@ namespace graphics
 		this->objectLoaders.clear();
 		for (GameObject gameObject : this->scene.getAllGameObjects())
 		{
-			ObjectLoader objLoader = ObjectLoader(this->graphicsEngine, this->descriptorPool, this, this->maximumFramesInFlight, gameObject);
+			ObjectLoader objLoader = ObjectLoader(this->graphicsEngine, &(this->descriptorPool), this, this->maximumFramesInFlight, gameObject);
 			objLoader.createModelAndBuffers();
 			this->objectLoaders.push_back(objLoader);
 		}

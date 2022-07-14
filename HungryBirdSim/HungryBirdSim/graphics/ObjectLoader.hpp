@@ -23,7 +23,7 @@ namespace graphics
 	class ObjectLoader
 	{
 		public:
-		ObjectLoader(GraphicsEngine* graphicsEngine, VkDescriptorPool descriptorPool, SceneLoader* sceneLoader, int maximumFramesInFlight, GameObject gameObject);
+		ObjectLoader(GraphicsEngine* graphicsEngine, VkDescriptorPool* descriptorPool, SceneLoader* sceneLoader, int maximumFramesInFlight, GameObject gameObject);
 		int getNumBuffers();
 		int getNumSamplers();
 		int getNumDescriptorSets();
@@ -37,7 +37,7 @@ namespace graphics
 		GameObject gameObject;
 		GraphicsEngine* graphicsEngine;
 		SceneLoader* sceneLoader;
-		VkDescriptorPool descriptorPool;
+		VkDescriptorPool* descriptorPool;
 		int maximumFramesInFlight;
 
 		// object specific values
