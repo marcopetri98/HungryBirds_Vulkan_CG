@@ -136,8 +136,7 @@ vec3 spot_light_color(vec3 pos) {
 	return guboLight.spotColor;
 }
 void main() { 
-	vec3 Norm = vec3(1,1,1); 
-	// Norm = normalize(fragNorm);
+	vec3 Norm = normalize(fragNorm);
 	
 	vec3 EyeDir = normalize(guboLight.eyePos - fragPos);
 	
@@ -178,5 +177,4 @@ void main() {
 	vec3 Ambient = AmbFact * DiffColor;
 	
 	outColor = vec4( (Diffuse + Specular + Ambient) * lC, 1.0f);	
-	
 }
