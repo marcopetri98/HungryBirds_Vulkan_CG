@@ -70,7 +70,7 @@ namespace graphics
 
 	vec3 GameObject::getCurrentPos()
 	{
-		return vec3(this->currentTransform[0][3], this->currentTransform[1][3], this->currentTransform[2][3]);
+		return vec3(this->currentTransform[3][0], this->currentTransform[3][1], this->currentTransform[3][2]);
 	}
 
 	string GameObject::getObjectPath()

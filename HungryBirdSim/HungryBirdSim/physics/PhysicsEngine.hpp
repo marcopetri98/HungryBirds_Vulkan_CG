@@ -89,7 +89,7 @@ namespace physics
 		 * @param others Other gameobject to check collision with the specified one.
 		 * @return a struct containing info about the collision. If there is no collision a CollisionInfo object is still returned, containing a false value in the 'collided' field.
 		 */
-		CollisionInfo checkCollisions(GameObject gameobject, vector<GameObject> others);
+		CollisionInfo checkCollisions(GameObject gameobject, vector<GameObject*> others);
 		/**
 		 * Start tracking a gameobject in order to update its position automatically when updates are called.
 		 * 

@@ -31,6 +31,6 @@ namespace graphics {
 		vec3 diff = point - this->gameObject->getCurrentPos();
 		return	pow(diff.x, 2) + 
 			    pow(diff.y, 2) +
-				pow(diff.z, 2) >= 0;
+				pow(diff.z, 2) - pow(this->radius,2) <= 0;
 	}
 }
