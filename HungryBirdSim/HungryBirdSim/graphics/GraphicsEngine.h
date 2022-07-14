@@ -35,7 +35,7 @@ namespace graphics
 	class GraphicsEngine
 	{
 		public:
-		GraphicsEngine(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT);
+		GraphicsEngine(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT, float nearPlane = 0.01f, float farPlane = 1000.0f);
 		void run();
 		void setUseValidationLayers(bool val);
 		void addScenes(vector<Scene> scenes);
@@ -53,6 +53,8 @@ namespace graphics
 		map<string, int> mapSceneNamesIds;
 		map<int, int> mapSceneIdsToPos;
 		SceneLoader sceneLoader;
+		float nearPlane;
+		float farPlane;
 
 		// TODO: insert a parametrized way to handle required queues by using attributes
 		// TODO: insert a parametrized way to choose which are the requirements for a GPU to be suitable

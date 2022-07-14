@@ -49,12 +49,14 @@ using collectionutils::vectorContains;
 
 namespace graphics
 {
-	GraphicsEngine::GraphicsEngine(string title, int width, int height)
+	GraphicsEngine::GraphicsEngine(string title, int width, int height, float nearPlane, float farPlane)
 	{
 		this->title = title;
 		this->width = width;
 		this->height = height;
 		this->activeScene = NULL;
+		this->nearPlane = nearPlane;
+		this->farPlane = farPlane;
 		useValidationLayers = true;
 	}
 	
@@ -1245,7 +1247,7 @@ namespace graphics
 		// load gubo of positions
 		GlobalUniformBufferObject gubo{};
 		gubo.view = activeScene->getCamera().getCurrentTransform();
-		gubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.01f, 1000.0f);
+		gubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, nearPlane, farPlane);
 		gubo.proj[1][1] *= -1;
 
 		vkMapMemory(device, sceneLoader.globalUniformBuffersMemory[0][currentImage], 0, sizeof(gubo), 0, &data);
