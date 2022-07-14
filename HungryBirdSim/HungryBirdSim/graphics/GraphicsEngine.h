@@ -9,6 +9,9 @@
 #include <vector>
 #include <map>
 
+#include "../RecSolver.h"
+#include "../application/Application.h"
+#include "../physics/PhysicsEngine.hpp"
 #include "engine/DummyRecursionSolver.hpp"
 #include "engine/Scene.hpp"
 #include "Queues.h"
@@ -18,11 +21,11 @@
 #include "ObjectLoader.hpp"
 #include "SceneLoader.hpp"
 
-#include "../physics/PhysicsEngine.hpp"
-
 using std::string;
 using std::vector;
 using std::map;
+
+using app::Application;
 
 using physics::PhysicsEngine;
 
@@ -33,15 +36,14 @@ namespace graphics
 	const int DEFAULT_HEIGHT = 600;
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 	const vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-	const string MODEL_PATH = "objects/viking_room.obj";
-	const string TEXTURE_PATH = "textures/viking_room.png";
 
 	class GraphicsEngine
 	{
 		public:
-		GraphicsEngine(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT, float nearPlane = 0.01f, float farPlane = 1000.0f);
+		GraphicsEngine(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT, float nearPlane = 0.01f, float farPlane = 1000.0f, float fovy = 45.0f);
 		void run();
 		void setUseValidationLayers(bool val);
+		void setApplication(Application* app);
 		void setPhysicsEngine(PhysicsEngine* engine);
 		void addScenes(vector<Scene*> scenes);
 		void selectScene(string sceneName);
@@ -51,6 +53,7 @@ namespace graphics
 		friend class ObjectLoader;
 		friend class SceneLoader;
 
+		Application* application;
 		PhysicsEngine* physicsEngine;
 		Scene* activeScene;
 		vector<Scene*> allScenes;
@@ -61,6 +64,7 @@ namespace graphics
 		SceneLoader sceneLoader;
 		float nearPlane;
 		float farPlane;
+		float fovy;
 
 		void updatePhysicsEngine();
 

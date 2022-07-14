@@ -49,7 +49,7 @@ using collectionutils::vectorContains;
 
 namespace graphics
 {
-	GraphicsEngine::GraphicsEngine(string title, int width, int height, float nearPlane, float farPlane)
+	GraphicsEngine::GraphicsEngine(string title, int width, int height, float nearPlane, float farPlane, float fovy)
 	{
 		this->title = title;
 		this->width = width;
@@ -57,6 +57,7 @@ namespace graphics
 		this->activeScene = NULL;
 		this->nearPlane = nearPlane;
 		this->farPlane = farPlane;
+		this->fovy = fovy;
 		useValidationLayers = true;
 	}
 	
@@ -76,6 +77,11 @@ namespace graphics
 	void GraphicsEngine::setPhysicsEngine(PhysicsEngine* engine)
 	{
 		this->physicsEngine = engine;
+	}
+
+	void GraphicsEngine::setApplication(Application* app)
+	{
+		this->application = app;
 	}
 
 	void GraphicsEngine::addScenes(vector<Scene*> scenes)
@@ -1249,13 +1255,14 @@ namespace graphics
 		lastFrameTime = currentTime;
 
 		physicsEngine->update(deltaTime);
+		application->update(deltaTime);
 
 		void* data;
 
 		// load gubo of positions
 		GlobalUniformBufferObject gubo{};
 		gubo.view = activeScene->getCamera()->getCurrentTransform();
-		gubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, nearPlane, farPlane);
+		gubo.proj = glm::perspective(glm::radians(fovy), swapChainExtent.width / (float)swapChainExtent.height, nearPlane, farPlane);
 		gubo.proj[1][1] *= -1;
 
 		vkMapMemory(device, sceneLoader.globalUniformBuffersMemory[0][currentImage], 0, sizeof(gubo), 0, &data);

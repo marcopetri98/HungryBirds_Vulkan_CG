@@ -91,11 +91,12 @@ namespace graphics
 
 	void SceneLoader::createDescriptorPool()
 	{
+		// TODO: see why vulkan on some pcs is happy with 0 descriptorCount and in other pcs is happy with only at least double the required number
 		std::array<VkDescriptorPoolSize, 2> poolSizes{};
 		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount = static_cast<uint32_t>((1 + objectLoaders.size()) * objectLoaders[0].getNumBuffers());
+		poolSizes[0].descriptorCount = static_cast<uint32_t>((1 + objectLoaders.size()) * objectLoaders[0].getNumBuffers() * 2);
 		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[1].descriptorCount = static_cast<uint32_t>((1 + objectLoaders.size()) * objectLoaders[0].getNumSamplers());
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(objectLoaders.size() * objectLoaders[0].getNumSamplers());
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;

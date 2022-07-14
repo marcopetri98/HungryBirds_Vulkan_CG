@@ -5,14 +5,12 @@
 
 #include <string>
 
-#include "../graphics/DummyRecursionSolver.hpp"
+#include "../RecSolver.h"
 #include "../graphics/GraphicsEngine.h"
 #include "../physics/PhysicsEngine.hpp"
+#include "../graphics/DummyRecursionSolver.hpp"
 
 using std::string;
-using graphics::DEFAULT_TITLE;
-using graphics::DEFAULT_WIDTH;
-using graphics::DEFAULT_HEIGHT;
 using graphics::GraphicsEngine;
 using physics::PhysicsEngine;
 
@@ -21,7 +19,7 @@ namespace app
 	class Application
 	{
 		public:
-		Application(string title = DEFAULT_TITLE, int width = DEFAULT_WIDTH, int height = DEFAULT_HEIGHT);
+		Application(string title = "Vulkan application", int width = 800, int height = 600);
 		/**
 		 * Starts the application.
 		 * 
@@ -30,10 +28,22 @@ namespace app
 		 * 
 		 */
 		int start();
+		/**
+		 * This function is called at each frame and must handle all the game changes between frames. Given that deltaTime is the time elapsed between the last and the current frame, everything can be computed without using Vulkan..
+		 * 
+		 * @param deltaTime time elapsed between last and current frame
+		 */
+		void update(float deltaTime);
+		/**
+		 * This function is called to handle user's commands through the keyboard.
+		 * 
+		 * @param deltaTime time elapsed between last and current frame
+		 */
+		void handleCommands(float deltaTime);
 
 		private:
-		GraphicsEngine graphicsEngine;
-		PhysicsEngine physicsEngine;
+		GraphicsEngine* graphicsEngine;
+		PhysicsEngine* physicsEngine;
 	};
 }
 
