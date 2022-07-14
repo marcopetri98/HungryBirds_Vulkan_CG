@@ -24,7 +24,7 @@ namespace app
 
 		GameObject bird = GameObject("bird", 0, "objects/bird.obj", "textures/bird.png");
 		Camera camera = Camera();
-		camera.lookAtGameObject(bird, vec3(0, 0, -50), vec3(0, 1, 0));
+		camera.lookAtGameObject(bird, vec3(10, 0, 10), vec3(0, 1, 0));
 		vector<GameObject> gameObjects = { bird };
 		vector<Camera> cameras = { camera };
 		Scene scene = Scene(gameObjects, 0, cameras, Background(), "try", 0);

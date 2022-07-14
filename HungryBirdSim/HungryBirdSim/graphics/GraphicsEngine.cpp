@@ -773,8 +773,7 @@ namespace graphics
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
 		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+
 
 		VkPipelineMultisampleStateCreateInfo multisampling{};
 		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -1246,7 +1245,7 @@ namespace graphics
 		// load gubo of positions
 		GlobalUniformBufferObject gubo{};
 		gubo.view = activeScene->getCamera().getCurrentTransform();
-		gubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+		gubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.01f, 1000.0f);
 		gubo.proj[1][1] *= -1;
 
 		vkMapMemory(device, sceneLoader.globalUniformBuffersMemory[0][currentImage], 0, sizeof(gubo), 0, &data);
