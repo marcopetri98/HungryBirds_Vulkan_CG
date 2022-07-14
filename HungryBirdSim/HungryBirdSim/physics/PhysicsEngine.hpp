@@ -129,6 +129,8 @@ namespace physics
 		bool raycast3d;
 		vec3 ambient_acc;
 		float collisionDamping;
+		int collisionTags;
+		int groundTags;
 	};
 }
 

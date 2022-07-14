@@ -6,16 +6,25 @@
 #include "RayCast2D.hpp"
 #include "RayCast3D.hpp"
 #include "../graphics/engine/Collider.hpp"
+#include "../graphics/engine/Tags.hpp"
 
 using std::array, std::pair, std::find;
 using glm::vec3, glm::mat4, glm::radians, glm::translate, glm::rotate, glm::scale, glm::inverse, glm::normalize, glm::length;
 using graphics::Collider;
+using tags::Tag, tags::getTags;
 
 namespace physics {
 	PhysicsEngine::PhysicsEngine(bool raycast3d, vec3 ambient_acc = vec3(0, -9.81f, 0), float collisionDamping=0.1) {
 		this->raycast3d = raycast3d;
 		this->ambient_acc = ambient_acc;
 		this->collisionDamping = collisionDamping;
+
+		vector<Tag> cTags{Tag::MOVABLE_COLLIDABLE_OBJECT, Tag::RIGID_COLLIDABLE_OBJECT};
+		this->collisionTags = getTags(cTags);
+
+		vector<Tag> gTags{ Tag::GROUND};
+		this->groundTags = getTags(gTags);
+
 	}
 	mat4 PhysicsEngine::translateObject(GameObject gameobject, vec3 translation) {
 		return translate(gameobject.getCurrentTransform(), translation);
@@ -67,7 +76,7 @@ namespace physics {
 		while ((*raycast).hasNext() && !collision.collided) {
 			pair<vec3, vec3> rayResult = (*raycast).nextRay(gameobject.getCurrentPos());
 			for (GameObject go : others) {
-				if ((*go.getCollider()).checkCollision(rayResult.second) && gameobject.getCollider()->getLastCollision()!=go.getName()) {
+				if ((*go.getCollider()).checkCollision(rayResult.second) && gameobject.getCollider()->getLastCollision() != go.getName()) {
 					collision = CollisionInfo(true, go, gameobject.getCurrentPos(), rayResult.first);
 					gameobject.getCollider()->setLastCollision(go.getName());
 					break;
@@ -132,8 +141,14 @@ namespace physics {
 				others.erase(others.begin() + i);
 				CollisionInfo collision = checkCollisions(go, others);
 				if (collision.collided) {
-					vec3 newVel = (normalize(velocity) + collision.collisionDir) * length(velocity) * this->collisionDamping;
-					go.setVelocity(newVel);
+					if (collision.collidedObject.getTag() & this->collisionTags) {
+						vec3 newVel = (normalize(velocity) + collision.collisionDir) * length(velocity) * this->collisionDamping;
+						go.setVelocity(newVel);
+					}
+					else if ((collision.collidedObject.getTag() & this->groundTags)) {
+						go.setVelocity(vec3(0, 0, 0));
+						go.setAcceleration(vec3(0, 0, 0));
+					}
 				}
 			}
 		}
