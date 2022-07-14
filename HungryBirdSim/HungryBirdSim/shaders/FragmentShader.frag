@@ -2,16 +2,16 @@
 
 layout(binding = 1) uniform GlobalUniformBufferObjectLight {
 	vec3 eyePos;
-	//~~~~~~~~~~Directional Lighting OK ~~~~~~~~~~~~~~~~~~~//
+	//~~~~~~~~~~Directional Lighting~~~~~~~~~~~~~~~~~~~~//
     vec3 directionalDir;
 	vec3 directionalColor;
-	//~~~~~~~~~~~Point Ligthing~~~~~~~~~~~~~~~~~~//
+	//~~~~~~~~~~~Point Lighting~~~~~~~~~~~~~~~~~~~~~~~//
 	vec3 pointDir;
 	vec3 pointColor;
 	vec3 pointPos;
 	float pointDecay;
 	float pointDistanceReduction;
-	//~~~~~~~~~~~Spotlighting~~~~~~~~~~~~~~~~~~//
+	//~~~~~~~~~~~Spotlighting~~~~~~~~~~~~~~~~~~~~//
 	vec3 spotDir;
 	vec3 spotColor;
 	vec3 spotPos;
@@ -42,24 +42,15 @@ layout(location = 2) in vec3 fragPos;
 layout(location = 3) in vec3 fragNorm;
 
 layout(location = 0) out vec4 outColor;
+
 /////           BRDF                       ////
 vec3 Lambert_Diffuse_BRDF(vec3 L, vec3 N, vec3 V, vec3 C) {
-	// Lambert Diffuse BRDF model
-	// in all BRDF parameters are:
-	// vec3 L : light direction
-	// vec3 N : normal vector
-	// vec3 V : view direction
-	// vec3 C : main color (diffuse color, or specular color)
-
-	// Color * dot_product of Light-Direction by Normal direction
 	return C * max(dot(L,N),0);
 }
 
 vec3 Oren_Nayar_Diffuse_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, float sigma) {
-	// Directional light direction
-	// additional parameter:
-	// float sigma : roughness of the material
-	float theta_i = acos(dot(V,N)); // OG : is L
+	
+	float theta_i = acos(dot(V,N)); 
 	float theta_r = acos(dot(L,N));
 
 	float alpha = max(theta_i,theta_r);
@@ -85,28 +76,14 @@ vec3 Oren_Nayar_Diffuse_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, float sigma) {
 		clamped = 1;
 	}
 	vec3 L_new = C * clamped;
-
-
-
 	return L_new * (A + B*G*sin(alpha)*tan(beta));
 }
 
 vec3 Phong_Specular_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, float gamma)  {
-	// Phong Specular BRDF model
-	// additional parameter:
-	// float gamma : exponent of the cosine term
-	// r_l,x = 2(xl - nx)nx-xl = 2 * (L - N) * N - L
-	// r_l,x = -reflect(xl,nx) = -reflect(L,N)
-	// pow( V*reflect(L,N) , gamma);
-
 	return C*max(0, pow(dot(V,-reflect(L,N)),gamma) );
 }
 
 vec3 Toon_Diffuse_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, vec3 Cd, float thr) {
-	// Toon Diffuse Brdf
-	// additional parameters:
-	// vec3 Cd : color to be used in dark areas
-	// float thr : color threshold
 	vec3 res = Cd;
 	if(dot(L,N)>= thr){
 		res = C;
@@ -115,9 +92,6 @@ vec3 Toon_Diffuse_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, vec3 Cd, float thr) {
 }
 
 vec3 Toon_Specular_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, float thr)  {
-	// Directional light direction
-	// additional parameter:
-	// float thr : color threshold
 	vec3 res = C;
 	if(dot(V,-reflect(L,N)) < thr){
 		res = vec3(0,0,0);
@@ -128,13 +102,10 @@ vec3 Toon_Specular_BRDF(vec3 L, vec3 N, vec3 V, vec3 C, float thr)  {
 ////                 Light Model                  ////
 
 vec3 direct_light_dir(vec3 pos) {
-	// Directional light direction
-	// return vec3(0.0f, 0.0f, 1.0f);
 	return guboLight.directionalDir;
 }
 
 vec3 direct_light_color(vec3 pos) {
-	// Directional light color
 	return guboLight.directionalColor;
 }
 vec3 point_light_dir(vec3 pos) {
@@ -150,7 +121,6 @@ vec3 point_light_color(vec3 pos) {
 
 
 vec3 spot_light_dir(vec3 pos) {
-	// Spot light direction
 	float cosA = dot(-normalize(pos-guboLight.spotPos),guboLight.spotDir);
 	float toClamp = ( cosA - guboLight.spotCosineOuterAngle) / (guboLight.spotCosineInnerAngle-guboLight.spotCosineOuterAngle);
 	if (toClamp > 1){
@@ -163,7 +133,6 @@ vec3 spot_light_dir(vec3 pos) {
 }
 
 vec3 spot_light_color(vec3 pos) {
-	// Spot light color
 	return guboLight.spotColor;
 }
 void main() { 
@@ -188,7 +157,6 @@ void main() {
 	
 	vec3 DiffColor = texture(texSampler, fragTexCoord).rgb;
 	vec3 Diffuse = vec3(0,0,0);	
-	// Remove line below
 	
 	if (guboLight.selectorDiffuse == 0){
 		Diffuse += Lambert_Diffuse_BRDF(lD, Norm, EyeDir, DiffColor ) ;
