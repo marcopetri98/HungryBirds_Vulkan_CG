@@ -46,6 +46,11 @@ namespace graphics
 		}
 	}
 
+	vector<GameObject> Scene::getAllGameObjects()
+	{
+		return this->gameObjects;
+	}
+
 	Camera Scene::getCamera()
 	{
 		return this->camera;

@@ -31,7 +31,7 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id);
+		Scene(vector<GameObject> gameObjects = {}, int camera = 0, vector<Camera> availableCameras = {}, Background background = Background(), string name = "none", int id = 0);
 		/**
 		 * Gets a game object by its name.
 		 * 
@@ -39,6 +39,12 @@ namespace graphics
 		 * @return The GameObject.
 		 */
 		GameObject getGameObjectByName(string name);
+		/**
+		 * Gets all the game objects of the scene.
+		 * 
+		 * @return vector of GameObject of the scene.
+		 */
+		vector<GameObject> getAllGameObjects();
 		/**
 		 * Gets the scene camera.
 		 * 
