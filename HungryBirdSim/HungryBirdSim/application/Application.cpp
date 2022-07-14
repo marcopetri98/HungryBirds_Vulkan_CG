@@ -22,7 +22,7 @@ namespace app
 	{
 		graphicsEngine = GraphicsEngine(title, width, height);
 
-		GameObject bird = GameObject("bird", 0, "../objects/bird.obj", "../textures/bird.png");
+		GameObject bird = GameObject("bird", 0, "objects/bird.obj", "textures/bird.png");
 		Camera camera = Camera();
 		camera.lookAtGameObject(bird, vec3(0, 0, -50), vec3(0, 1, 0));
 		vector<GameObject> gameObjects = { bird };

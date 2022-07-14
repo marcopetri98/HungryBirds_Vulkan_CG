@@ -15,8 +15,6 @@ namespace graphics
 
 	Scene::Scene(vector<GameObject> gameObjects, int camera, vector<Camera> availableCameras, Background background, string name, int id)
 	{
-		this->gameObjectsNames.resize(gameObjects.size());
-		this->gameObjects.resize(gameObjects.size());
 
 		for (GameObject gameObject : gameObjects)
 		{
