@@ -11,6 +11,9 @@
 #include "GameObject.hpp"
 #include "Camera.hpp"
 #include "Background.hpp"
+#include "DirectionalLight.hpp"
+#include "PointLight.hpp"
+#include "SpotLight.hpp"
 
 using std::string;
 using std::vector;
@@ -32,7 +35,7 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id);
+		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL);
 		/**
 		 * Get the pointer to the game object by its position.
 		 * 
@@ -59,6 +62,9 @@ namespace graphics
 		 * @return number of stored GameObject
 		 */
 		int getNumOfGameObjects();
+		DirectionalLight* getDirectionalLightPointer();
+		PointLight* getPointLightPointer();
+		SpotLight* getSpotLightPointer();
 		/**
 		 * Gets the scene camera.
 		 * 
@@ -129,6 +135,9 @@ namespace graphics
 		 * Vector of all the game objects in the scene.
 		 */
 		vector<GameObject*> gameObjects;
+		DirectionalLight* dirLight;
+		PointLight* pointLight;
+		SpotLight* spotLight;
 		/**
 		 * The camera defining the view.
 		 */

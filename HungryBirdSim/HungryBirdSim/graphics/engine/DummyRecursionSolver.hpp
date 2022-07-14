@@ -12,6 +12,10 @@ namespace graphics
 	class Scene;
 	class Background;
 	class Camera;
+	class Light;
+	class DirectionalLight;
+	class PointLight;
+	class SpotLight;
 }
 
 #endif

@@ -24,7 +24,6 @@ namespace graphics
 		alignas(16) vec3 eyePos;
 		alignas(16) vec3 directionalDir;
 		alignas(16) vec3 directionalColor;
-		alignas(16) vec3 pointDir;
 		alignas(16) vec3 pointColor;
 		alignas(16) vec3 pointPos;
 		alignas(4) float pointDecay;

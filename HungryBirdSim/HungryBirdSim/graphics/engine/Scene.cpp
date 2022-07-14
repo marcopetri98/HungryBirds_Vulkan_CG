@@ -1,7 +1,11 @@
 
 #include <stdexcept>
 
+#include "DummyRecursionSolver.hpp"
 #include "Scene.hpp"
+#include "DirectionalLight.hpp"
+#include "PointLight.hpp"
+#include "SpotLight.hpp"
 #include "../../utils/CollectionUtils.hpp"
 
 using collectionutils::vectorContains;
@@ -13,7 +17,7 @@ namespace graphics
 
 	}
 
-	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id)
+	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight)
 	{
 
 		for (GameObject* gameObject : gameObjects)
@@ -35,6 +39,9 @@ namespace graphics
 		this->background = background;
 		this->name = name;
 		this->id = id;
+		this->dirLight = dirLight;
+		this->pointLight = pointLight;
+		this->spotLight = spotLight;
 	}
 
 	GameObject* Scene::getGameObjectPointerByPos(unsigned int pos)
@@ -67,6 +74,21 @@ namespace graphics
 	vector<GameObject*> Scene::getAllGameObjects()
 	{
 		return this->gameObjects;
+	}
+
+	DirectionalLight* Scene::getDirectionalLightPointer()
+	{
+		return this->dirLight;
+	}
+
+	PointLight* Scene::getPointLightPointer()
+	{
+		return this->pointLight;
+	}
+
+	SpotLight* Scene::getSpotLightPointer()
+	{
+		return this->spotLight;
 	}
 
 	Camera* Scene::getCamera()
