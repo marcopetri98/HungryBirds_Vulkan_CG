@@ -10,11 +10,13 @@
 #include <map>
 
 #include "engine/DummyRecursionSolver.hpp"
+#include "engine/Scene.hpp"
 #include "Queues.h"
 #include "SwapChainSupportDetails.h"
 #include "Vertex.h"
 #include "UniformObjects.h"
-#include "engine/Scene.hpp"
+#include "ObjectLoader.hpp"
+#include "SceneLoader.hpp"
 
 using std::string;
 using std::vector;
@@ -41,12 +43,16 @@ namespace graphics
 		void selectScene(int sceneId);
 
 		private:
+		friend class ObjectLoader;
+		friend class SceneLoader;
+
 		Scene* activeScene;
 		vector<Scene> allScenes;
 		vector<string> sceneNames;
 		vector<int> sceneIds;
 		map<string, int> mapSceneNamesIds;
 		map<int, int> mapSceneIdsToPos;
+		SceneLoader sceneLoader;
 
 		// TODO: insert a parametrized way to handle required queues by using attributes
 		// TODO: insert a parametrized way to choose which are the requirements for a GPU to be suitable
@@ -77,24 +83,6 @@ namespace graphics
 		vector<VkSemaphore> renderFinishedSemaphores;
 		vector<VkFence> inFlightFences;
 		bool framebuffersResized = false;
-		// TODO: the triangle is stored in this buffer (I assume that multiple objects will mean multiple vertex buffer)
-		vector<Vertex> vertices;
-		vector<uint32_t> indices;
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
-		// vectors are organized as buffers[ubo type][frame]
-		vector<VkBuffer> globalUniformBuffers;
-		vector<VkDeviceMemory> globalUniformBuffersMemory;
-		VkDescriptorPool descriptorPool;
-		vector<VkDescriptorSet> descriptorSets;
-		// TODO: each image will have its own possible number of mipmapping levels that can be computed when they are loaded
-		uint32_t mipLevels;
-		VkImage textureImage;
-		VkDeviceMemory textureImageMemory;
-		VkImageView textureImageView;
-		VkSampler textureSampler;
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;
 		VkImageView depthImageView;
@@ -285,11 +273,6 @@ namespace graphics
 		 */
 		void cleanupSwapChain();
 		/**
-		 * Creates the vertex buffer to be able to send to shaders vertices from Vulkan.
-		 * 
-		 */
-		void createVertexBuffer();
-		/**
 		 * Find the memory best suiting the application requirements.
 		 * 
 		 * @param typeFilter Memories supporting the vertex buffer requrements.
@@ -316,41 +299,16 @@ namespace graphics
 		 */
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		/**
-		 * Creates the index buffer to optimize memory used by vertices.
-		 * 
-		 */
-		void createIndexBuffer();
-		/**
 		 * Create descriptor set layout to be able to pass uniform objects to shaders.
 		 * 
 		 */
 		void createDescriptorSetLayout();
-		/**
-		 * Creates the uniform buffers to be filled and used with description set layouts.
-		 * 
-		 */
-		void createUniformBuffers();
 		/**
 		 * Updates the current uniform buffer object for rendering..
 		 * 
 		 * @param currentImage The current image on which we need to draw.
 		 */
 		void updateUniformBuffer(uint32_t currentImage);
-		/**
-		 * Creates the descriptor pool to create all the needed descriptor sets.
-		 * 
-		 */
-		void createDescriptorPool();
-		/**
-		 * Create the descriptor sets.
-		 * 
-		 */
-		void createDescriptorSets();
-		/**
-		 * Create a texture image.
-		 * 
-		 */
-		void createTextureImage();
 		/**
 		 * Create an image from the specified parameters.
 		 * 
@@ -398,11 +356,6 @@ namespace graphics
 		 */
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		/**
-		 * Create the image view for the texture image to be able to access it.
-		 * 
-		 */
-		void createTextureImageView();
-		/**
 		 * Create the image view for an image.
 		 * 
 		 * @param image The image from which we want to create the image view.
@@ -411,11 +364,6 @@ namespace graphics
 		 * @return 
 		 */
 		VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-		/**
-		 * Create a texture sampler.
-		 * 
-		 */
-		void createTextureSampler();
 		/**
 		 * Create the depth image to perform depth buffering.
 		 * 
@@ -443,11 +391,6 @@ namespace graphics
 		 * @return true if the format contains a stencil component, false otherwise
 		 */
 		bool hasStencilComponent(VkFormat format);
-		/**
-		 * Load the models to be shown in the world.
-		 * 
-		 */
-		void loadModels();
 		/**
 		 * Generate all the mipmapping levels.
 		 * 

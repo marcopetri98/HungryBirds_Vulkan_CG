@@ -21,6 +21,7 @@ namespace graphics
 
 	struct GlobalUniformBufferObjectLight
 	{
+		alignas(16) vec3 eyePos;
 		alignas(16) vec3 directionalDir;
 		alignas(16) vec3 directionalColor;
 		alignas(16) vec3 pointDir;
