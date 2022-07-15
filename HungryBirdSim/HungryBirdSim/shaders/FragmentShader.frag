@@ -6,15 +6,9 @@ layout(binding = 1) uniform GlobalUniformBufferObjectLight {
 	vec3 directionalColor;
 	vec3 pointColor;
 	vec3 pointPos;
-	float pointDecay;
-	float pointDistanceReduction;
 	vec3 spotDir;
 	vec3 spotColor;
 	vec3 spotPos;
-	float spotDecay;
-	float spotDistanceReduction;
-	float spotCosineOuterAngle;
-	float spotCosineInnerAngle;
 	vec3 ambientColor;
 	vec3 ambientReflection;
 	vec3 hemisphericalTopColor;
@@ -26,8 +20,14 @@ layout(binding = 1) uniform GlobalUniformBufferObjectLight {
 	vec3 sphericalColorDeviationY;
 	vec3 sphericalColorDeviationZ;
 	vec3 sphericalReflection;
-    int selectorDiffuse;
-    int selectorSpecular;
+    vec3 selectorDiffuse;
+    vec3 selectorSpecular;
+	float pointDecay;
+	float pointDistanceReduction;
+	float spotDecay;
+	float spotDistanceReduction;
+	float spotCosineOuterAngle;
+	float spotCosineInnerAngle;
 	int selectorDirectional;
 	int selectorAmbient;
 	int selectorHemispherical;
@@ -252,7 +252,7 @@ vec3 Spherical_Harmonics_Light(vec3 baseColor, vec3 DxColor, vec3 DyColor, vec3 
 
 void main() { 
 	const vec3  diffColor = texture(diffuseSampler, fragTexCoord).rgb;
-	const vec3  specColor = vec3(0, 0, 0);
+	const vec3  specColor = vec3(1, 1, 1);
 	const float specPower = 200.0f;
 
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -266,8 +266,8 @@ void main() {
 						guboLight.selectorHemispherical * Hemispheric_Light(guboLight.hemisphericalTopColor, guboLight.hemisphericalBottomColor, guboLight.hemisphericalTopDir, fragNorm, diffColor) +
 						guboLight.selectorSpherical * Spherical_Harmonics_Light(guboLight.sphericalColor, guboLight.sphericalColorDeviationX, guboLight.sphericalColorDeviationY, guboLight.sphericalColorDeviationZ, fragNorm, diffColor);
 
-	vec3 diffuseColor = vec3(0,0,0);
-	vec3 specularColor = vec3(0,0,0);
+	vec3 diffuseColor = vec3(0.f,0.f,0.f);
+	vec3 specularColor = vec3(0.f,0.f,0.f);
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	//																					 //
@@ -276,19 +276,18 @@ void main() {
 	//																					 //
 	//																					 //
 	///////////////////////////////////////////////////////////////////////////////////////
-	if (guboLight.selectorDiffuse == 0) {
-		diffuseColor += guboLight.selectorDirectional * direct_light_color(fragPos) * Lambert_Diffuse_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, diffColor) +
+
+	diffuseColor = guboLight.selectorDiffuse.x * (guboLight.selectorDirectional * direct_light_color(fragPos) * Lambert_Diffuse_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, diffColor) +
 						guboLight.selectorPoint * point_light_color(fragPos) * Lambert_Diffuse_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, diffColor) +  
-						guboLight.selectorSpot * spot_light_color(fragPos) * Lambert_Diffuse_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, diffColor);
-	} else if (guboLight.selectorDiffuse == 1) {
-		diffuseColor += guboLight.selectorDirectional * direct_light_color(fragPos) * Toon_Diffuse_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 0.2f * diffColor, 0.5f) +
+						guboLight.selectorSpot * spot_light_color(fragPos) * Lambert_Diffuse_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, diffColor)) +
+
+	guboLight.selectorDiffuse.y * (guboLight.selectorDirectional * direct_light_color(fragPos) * Toon_Diffuse_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 0.2f * diffColor, 0.5f) +
 						guboLight.selectorPoint * point_light_color(fragPos) * Toon_Diffuse_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 0.2f * diffColor, 0.5f) +  
-						guboLight.selectorSpot * spot_light_color(fragPos) * Toon_Diffuse_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 0.2f * diffColor, 0.5f);
-	} else {
-		diffuseColor += guboLight.selectorDirectional * direct_light_color(fragPos) * Oren_Nayar_Diffuse_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 1.5f) +
+						guboLight.selectorSpot * spot_light_color(fragPos) * Toon_Diffuse_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 0.2f * diffColor, 0.5f)) +
+
+	guboLight.selectorDiffuse.z * (guboLight.selectorDirectional * direct_light_color(fragPos) * Oren_Nayar_Diffuse_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 1.5f) +
 						guboLight.selectorPoint * point_light_color(fragPos) * Oren_Nayar_Diffuse_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 1.5f) +  
-						guboLight.selectorSpot * spot_light_color(fragPos) * Oren_Nayar_Diffuse_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 1.5f);
-	}
+						guboLight.selectorSpot * spot_light_color(fragPos) * Oren_Nayar_Diffuse_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, diffColor, 1.5f));
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	//																					  //
@@ -297,19 +296,20 @@ void main() {
 	//																					  //
 	//																					  //
 	////////////////////////////////////////////////////////////////////////////////////////
-	if (guboLight.selectorSpecular == 0) {
-		specularColor += guboLight.selectorDirectional * direct_light_color(fragPos) * Phong_Specular_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +
+
+	specularColor = 
+		guboLight.selectorSpecular.x * (guboLight.selectorDirectional * direct_light_color(fragPos) * Phong_Specular_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +
 						guboLight.selectorPoint * point_light_color(fragPos) * Phong_Specular_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +  
-						guboLight.selectorSpot * spot_light_color(fragPos) * Phong_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower);
-	} else if (guboLight.selectorSpecular == 1) {
-		specularColor += guboLight.selectorDirectional * direct_light_color(fragPos) * Toon_Specular_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, specColor, 0.97f) +
+						guboLight.selectorSpot * spot_light_color(fragPos) * Phong_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower)) +
+
+		guboLight.selectorSpecular.y * (guboLight.selectorDirectional * direct_light_color(fragPos) * Toon_Specular_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, specColor, 0.97f) +
 						guboLight.selectorPoint * point_light_color(fragPos) * Toon_Specular_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, specColor, 0.97f) +  
-						guboLight.selectorSpot * spot_light_color(fragPos) * Toon_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, 0.97f);
-	} else {
-		specularColor += guboLight.selectorDirectional * direct_light_color(fragPos) * Blinn_Specular_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +
+						guboLight.selectorSpot * spot_light_color(fragPos) * Toon_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, 0.97f)) +
+		
+		guboLight.selectorSpecular.z * (guboLight.selectorDirectional * direct_light_color(fragPos) * Blinn_Specular_BRDF(direct_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +
 						guboLight.selectorPoint * point_light_color(fragPos) * Blinn_Specular_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +  
-						guboLight.selectorSpot * spot_light_color(fragPos) * Blinn_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower);
-	}
+						guboLight.selectorSpot * spot_light_color(fragPos) * Blinn_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower));
+
 
 	outColor = vec4(diffuseColor + specularColor + ambientLight, 1.0f);
 }

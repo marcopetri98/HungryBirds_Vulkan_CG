@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 
 using glm::mat4;
-using glm::vec3;
+using glm::vec3, glm::vec1, glm::vec2;
 
 namespace graphics
 {
@@ -26,15 +26,9 @@ namespace graphics
 		alignas(16) vec3 directionalColor;
 		alignas(16) vec3 pointColor;
 		alignas(16) vec3 pointPos;
-		alignas(4) float pointDecay;
-		alignas(4) float pointDistanceReduction;
 		alignas(16) vec3 spotDir;
 		alignas(16) vec3 spotColor;
 		alignas(16) vec3 spotPos;
-		alignas(4) float spotDecay;
-		alignas(4) float spotDistanceReduction;
-		alignas(4) float spotCosineOuterAngle;
-		alignas(4) float spotCosineInnerAngle;
 		alignas(16) vec3 ambientColor;
 		alignas(16) vec3 ambientReflection;
 		alignas(16) vec3 hemisphericalTopColor;
@@ -46,8 +40,14 @@ namespace graphics
 		alignas(16) vec3 sphericalColorDeviationY;
 		alignas(16) vec3 sphericalColorDeviationZ;
 		alignas(16) vec3 sphericalReflection;
-		alignas(4) int selectorDiffuse;
-		alignas(4) int selectorSpecular;
+		alignas(16) vec3 selectorDiffuse;
+		alignas(16) vec3 selectorSpecular;
+		alignas(4) float pointDecay;
+		alignas(4) float pointDistanceReduction;
+		alignas(4) float spotDecay;
+		alignas(4) float spotDistanceReduction;
+		alignas(4) float spotCosineOuterAngle;
+		alignas(4) float spotCosineInnerAngle;
 		alignas(4) int selectorDirectional;
 		alignas(4) int selectorAmbient;
 		alignas(4) int selectorHemispherical;

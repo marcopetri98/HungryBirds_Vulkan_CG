@@ -56,6 +56,7 @@ using std::endl;
 using errors::getErrorStr;
 using errors::Error;
 using collectionutils::vectorContains;
+using glm::vec2;
 
 namespace graphics
 {
@@ -1316,9 +1317,39 @@ namespace graphics
 
 		// TODO: there are at most one light per type per scene
 		GlobalUniformBufferObjectLight guboLight{};
+		
+		guboLight.directionalDir = vec3(0,0,0);
+		guboLight.directionalColor = vec3(0, 0, 0);
+		guboLight.pointPos = vec3(0, 0, 0);
+		guboLight.pointColor = vec3(0, 0, 0);
+		guboLight.pointDecay = 1;
+		guboLight.pointDistanceReduction = 0;
+		guboLight.spotDir = vec3(0, 0, 0);
+		guboLight.spotPos = vec3(0, 0, 0);
+		guboLight.spotColor = vec3(0, 0, 0);
+		guboLight.spotDecay = 1;
+		guboLight.spotDistanceReduction = 0;
+		guboLight.spotCosineOuterAngle = 0;
+		guboLight.spotCosineInnerAngle = 0;
+		guboLight.ambientColor = vec3(0, 0, 0);
+		guboLight.ambientReflection = vec3(0, 0, 0);
+		guboLight.hemisphericalTopColor = vec3(0, 0, 0);
+		guboLight.hemisphericalBottomColor = vec3(0, 0, 0);
+		guboLight.hemisphericalTopDir = vec3(0, 0, 0);
+		guboLight.hemisphericalReflection = vec3(0, 0, 0);
+		guboLight.sphericalColor = vec3(0, 0, 0);
+		guboLight.sphericalColorDeviationX = vec3(0, 0, 0);
+		guboLight.sphericalColorDeviationY = vec3(0, 0, 0);
+		guboLight.sphericalColorDeviationZ = vec3(0, 0, 0);
+		guboLight.sphericalReflection = vec3(0, 0, 0);
+
 		guboLight.eyePos = activeScene->getCamera()->getCurrentPos();
-		guboLight.selectorDiffuse = (int)activeScene->getDiffuseModel();
-		guboLight.selectorSpecular = (int)activeScene->getSpecularModel();
+		vec3 selectorDiffuse = vec3(0);
+		selectorDiffuse[(int)activeScene->getDiffuseModel()] = 1;
+		guboLight.selectorDiffuse = selectorDiffuse;
+		vec3 selectorSpecular = vec3(0);
+		selectorSpecular[(int)activeScene->getSpecularModel()] = 1;
+		guboLight.selectorSpecular = selectorSpecular;
 		guboLight.selectorDirectional = activeScene->getDirectionalLightPointer() == NULL ? 0 : 1;
 		guboLight.selectorPoint = activeScene->getPointLightPointer() == NULL ? 0 : 1;
 		guboLight.selectorSpot = activeScene->getSpotLightPointer() == NULL ? 0 : 1;
@@ -1375,7 +1406,7 @@ namespace graphics
 		}
 
 		vkMapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage], 0, sizeof(gubo), 0, &data);
-		memcpy(data, &gubo, sizeof(gubo));
+		memcpy(data, &guboLight, sizeof(guboLight));
 		vkUnmapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage]);
 
 		UniformBufferObject ubo{};
