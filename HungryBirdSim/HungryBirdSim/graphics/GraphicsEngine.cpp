@@ -31,8 +31,11 @@
 #include <map>
 #include <unordered_map>
 
-#include "DummyRecursionSolver.hpp"
+#include "../RecSolver.h"
 #include "GraphicsEngine.h"
+#include "../application/Application.h"
+#include "../physics/PhysicsEngine.hpp"
+#include "DummyRecursionSolver.hpp"
 #include "SceneLoader.hpp"
 #include "../utils/Errors.h"
 #include "../utils/CollectionUtils.hpp"
@@ -1328,7 +1331,7 @@ namespace graphics
 			GameObject* gameObject = activeScene->getAllGameObjects()[i];
 
 			ubo.modelVertices = gameObject->getCurrentTransform();
-			ubo.modelNormal = gameObject->getCurrentTransform();
+			ubo.modelNormal = glm::inverse(glm::transpose(gameObject->getCurrentTransform()));
 
 			uboLight.selectorDirectional = 1;
 			uboLight.selectorPoint = 1;
@@ -1347,7 +1350,7 @@ namespace graphics
 		if (activeScene->getBackgroundPointer() != NULL)
 		{
 			ubo.modelVertices = glm::scale(mat4(1), vec3(farPlane / 3.0f, farPlane / 3.0f, farPlane / 3.0f)) * glm::rotate(mat4(1), glm::radians(180.0f), vec3(1, 0, 0));
-			ubo.modelNormal = mat4(1);
+			ubo.modelNormal = glm::inverse(glm::transpose(ubo.modelVertices));
 
 			uboLight.selectorDirectional = 0;
 			uboLight.selectorPoint = 0;
