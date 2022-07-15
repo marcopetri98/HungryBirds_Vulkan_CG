@@ -1225,7 +1225,6 @@ namespace graphics
 		vkDestroySwapchainKHR(device, swapChain, nullptr);
 	}
 
-	// TODO: here uniform buffer objects are created as descriptor set to be passed to shaders
 	void GraphicsEngine::createDescriptorSetLayout()
 	{
 		VkDescriptorSetLayoutBinding guboLayoutBinding{};
@@ -1239,7 +1238,7 @@ namespace graphics
 		guboLightLayoutBinding.binding = 1;
 		guboLightLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		guboLightLayoutBinding.descriptorCount = 1;
-		guboLightLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		guboLightLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 		guboLightLayoutBinding.pImmutableSamplers = nullptr;
 
 		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
