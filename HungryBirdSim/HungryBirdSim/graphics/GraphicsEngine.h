@@ -238,7 +238,7 @@ namespace graphics
 		 * @param pipelinePtr pointer to the pipeline to create
 		 * @param pipelineLayoutPtr pointer to the pipeline layout to fill
 		 */
-		void createGraphicsPipeline(VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr);
+		void createGraphicsPipeline(VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr);
 		/**
 		 * Helper function to load the binary data from a file.
 		 * 

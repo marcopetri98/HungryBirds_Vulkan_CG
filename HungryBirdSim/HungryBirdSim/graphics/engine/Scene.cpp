@@ -121,6 +121,11 @@ namespace graphics
 		return this->sphericalLight;
 	}
 
+	int Scene::getCurrCameraIdx() {
+		return this->currCameraIdx;
+	}
+
+
 	Camera* Scene::getCamera()
 	{
 		return this->camera;
@@ -170,6 +175,10 @@ namespace graphics
 				}
 			}
 		}
+	}
+
+	void Scene::setCurrCameraIdx(int idx) {
+		this->currCameraIdx = idx;
 	}
 
 	void Scene::setCamera(int cameraPos)

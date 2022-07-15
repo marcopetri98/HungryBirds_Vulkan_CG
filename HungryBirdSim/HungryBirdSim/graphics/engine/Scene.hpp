@@ -74,6 +74,7 @@ namespace graphics
 		AmbientLight* getAmbientLightPointer();
 		HemisphericalLight* getHemisphericalLightPointer();
 		SphericalLight* getSphericalLightPointer();
+		int getCurrCameraIdx();
 		/**
 		 * Gets the scene camera.
 		 * 
@@ -112,6 +113,7 @@ namespace graphics
 		 * @param name The name of the GameObject.
 		 */
 		void setGameObjectByName(GameObject gameObject, string name);
+		void setCurrCameraIdx(int idx);
 		/**
 		 * Set the camera for the scene.
 		 * 
@@ -153,6 +155,7 @@ namespace graphics
 		AmbientLight* ambientLight;
 		HemisphericalLight* hemisphericalLight;
 		SphericalLight* sphericalLight;
+		int currCameraIdx = 0;
 		/**
 		 * The camera defining the view.
 		 */

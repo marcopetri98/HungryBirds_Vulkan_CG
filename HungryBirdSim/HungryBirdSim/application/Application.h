@@ -4,12 +4,14 @@
 #define APPLICATION_H_
 
 #include <string>
+#include <chrono>
 
 #include "../RecSolver.h"
 #include "../graphics/GraphicsEngine.h"
 #include "../physics/PhysicsEngine.hpp"
 #include "../graphics/DummyRecursionSolver.hpp"
 
+using Clock = std::chrono::high_resolution_clock;
 using std::string;
 using graphics::GraphicsEngine;
 using physics::PhysicsEngine;
@@ -44,6 +46,11 @@ namespace app
 		private:
 		GraphicsEngine* graphicsEngine;
 		PhysicsEngine* physicsEngine;
+		GameObject* arrow;
+		GameObject* bird;
+		std::chrono::time_point<Clock> lastCameraChangeTime;
+		float arrowAngle1, arrowAngle2;
+		bool launched;
 	};
 }
 

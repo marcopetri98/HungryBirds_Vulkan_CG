@@ -31,6 +31,15 @@ namespace physics {
 		vector<Tag> gTags{ Tag::GROUND};
 		this->groundTags = getTags(gTags);
 
+		vector<Tag> eTags{ Tag::ENEMY_OBJ };
+		this->enemyTags = getTags(eTags);
+
+		vector<Tag> collTags{ Tag::COLLECTABLE_OBJ };
+		this->collectablesTags = getTags(collTags);
+
+		vector<Tag> rigidMovableTags{ Tag::MOVABLE_COLLIDABLE_OBJECT };
+		this->movableTag = getTags(rigidMovableTags);
+
 	}
 	mat4 PhysicsEngine::translateObject(Object* gameobject, vec3 translation) {
 		mat4 T = translate(mat4(1.0f), translation);
@@ -84,9 +93,8 @@ namespace physics {
 		while ((*raycast).hasNext() && !collision.collided) {
 			pair<vec3, vec3> rayResult = (*raycast).nextRay(gameobject.getCurrentPos());
 			for (GameObject* go : others) {
-				if (go->getCollider()->checkCollision(rayResult.second) && gameobject.getCollider()->getLastCollision() != go->getName()) {
-					collision = CollisionInfo(true, *go, gameobject.getCurrentPos(), rayResult.first);
-					gameobject.getCollider()->setLastCollision(go->getName());
+				if (go->getCollider()->checkCollision(rayResult.second)) {
+					collision = CollisionInfo(true, go, gameobject.getCurrentPos(), rayResult.first);
 					break;
 				}
 			}
@@ -94,6 +102,10 @@ namespace physics {
 		return collision;
 	}
 	
+	void PhysicsEngine::hideObject(GameObject* gameobject) {
+		this->translateObjectInPlace(gameobject, vec3(100000, 100000, 100000));
+	}
+
 	void PhysicsEngine::track(GameObject* gameobject) {
 		vector<GameObject*> go;
 		go.push_back(gameobject);
@@ -154,14 +166,42 @@ namespace physics {
 				}
 				CollisionInfo collision = checkCollisions(*go, others);
 				if (collision.collided) {
-					if (collision.collidedObject.getTag() & this->collisionTags) {
-						vec3 newVel = (normalize(velocity) - collision.collisionDir) * length(velocity) * (1-this->collisionDamping);
-						go->setVelocity(newVel);
+					if (go->getCollider()->getLastCollision() != collision.collidedObject->getName()) {
+						go->getCollider()->setLastCollision(collision.collidedObject->getName());
+						int tag = collision.collidedObject->getTag();
+						if (tag & this->collisionTags) {
+							vec3 newVel;
+							if (tag & this->movableTag) {
+								//TODO non usare funziona male
+								float rand_x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+								float rand_y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+								float rand_z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+								newVel = velocity * 0.5f;
+								go->setVelocity(newVel+vec3(rand_x, rand_y, rand_z));
+							    rand_x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+								rand_y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+								rand_z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+								collision.collidedObject->setVelocity(newVel+vec3(rand_x, rand_y, rand_z));
+								collision.collidedObject->getCollider()->setLastCollision(go->getName());
+							}
+							else {
+								newVel = (normalize(velocity) - collision.collisionDir) * length(velocity) * (1 - this->collisionDamping);
+								go->setVelocity(newVel);
+							}
+							
+						}
+						else if (tag & this->groundTags) {
+							go->setVelocity(vec3(0, 0, 0));
+							go->setAcceleration(vec3(0, 0, 0));
+						}
+						else if (tag & this->enemyTags) {
+							hideObject(collision.collidedObject);
+						}
 					}
-					else if ((collision.collidedObject.getTag() & this->groundTags)) {
-						go->setVelocity(vec3(0, 0, 0));
-						go->setAcceleration(vec3(0, 0, 0));
-					}
+				}
+				else {
+					go->getCollider()->setLastCollision("None");
 				}
 			}
 		}

@@ -16,7 +16,7 @@ namespace physics {
 	 */
 	struct CollisionInfo{
 		public:
-		CollisionInfo(bool collided, GameObject collidedObject, vec3 collisionPoint, vec3 collisionDir) {
+		CollisionInfo(bool collided, GameObject* collidedObject, vec3 collisionPoint, vec3 collisionDir) {
 			this->collided = collided;
 			this->collidedObject = collidedObject;
 			this->collisionPoint = collisionPoint;
@@ -26,7 +26,7 @@ namespace physics {
 			this->collided = false;
 		}
 		bool collided;
-		GameObject collidedObject;
+		GameObject* collidedObject;
 		vec3 collisionPoint;
 		vec3 collisionDir;
 	};

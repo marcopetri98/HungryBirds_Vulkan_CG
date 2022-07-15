@@ -8,18 +8,26 @@ using graphics::GameObject;
 namespace graphics {
 	BoxCollider3D::BoxCollider3D(GameObject* gameObject, float size_x, float size_y, float size_z) {
 		this->gameObject = gameObject;
-		this->size_x = size_x;
+ 		this->size_x = size_x;
 		this->size_y = size_y;
 		this->size_z = size_z;
 		createBoundingBox();
 	}
 
 	BoxCollider3D::BoxCollider3D(GameObject* gameObject, float side, float height) {
-		BoxCollider3D(gameObject, side, height, side);
+		this->gameObject = gameObject;
+ 		this->size_x = side;
+		this->size_y = height;
+		this->size_z = side;
+		createBoundingBox();
 	}
 
 	BoxCollider3D::BoxCollider3D(GameObject* gameObject, float side) {
-		BoxCollider3D(gameObject, side, side, side);
+		this->gameObject = gameObject;
+		this->size_x = side;
+		this->size_y = side;
+		this->size_z = side;
+		createBoundingBox();
 	}
 
 	float BoxCollider3D::getSize() {
@@ -38,7 +46,7 @@ namespace graphics {
 		vector<vec3> vertices;
 		for (int x = -1; x <= 1; x+=2) {
 			for (int y = -1; y <= 1; y+=2) {
-				for (int z = -1; z <= 1; z++) {
+				for (int z = -1; z <= 1; z+=2) {
 					vec3 vertex = goPos + vec3(x*this->size_x/2.0f, y*this->size_y/2.0f, z*this->size_z/2.0f);
 					vertices.push_back(vertex);
 				}
@@ -66,8 +74,9 @@ namespace graphics {
 	}
 
 	bool BoxCollider3D::checkCollision(vec3 point) {
-		return	this->x_low <= point.x && point.x <= this->x_high &&
-				this->y_low <= point.y && point.y <= this->y_high &&
-				this->z_low <= point.z && point.z <= this->z_high;
+		bool res = this->x_low <= point.x && point.x <= this->x_high &&
+			this->y_low <= point.y && point.y <= this->y_high &&
+			this->z_low <= point.z && point.z <= this->z_high;
+		return res;
 	}
 }

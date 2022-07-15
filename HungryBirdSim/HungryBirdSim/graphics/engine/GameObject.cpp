@@ -1,5 +1,6 @@
 #include <vector>
 
+#include "DummyRecursionSolver.hpp"
 #include "GameObject.hpp"
 #include "Tags.hpp"
 
@@ -28,6 +29,10 @@ namespace graphics
 	{
 		collider->setGameObject(this);
 		this->collider = collider;
+	}
+
+	void GameObject::setInitialTransform(mat4 initialTransform) {
+		this->initialTransform = initialTransform;
 	}
 
 	void GameObject::setCurrentTransform(mat4 transform)

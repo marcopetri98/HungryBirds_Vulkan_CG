@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef BOXCOLLIDER3D_HPP
-#define BOXCOLLIDER3D_HPP
+#ifndef SPHERECOLLIDER3D_HPP
+#define SPHERECOLLIDER3D_HPP
 
 
 #include <glm/glm.hpp>

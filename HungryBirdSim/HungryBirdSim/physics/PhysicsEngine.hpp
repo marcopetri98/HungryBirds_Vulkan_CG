@@ -132,7 +132,10 @@ namespace physics
 		vec3 ambient_acc;
 		float collisionDamping;
 		int collisionTags;
+		int movableTag;
 		int groundTags;
+		int enemyTags;
+		int collectablesTags;
 	};
 }
 

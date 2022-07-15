@@ -222,8 +222,8 @@ namespace graphics
 		// creation of the graphics pipeline with render passes
 		createRenderPass();
 		createFramebuffers();
-		createGraphicsPipeline(VK_FRONT_FACE_COUNTER_CLOCKWISE, &graphicsPipeline, &pipelineLayout);
-		createGraphicsPipeline(VK_FRONT_FACE_CLOCKWISE, &backgroundPipeline, &backgroundPipelineLayout);
+		createGraphicsPipeline(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, &graphicsPipeline, &pipelineLayout);
+		createGraphicsPipeline(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE, &backgroundPipeline, &backgroundPipelineLayout);
 
 		// create uniform buffers to pass to the shaders
 		createSyncObjects();
@@ -766,7 +766,7 @@ namespace graphics
 		return shaderModule;
 	}
 
-	void GraphicsEngine::createGraphicsPipeline(VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr) {
+	void GraphicsEngine::createGraphicsPipeline(VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr) {
 		auto vertShaderCode = readFile(this->vertexShaderPath);
 		auto fragShaderCode = readFile(this->fragmentShaderPath);
 		VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
@@ -812,7 +812,7 @@ namespace graphics
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizer.cullMode = cullMode;
 		rasterizer.frontFace = frontFace;
 		rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -1041,8 +1041,6 @@ namespace graphics
 		renderPassInfo.pClearValues = clearValues.data();
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipeline);
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -1058,6 +1056,7 @@ namespace graphics
 		scissor.extent = swapChainExtent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 		for (int i = 0; i < sceneLoader->getNumOfObjects(); i++)
 		{
 			ObjectLoader* renderedObject = sceneLoader->getIthObject(i);
@@ -1070,6 +1069,7 @@ namespace graphics
 			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
 		}
 
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipeline);
 		if (activeScene->getBackgroundPointer() != NULL)
 		{
 			ObjectLoader* renderedObject = sceneLoader->backgroundLoader;

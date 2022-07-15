@@ -123,6 +123,12 @@ namespace graphics
 		 */
 		void setAcceleration(vec3 acceleration);
 		/**
+		 * Sets the initial transform of the object.
+		 * 
+		 * @param initialTransform the initial transform.
+		 */
+		void setInitialTransform(mat4 initialTransform);
+		/**
 		 * Gets the velocity of the object.
 		 *
 		 * @return The velocity of the object.
