@@ -1367,7 +1367,8 @@ namespace graphics
 		if (guboLight.selectorSpherical)
 		{
 			SphericalLight* light = activeScene->getSphericalLightPointer();
-			guboLight.sphericalColorDeviationX = light->getLightColor();
+			guboLight.sphericalColor = light->getLightColor();
+			guboLight.sphericalColorDeviationX = light->getLightDeviationXColor();
 			guboLight.sphericalColorDeviationY = light->getLightDeviationYColor();
 			guboLight.sphericalColorDeviationZ = light->getLightDeviationZColor();
 			guboLight.sphericalReflection = light->getLightReflection();

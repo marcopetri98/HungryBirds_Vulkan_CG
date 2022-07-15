@@ -41,6 +41,7 @@ namespace graphics
 		alignas(16) vec3 hemisphericalBottomColor;
 		alignas(16) vec3 hemisphericalTopDir;
 		alignas(16) vec3 hemisphericalReflection;
+		alignas(16) vec3 sphericalColor;
 		alignas(16) vec3 sphericalColorDeviationX;
 		alignas(16) vec3 sphericalColorDeviationY;
 		alignas(16) vec3 sphericalColorDeviationZ;

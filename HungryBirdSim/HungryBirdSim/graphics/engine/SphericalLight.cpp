@@ -16,6 +16,11 @@ namespace graphics
 
 	vec3 SphericalLight::getLightColor()
 	{
+		return this->color;
+	}
+
+	vec3 SphericalLight::getLightDeviationXColor()
+	{
 		return this->colorDeviationX;
 	}
 
