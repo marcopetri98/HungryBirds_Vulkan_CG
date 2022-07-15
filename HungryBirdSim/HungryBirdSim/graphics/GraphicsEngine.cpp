@@ -149,6 +149,7 @@ namespace graphics
 			else
 			{
 				activeScene = allScenes[this->mapSceneIdsToPos[sceneId]];
+				vkDeviceWaitIdle(device);
 				this->updatePhysicsEngine();
 				// TODO: deallocation, see how-to
 				sceneLoader->cleanup();
@@ -1405,7 +1406,7 @@ namespace graphics
 			guboLight.sphericalReflection = light->getLightReflection();
 		}
 
-		vkMapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage], 0, sizeof(gubo), 0, &data);
+		vkMapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage], 0, sizeof(guboLight), 0, &data);
 		memcpy(data, &guboLight, sizeof(guboLight));
 		vkUnmapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage]);
 

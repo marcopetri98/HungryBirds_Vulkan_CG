@@ -184,8 +184,13 @@ namespace app
 		float deltaT = deltaTime * speed;
 		Camera* camera = this->graphicsEngine->activeScene->getCamera();
 		vector<vec3> cameraDirsFRBL = camera->getMovingDirsFRBL();
-		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_1)) {
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_1))
+		{
 			this->graphicsEngine->selectScene("City");
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_2))
+		{
+			this->graphicsEngine->selectScene("Nature");
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_UP)) {
 			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[0]);
