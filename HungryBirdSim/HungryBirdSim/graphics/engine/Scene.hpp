@@ -14,6 +14,7 @@
 #include "DirectionalLight.hpp"
 #include "PointLight.hpp"
 #include "SpotLight.hpp"
+#include "LightEnums.hpp"
 
 using std::string;
 using std::vector;
@@ -35,7 +36,7 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL);
+		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL, DiffuseModel diffuseModel = DiffuseModel::TOON, SpecularModel specularModel = SpecularModel::TOON);
 		/**
 		 * Get the pointer to the game object by its position.
 		 * 
@@ -65,6 +66,8 @@ namespace graphics
 		DirectionalLight* getDirectionalLightPointer();
 		PointLight* getPointLightPointer();
 		SpotLight* getSpotLightPointer();
+		DiffuseModel getDiffuseModel();
+		SpecularModel getSpecularModel();
 		/**
 		 * Gets the scene camera.
 		 * 
@@ -138,6 +141,8 @@ namespace graphics
 		DirectionalLight* dirLight;
 		PointLight* pointLight;
 		SpotLight* spotLight;
+		DiffuseModel diffuseModel;
+		SpecularModel specularModel;
 		/**
 		 * The camera defining the view.
 		 */

@@ -17,7 +17,7 @@ namespace graphics
 
 	}
 
-	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight)
+	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight, DiffuseModel diffuseModel, SpecularModel specularModel)
 	{
 
 		for (GameObject* gameObject : gameObjects)
@@ -42,6 +42,8 @@ namespace graphics
 		this->dirLight = dirLight;
 		this->pointLight = pointLight;
 		this->spotLight = spotLight;
+		this->diffuseModel = diffuseModel;
+		this->specularModel = specularModel;
 	}
 
 	GameObject* Scene::getGameObjectPointerByPos(unsigned int pos)
@@ -89,6 +91,16 @@ namespace graphics
 	SpotLight* Scene::getSpotLightPointer()
 	{
 		return this->spotLight;
+	}
+
+	DiffuseModel Scene::getDiffuseModel()
+	{
+		return this->diffuseModel;
+	}
+
+	SpecularModel Scene::getSpecularModel()
+	{
+		return this->specularModel;
 	}
 
 	Camera* Scene::getCamera()

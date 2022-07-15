@@ -37,6 +37,9 @@ namespace graphics
 		alignas(4) float spotCosineInnerAngle;
 		alignas(4) int selectorDiffuse;
 		alignas(4) int selectorSpecular;
+		alignas(4) int selectorDirectional;
+		alignas(4) int selectorPoint;
+		alignas(4) int selectorSpot;
 	};
 
 	struct UniformBufferObject

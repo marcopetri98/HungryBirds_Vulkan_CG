@@ -6,7 +6,6 @@ layout(binding = 1) uniform GlobalUniformBufferObjectLight {
     vec3 directionalDir;
 	vec3 directionalColor;
 	//~~~~~~~~~~~Point Lighting~~~~~~~~~~~~~~~~~~~~~~~//
-	vec3 pointDir;
 	vec3 pointColor;
 	vec3 pointPos;
 	float pointDecay;
@@ -26,6 +25,9 @@ layout(binding = 1) uniform GlobalUniformBufferObjectLight {
 	//~~~~~~~~~~~0 Phong_Specular~~~~~~~~//
 	//~~~~~~~~~~~1 Toon_Specular~~~~~~~~//
     int selectorSpecular;
+	int selectorDirectional;
+	int selectorPoint;
+	int selectorSpot;
 } guboLight;
 
 layout(binding = 2) uniform sampler2D texSampler;

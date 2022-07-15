@@ -16,6 +16,8 @@ namespace graphics
 	class DirectionalLight;
 	class PointLight;
 	class SpotLight;
+	enum class DiffuseModel;
+	enum class SpecularModel;
 }
 
 #endif

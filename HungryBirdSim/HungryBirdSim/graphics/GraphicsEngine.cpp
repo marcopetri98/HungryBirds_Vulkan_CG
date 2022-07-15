@@ -1269,8 +1269,39 @@ namespace graphics
 		memcpy(data, &gubo, sizeof(gubo));
 		vkUnmapMemory(device, sceneLoader.globalUniformBuffersMemory[0][currentImage]);
 
+		// TODO: there are at most one light per type per scene
 		GlobalUniformBufferObjectLight guboLight{};
-		// TODO: implement light
+		guboLight.eyePos = activeScene->getCamera()->getCurrentPos();
+		guboLight.selectorDiffuse = (int)activeScene->getDiffuseModel();
+		guboLight.selectorSpecular = (int)activeScene->getSpecularModel();
+		guboLight.selectorDirectional = activeScene->getDirectionalLightPointer() == NULL ? 0 : 1;
+		guboLight.selectorPoint = activeScene->getPointLightPointer() == NULL ? 0 : 1;
+		guboLight.selectorSpot = activeScene->getSpotLightPointer() == NULL ? 0 : 1;
+		if (guboLight.selectorDirectional)
+		{
+			DirectionalLight* light = activeScene->getDirectionalLightPointer();
+			guboLight.directionalDir = light->getLightDir();
+			guboLight.directionalColor = light->getLightColor();
+		}
+		if (guboLight.selectorPoint)
+		{
+			PointLight* light = activeScene->getPointLightPointer();
+			guboLight.pointPos = light->getLightPos();
+			guboLight.pointColor = light->getLightColor();
+			guboLight.pointDecay = light->getDecay();
+			guboLight.pointDistanceReduction = light->getDistanceReduction();
+		}
+		if (guboLight.selectorSpot)
+		{
+			SpotLight* light = activeScene->getSpotLightPointer();
+			guboLight.spotDir = light->getLightDir();
+			guboLight.spotPos = light->getLightPos();
+			guboLight.spotColor = light->getLightColor();
+			guboLight.spotDecay = light->getDecay();
+			guboLight.spotDistanceReduction = light->getDistanceReduction();
+			guboLight.spotCosineOuterAngle = light->getCosineOuterAngle();
+			guboLight.spotCosineInnerAngle = light->getCosineInnerAngle();
+		}
 
 		vkMapMemory(device, sceneLoader.globalUniformBuffersMemory[1][currentImage], 0, sizeof(gubo), 0, &data);
 		memcpy(data, &gubo, sizeof(gubo));
@@ -1286,7 +1317,9 @@ namespace graphics
 			ubo.modelVertices = gameObject->getCurrentTransform();
 			ubo.modelNormal = gameObject->getCurrentTransform();
 
-			// TODO: implement object light
+			uboLight.selectorDirectional = 1;
+			uboLight.selectorPoint = 1;
+			uboLight.selectorSpot = 1;
 
 			vkMapMemory(device, renderedObject->objectUniformBuffersMemory[0][currentImage], 0, sizeof(ubo), 0, &data);
 			memcpy(data, &ubo, sizeof(ubo));
@@ -1296,6 +1329,8 @@ namespace graphics
 			memcpy(data, &uboLight, sizeof(uboLight));
 			vkUnmapMemory(device, renderedObject->objectUniformBuffersMemory[1][currentImage]);
 		}
+
+		// TODO: manage background
 	}
 
 	void GraphicsEngine::createDepthResources()
