@@ -11,6 +11,7 @@
 #include "DummyRecursionSolver.hpp"
 #include "Collider.hpp"
 #include "Tags.hpp"
+#include "Object.hpp"
 
 using tags::Tag, tags::getTags;
 using std::string, std::vector;
@@ -19,7 +20,7 @@ using glm::mat4;
 
 namespace graphics
 {
-	class GameObject
+	class GameObject : public Object
 	{
 		public:
 		GameObject();

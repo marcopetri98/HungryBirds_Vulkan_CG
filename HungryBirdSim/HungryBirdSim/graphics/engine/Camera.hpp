@@ -7,13 +7,14 @@
 
 #include "DummyRecursionSolver.hpp"
 #include "GameObject.hpp"
+#include "Object.hpp"
 
 using glm::mat4;
 using glm::vec3;
 
 namespace graphics
 {
-	class Camera
+	class Camera : public Object
 	{
 		public:
 		/**
@@ -49,6 +50,14 @@ namespace graphics
 		 */
 		vec3 getCurrentPos();
 		/**
+		 * Get the current eye direction of the camera wrt the looked object.
+		 *
+		 * @return Get the current watch direction.
+		 */
+		vec3 getEyeObjDir();
+
+		vector<vec3> getMovingDirsFRBL();
+		/**
 		 * Makes the camera to look at one object.
 		 * 
 		 * @param gameObject The GameObject to be watched.
@@ -62,6 +71,12 @@ namespace graphics
 		 * @param transform The new transform of the camera.
 		 */
 		void setCurrentTransform(mat4 transform);
+		/**
+		 * Set the current eyedir.
+		 * 
+		 * @param dir The direction of the eye wrt the looked object.
+		 */
+		void setEyeObjDir(vec3 dir);
 
 		private:
 		/**
@@ -72,6 +87,14 @@ namespace graphics
 		 * The current transform of the camera.
 		 */
 		mat4 currentTransform;
+		/**
+		 * The direction vector pointing at the looked object.
+		 */
+		vec3 eyeObjDir;
+		/**
+		 * Vector containing the moving directions, ordered as: FORWARD, RIGHT, BACKWARD, LEFT.
+		 */
+		vector<vec3> movingDirsFRBL;
 	};
 }
 

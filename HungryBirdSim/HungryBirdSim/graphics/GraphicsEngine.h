@@ -53,6 +53,7 @@ namespace graphics
 		private:
 		friend class ObjectLoader;
 		friend class SceneLoader;
+		friend class Application;
 
 		Application* application;
 		PhysicsEngine* physicsEngine;

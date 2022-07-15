@@ -22,6 +22,7 @@ using std::vector;
 using tags::Tag;
 using physics::PhysicsEngine;
 
+
 namespace app
 {
 	Application::Application(string title, int width, int height)
@@ -29,6 +30,7 @@ namespace app
 		graphicsEngine = new GraphicsEngine(title, width, height);
 		physicsEngine = new PhysicsEngine(true);
 		graphicsEngine->setPhysicsEngine(physicsEngine);
+		graphicsEngine->setApplication(this);
 
 		GameObject* bird = new GameObject("bird", vector<Tag>{}, "objects/bird.obj", "textures/bird.png");
 		GameObject* bird2 = new GameObject("bird2", vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/bird.obj", "textures/bird.png");
@@ -41,7 +43,7 @@ namespace app
 		physicsEngine->translateObjectInPlace(bird3, vec3(0, -5, 3));
 		physicsEngine->translateObjectInPlace(bird4, vec3(0, -10, 10));
 		physicsEngine->translateObjectInPlace(bird5, vec3(0, 10, 10));
-		bird->setVelocity(vec3(0, 5.f, 10.f));
+		//bird->setVelocity(vec3(0, 9.f, 10.f));
 
 		// TODO: new allocates to heap, manage the free operation
 		SphereCollider* birdCollider = new SphereCollider(1.0f);
@@ -64,11 +66,19 @@ namespace app
 		bird5->setCollider(birdCollider5);
 		birdCollider5->setGameObject(bird5);
 
+		Background* background = new Background("objects/MountainSkyBox.obj", "textures/MountainSkyBox.png");
+
 		Camera* camera = new Camera();
-		camera->lookAtGameObject(bird, vec3(100, 10, 0), vec3(0, 1, 0));
+		camera->lookAtGameObject(bird, vec3(100, 0, 0), vec3(0, 1, 0));
+		camera->setEyeObjDir(bird->getCurrentPos() - camera->getCurrentPos());
+
+		Camera* camera2 = new Camera();
+		camera2->lookAtGameObject(bird2, vec3(0, 10, -100), vec3(0, 1, 0));
+		camera2->setEyeObjDir(bird2->getCurrentPos() - camera2->getCurrentPos());
+
 		vector<GameObject*> gameObjects = { bird, bird2, bird3, bird4, bird5 };
-		vector<Camera*> cameras = { camera };
-		Scene* scene = new Scene(gameObjects, 0, cameras, Background(), "try", 0);
+		vector<Camera*> cameras = { camera, camera2 };
+		Scene* scene = new Scene(gameObjects, 0, cameras, background, "try", 0);
 
 		graphicsEngine->addScenes({ scene });
 		graphicsEngine->selectScene("try");
@@ -93,6 +103,32 @@ namespace app
 	void Application::handleCommands(float deltaTime)
 	{
 		// TODO: handle key presses and high level commands with physics engine and eventually graphics engine API calls
+		float speed = 19.89;
+		float deltaT = deltaTime * speed;
+		Camera* camera = this->graphicsEngine->activeScene->getCamera();
+		vector<vec3> cameraDirsFRBL = camera->getMovingDirsFRBL();
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_UP)) {
+			this->physicsEngine->translateObjectInPlace(camera, deltaT*cameraDirsFRBL[0]);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_DOWN)) {
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[2]);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_LEFT)) {
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[3]);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_RIGHT)) {
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[1]);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_SPACE)) {
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, -1, 0));
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_LEFT_SHIFT)) {
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, 1, 0));
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_C)) {
+			//TODO parametrize this
+			this->graphicsEngine->activeScene->setCamera(1);
+		}
 	}
 
 	void Application::update(float deltaTime)

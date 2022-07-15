@@ -8,12 +8,13 @@
 #include <glm/glm.hpp>
 
 #include "../graphics/engine/DummyRecursionSolver.hpp"
-#include "../graphics/engine/GameObject.hpp"
+#include "../graphics/engine/Object.hpp"
 #include "CollisionInfo.hpp"
 #include "RayCast.hpp"
+
 using std::array, std::vector;
 using glm::vec3, glm::mat4;
-using graphics::GameObject;
+using graphics::Object;
 
 
 namespace physics
@@ -30,7 +31,7 @@ namespace physics
 		 * @param translation The vector of translation on the xyz axes.
 		 * @return The translated transform matrix.
 		 */
-		mat4 translateObject(GameObject gameobject, vec3 translation);
+		mat4 translateObject(Object* gameobject, vec3 translation);
 		/**
 		 * Rotate an object around xyz axes with the given angles, the rotation order is x->y->z.
 		 * 
@@ -38,7 +39,7 @@ namespace physics
 		 * @param angles_xyz The vector of angles for the rotations on the xyz axes.
 		 * @return The rotated transform matrix.
 		 */
-		mat4 rotateObject(GameObject gameobject, vec3 angles_xyz);
+		mat4 rotateObject(Object* gameobject, vec3 angles_xyz);
 		/**
 		 * Rotate an object around an arbitrary axis passing through a point, given the angles to align one of the xyz axes with the desired rotation axis.
 		 * 
@@ -50,7 +51,7 @@ namespace physics
 		 * \param alignmentRotationAxis The standard axis (xyz) to perform rotations to align the arbitrary axis with the specified standard one.
 		 * \return The rotated transform matrix.
 		 */
-		mat4 rotateAroundAxis(GameObject gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis);
+		mat4 rotateAroundAxis(Object* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis);
 		/**
 		 * Scale a gameobject.
 		 * 
@@ -58,24 +59,24 @@ namespace physics
 		 * \param scales The scaling factors for each axis.
 		 * \return The scaled transform matrix.
 		 */
-		mat4 scaleObject(GameObject gameobject, vec3 scales);
+		mat4 scaleObject(Object* gameobject, vec3 scales);
 
 		/**
 		 * Wrapper for translateObject which operates in place.
 		 */
-		void translateObjectInPlace(GameObject* gameobject, vec3 translation);
+		void translateObjectInPlace(Object* gameobject, vec3 translation);
 		/**
 		 * Wrapper for rotateObject which operates in place.
 		 */
-		void rotateObjectInPlace(GameObject* gameobject, vec3 angles_xyz);
+		void rotateObjectInPlace(Object* gameobject, vec3 angles_xyz);
 		/**
 		 * Wrapper for rotateAroundAxis which operates in place.
 		 */
-		void rotateAroundAxisInPlace(GameObject* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis);
+		void rotateAroundAxisInPlace(Object* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis);
 		/**
 		 * Wrapper for scaleObject which operates in place.
 		 */
-		void scaleObjectInPlace(GameObject* gameobject, vec3 scales);
+		void scaleObjectInPlace(Object* gameobject, vec3 scales);
 		/**
 		 * Remove the object from the frustum.
 		 * 

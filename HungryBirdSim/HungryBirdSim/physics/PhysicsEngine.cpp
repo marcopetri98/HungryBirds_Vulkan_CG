@@ -7,10 +7,11 @@
 #include "RayCast3D.hpp"
 #include "../graphics/engine/Collider.hpp"
 #include "../graphics/engine/Tags.hpp"
+#include "../graphics/engine/Object.hpp"
 
 using std::array, std::pair, std::find;
 using glm::vec3, glm::mat4, glm::radians, glm::translate, glm::rotate, glm::scale, glm::inverse, glm::normalize, glm::length;
-using graphics::Collider;
+using graphics::Collider, graphics::Object;
 using tags::Tag, tags::getTags;
 
 namespace physics {
@@ -31,18 +32,18 @@ namespace physics {
 		this->groundTags = getTags(gTags);
 
 	}
-	mat4 PhysicsEngine::translateObject(GameObject gameobject, vec3 translation) {
+	mat4 PhysicsEngine::translateObject(Object* gameobject, vec3 translation) {
 		mat4 T = translate(mat4(1.0f), translation);
-		return T * gameobject.getCurrentTransform();
+		return T * gameobject->getCurrentTransform();
 	}
-	mat4 PhysicsEngine::rotateObject(GameObject gameobject, vec3 angles_xyz) {
+	mat4 PhysicsEngine::rotateObject(Object* gameobject, vec3 angles_xyz) {
 		mat4 R1 = rotate(mat4(1.0f), radians(angles_xyz[0]), vec3(1, 0, 0));
 		mat4 R2 = rotate(mat4(1.0f), radians(angles_xyz[1]), vec3(0, 1, 0));
 		mat4 R3 = rotate(mat4(1.0f), radians(angles_xyz[2]), vec3(0, 0, 1));
-		return R3 * R2 * R1 * gameobject.getCurrentTransform();
+		return R3 * R2 * R1 * gameobject->getCurrentTransform();
 	}
-	mat4 PhysicsEngine::rotateAroundAxis(GameObject gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
-		mat4 current = gameobject.getCurrentTransform();
+	mat4 PhysicsEngine::rotateAroundAxis(Object* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
+		mat4 current = gameobject->getCurrentTransform();
 		mat4 T = translate(mat4(1.0f), rotationPoint);
 		mat4 R1 = rotate(mat4(1.0f), radians(alignmentAngles[0]), alignmentRotationAxis[0]);
 		mat4 R2 = rotate(mat4(1.0f), radians(alignmentAngles[1]), alignmentRotationAxis[1]);
@@ -50,22 +51,22 @@ namespace physics {
 
 		return T * R2 * R1 * R * inverse(R1) * inverse(R2) * inverse(T) * current;
 	}
-	mat4 PhysicsEngine::scaleObject(GameObject gameobject, vec3 scales) {
+	mat4 PhysicsEngine::scaleObject(Object* gameobject, vec3 scales) {
 		mat4 S = scale(mat4(1.0f), scales);
-		return S * gameobject.getCurrentTransform();
+		return S * gameobject->getCurrentTransform();
 	}
 
-	void PhysicsEngine::translateObjectInPlace(GameObject* gameobject, vec3 translation) {
-		gameobject->setCurrentTransform(translateObject(*gameobject, translation));
+	void PhysicsEngine::translateObjectInPlace(Object* gameobject, vec3 translation) {
+		gameobject->setCurrentTransform(translateObject(gameobject, translation));
 	}
-	void PhysicsEngine::rotateObjectInPlace(GameObject* gameobject, vec3 angles_xyz) {
-		gameobject->setCurrentTransform(rotateObject(*gameobject, angles_xyz));
+	void PhysicsEngine::rotateObjectInPlace(Object* gameobject, vec3 angles_xyz) {
+		gameobject->setCurrentTransform(rotateObject(gameobject, angles_xyz));
 	}
-	void PhysicsEngine::rotateAroundAxisInPlace(GameObject* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
-		gameobject->setCurrentTransform(rotateAroundAxis(*gameobject, rotationPoint, angle, alignedAxis, alignmentAngles, alignmentRotationAxis));
+	void PhysicsEngine::rotateAroundAxisInPlace(Object* gameobject, vec3 rotationPoint, float angle, vec3 alignedAxis, array<float, 2> alignmentAngles, array<vec3, 2> alignmentRotationAxis) {
+		gameobject->setCurrentTransform(rotateAroundAxis(gameobject, rotationPoint, angle, alignedAxis, alignmentAngles, alignmentRotationAxis));
 	}
-	void PhysicsEngine::scaleObjectInPlace(GameObject* gameobject, vec3 scales) {
-		gameobject->setCurrentTransform(scaleObject(*gameobject, scales));
+	void PhysicsEngine::scaleObjectInPlace(Object* gameobject, vec3 scales) {
+		gameobject->setCurrentTransform(scaleObject(gameobject, scales));
 	}
 	CollisionInfo PhysicsEngine::checkCollisions(GameObject gameobject, vector<GameObject*> others){
 		Collider* collider = gameobject.getCollider();
@@ -73,7 +74,7 @@ namespace physics {
 		RayCast* raycast;
 		if (this->raycast3d) {
 			//for now assume gameobject is only spherical and others are boxes
-			RayCast3D raycastObj = RayCast3D(36.0f, (*collider).getSize(), 0.3f);
+			RayCast3D raycastObj = RayCast3D(360.0f, (*collider).getSize(), 0.3f);
 			raycast = &raycastObj;
 		}
 		else {
