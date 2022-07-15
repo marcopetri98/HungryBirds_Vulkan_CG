@@ -49,6 +49,8 @@ namespace graphics
 		void addScenes(vector<Scene*> scenes);
 		void selectScene(string sceneName);
 		void selectScene(int sceneId);
+		void setVertexShaderPath(string path);
+		void setFragmentShaderPath(string path);
 
 		private:
 		friend class ObjectLoader;
@@ -67,6 +69,8 @@ namespace graphics
 		float nearPlane;
 		float farPlane;
 		float fovy;
+		string vertexShaderPath;
+		string fragmentShaderPath;
 
 		void updatePhysicsEngine();
 

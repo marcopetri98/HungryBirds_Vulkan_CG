@@ -61,6 +61,8 @@ namespace graphics
 		this->nearPlane = nearPlane;
 		this->farPlane = farPlane;
 		this->fovy = fovy;
+		this->vertexShaderPath = "shaders/vert.spv";
+		this->fragmentShaderPath = "shaders/frag.spv";
 		useValidationLayers = true;
 	}
 	
@@ -159,6 +161,18 @@ namespace graphics
 		}
 
 		physicsEngine->track(gameObjectPointers);
+	}
+
+	void GraphicsEngine::setVertexShaderPath(string path)
+	{
+		this->vertexShaderPath = path;
+		// TODO: add runtime shader path change
+	}
+
+	void GraphicsEngine::setFragmentShaderPath(string path)
+	{
+		this->fragmentShaderPath = path;
+		// TODO: add runtime shader path change
 	}
 
 	void GraphicsEngine::initWindow()
@@ -745,9 +759,8 @@ namespace graphics
 	}
 
 	void GraphicsEngine::createGraphicsPipeline() {
-		// TODO: we should generalize the creation of shaders and the attachment of shaders to object by API calls
-		auto vertShaderCode = readFile("shaders/vert.spv");
-		auto fragShaderCode = readFile("shaders/frag.spv");
+		auto vertShaderCode = readFile(this->vertexShaderPath);
+		auto fragShaderCode = readFile(this->fragmentShaderPath);
 		VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 		VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
