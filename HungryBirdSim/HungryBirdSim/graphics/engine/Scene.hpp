@@ -54,6 +54,7 @@ namespace graphics
 		 * @return The GameObject.
 		 */
 		GameObject getGameObjectByName(string name);
+		vector<GameObject*> getAllGameObjectsByObjTexPaths(string objPath, string texPath);
 		/**
 		 * Gets all the game objects of the scene.
 		 * 

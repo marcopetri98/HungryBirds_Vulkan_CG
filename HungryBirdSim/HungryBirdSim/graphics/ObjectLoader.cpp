@@ -25,6 +25,7 @@ namespace graphics
 		this->sceneLoader = sceneLoader;
 		this->descriptorPool = descriptorPool;
 		this->maximumFramesInFlight = maximumFramesInFlight;
+		this->numInstances = 1;
 	}
 
 	void ObjectLoader::createModelAndBuffers()
@@ -35,12 +36,22 @@ namespace graphics
 		createTextureImage();
 		createTextureImageView();
 		createTextureSampler();
-		createUniformBuffers();
+
+		objectUniformBuffers.resize(this->numInstances);
+		objectUniformBuffersMemory.resize(this->numInstances);
+		for (int i = 0; i < this->numInstances; i++)
+		{
+			createUniformBuffers(i);
+		}
 	}
 
 	void ObjectLoader::createOnlyDescriptorSets()
 	{
-		createDescriptorSets();
+		descriptorSets.resize(this->numInstances); 
+		for (int i = 0; i < this->numInstances; i++)
+		{
+			createDescriptorSets(i);
+		}
 	}
 
 	int ObjectLoader::getNumBuffers()
@@ -51,7 +62,7 @@ namespace graphics
 		}
 		else
 		{
-			return objectUniformBuffers.size() * objectUniformBuffers[0].size();
+			return objectUniformBuffers.size() * objectUniformBuffers[0].size() * objectUniformBuffers[0][0].size();
 		}
 	}
 
@@ -62,7 +73,17 @@ namespace graphics
 
 	int ObjectLoader::getNumDescriptorSets()
 	{
-		return this->maximumFramesInFlight;
+		return this->numInstances * this->maximumFramesInFlight;
+	}
+
+	int ObjectLoader::getNumInstances()
+	{
+		return this->numInstances;
+	}
+
+	void ObjectLoader::incrementInstanceCount()
+	{
+		this->numInstances++;
 	}
 
 	void ObjectLoader::cleanup()
@@ -79,12 +100,15 @@ namespace graphics
 		vkDestroyBuffer(graphicsEngine->device, vertexBuffer, nullptr);
 		vkFreeMemory(graphicsEngine->device, vertexBufferMemory, nullptr);
 
-		for (int i = 0; i < objectUniformBuffers.size(); i++)
+		for (int x = 0; x < objectUniformBuffers.size(); x++)
 		{
-			for (size_t j = 0; j < objectUniformBuffers[0].size(); j++)
+			for (int i = 0; i < objectUniformBuffers[0].size(); i++)
 			{
-				vkDestroyBuffer(graphicsEngine->device, objectUniformBuffers[i][j], nullptr);
-				vkFreeMemory(graphicsEngine->device, objectUniformBuffersMemory[i][j], nullptr);
+				for (size_t j = 0; j < objectUniformBuffers[0][0].size(); j++)
+				{
+					vkDestroyBuffer(graphicsEngine->device, objectUniformBuffers[x][i][j], nullptr);
+					vkFreeMemory(graphicsEngine->device, objectUniformBuffersMemory[x][i][j], nullptr);
+				}
 			}
 		}
 	}
@@ -251,28 +275,28 @@ namespace graphics
 		}
 	}
 
-	void ObjectLoader::createUniformBuffers()
+	void ObjectLoader::createUniformBuffers(int instance)
 	{
 		vector<uint64_t> uboSizes = { sizeof(UniformBufferObject), sizeof(UniformBufferObjectLight) };
 
-		objectUniformBuffers.resize(uboSizes.size());
-		objectUniformBuffersMemory.resize(uboSizes.size());
+		objectUniformBuffers[instance].resize(uboSizes.size());
+		objectUniformBuffersMemory[instance].resize(uboSizes.size());
 
 		for (int i = 0; i < uboSizes.size(); i++)
 		{
 			VkDeviceSize bufferSize = uboSizes[i];
 
-			objectUniformBuffers[i].resize(this->maximumFramesInFlight);
-			objectUniformBuffersMemory[i].resize(this->maximumFramesInFlight);
+			objectUniformBuffers[instance][i].resize(this->maximumFramesInFlight);
+			objectUniformBuffersMemory[instance][i].resize(this->maximumFramesInFlight);
 
 			for (size_t j = 0; j < this->maximumFramesInFlight; j++)
 			{
-				vulkanutils::createBuffer(graphicsEngine->physicalDevice, graphicsEngine->device, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, objectUniformBuffers[i][j], objectUniformBuffersMemory[i][j]);
+				vulkanutils::createBuffer(graphicsEngine->physicalDevice, graphicsEngine->device, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, objectUniformBuffers[instance][i][j], objectUniformBuffersMemory[instance][i][j]);
 			}
 		}
 	}
 
-	void ObjectLoader::createDescriptorSets()
+	void ObjectLoader::createDescriptorSets(int instance)
 	{
 		vector<VkDescriptorSetLayout> layouts(this->maximumFramesInFlight, graphicsEngine->descriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -281,8 +305,8 @@ namespace graphics
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(this->maximumFramesInFlight);
 		allocInfo.pSetLayouts = layouts.data();
 
-		descriptorSets.resize(this->maximumFramesInFlight);
-		auto result = vkAllocateDescriptorSets(graphicsEngine->device, &allocInfo, descriptorSets.data());
+		descriptorSets[instance].resize(this->maximumFramesInFlight);
+		auto result = vkAllocateDescriptorSets(graphicsEngine->device, &allocInfo, descriptorSets[instance].data());
 		if (result != VK_SUCCESS)
 		{
 			throw std::runtime_error(getVulkanErrorStr(result) + getErrorStr(Error::VULKAN_FAIL_ALLOCATE_DESCRIPTOR_SET));
@@ -307,19 +331,19 @@ namespace graphics
 			imageInfo.sampler = textureSampler;
 
 			VkDescriptorBufferInfo uboBufferInfo{};
-			uboBufferInfo.buffer = objectUniformBuffers[0][i];
+			uboBufferInfo.buffer = objectUniformBuffers[instance][0][i];
 			uboBufferInfo.offset = 0;
 			uboBufferInfo.range = sizeof(UniformBufferObject);
 
 			VkDescriptorBufferInfo uboLightBufferInfo{};
-			uboLightBufferInfo.buffer = objectUniformBuffers[1][i];
+			uboLightBufferInfo.buffer = objectUniformBuffers[instance][1][i];
 			uboLightBufferInfo.offset = 0;
 			uboLightBufferInfo.range = sizeof(UniformBufferObjectLight);
 
 			std::array<VkWriteDescriptorSet, 5> descriptorWrites{};
 
 			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[0].dstSet = descriptorSets[i];
+			descriptorWrites[0].dstSet = descriptorSets[instance][i];
 			descriptorWrites[0].dstBinding = 0;
 			descriptorWrites[0].dstArrayElement = 0;
 			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -327,7 +351,7 @@ namespace graphics
 			descriptorWrites[0].pBufferInfo = &guboBufferInfo;
 
 			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[1].dstSet = descriptorSets[i];
+			descriptorWrites[1].dstSet = descriptorSets[instance][i];
 			descriptorWrites[1].dstBinding = 1;
 			descriptorWrites[1].dstArrayElement = 0;
 			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -335,7 +359,7 @@ namespace graphics
 			descriptorWrites[1].pBufferInfo = &guboLightBufferInfo;
 
 			descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[2].dstSet = descriptorSets[i];
+			descriptorWrites[2].dstSet = descriptorSets[instance][i];
 			descriptorWrites[2].dstBinding = 3;
 			descriptorWrites[2].dstArrayElement = 0;
 			descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -343,7 +367,7 @@ namespace graphics
 			descriptorWrites[2].pBufferInfo = &uboBufferInfo;
 
 			descriptorWrites[3].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[3].dstSet = descriptorSets[i];
+			descriptorWrites[3].dstSet = descriptorSets[instance][i];
 			descriptorWrites[3].dstBinding = 4;
 			descriptorWrites[3].dstArrayElement = 0;
 			descriptorWrites[3].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -351,7 +375,7 @@ namespace graphics
 			descriptorWrites[3].pBufferInfo = &uboLightBufferInfo;
 
 			descriptorWrites[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[4].dstSet = descriptorSets[i];
+			descriptorWrites[4].dstSet = descriptorSets[instance][i];
 			descriptorWrites[4].dstBinding = 2;
 			descriptorWrites[4].dstArrayElement = 0;
 			descriptorWrites[4].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;

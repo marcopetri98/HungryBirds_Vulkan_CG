@@ -76,6 +76,22 @@ namespace graphics
 		return this->gameObjects.size();
 	}
 
+	vector<GameObject*> Scene::getAllGameObjectsByObjTexPaths(string objPath, string texPath)
+	{
+		vector<GameObject*> objTexGameObjects;
+
+		objTexGameObjects.clear();
+		for (GameObject* objPtr : this->gameObjects)
+		{
+			if (objPtr->getObjectPath() == objPath && objPtr->getTexturePath() == texPath)
+			{
+				objTexGameObjects.push_back(objPtr);
+			}
+		}
+
+		return objTexGameObjects;
+	}
+
 	vector<GameObject*> Scene::getAllGameObjects()
 	{
 		return this->gameObjects;

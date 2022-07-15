@@ -16,6 +16,7 @@
 
 using std::string;
 using std::vector;
+using std::pair;
 using std::map;
 
 namespace graphics
@@ -35,9 +36,15 @@ namespace graphics
 
 		Scene scene;
 		GraphicsEngine* graphicsEngine;
-		vector<ObjectLoader> objectLoaders;
 		ObjectLoader* backgroundLoader;
+		vector<ObjectLoader> objectLoaders;
+		vector<pair<string, string>> objectsTypes;
+		map<pair<string, string>, int> mapTypeToLoaderPos;
 		int maximumFramesInFlight;
+
+		int getTotalNumBuffers();
+		int getTotalNumDescriptorSets();
+		int getTotalNumSamplers();
 
 		// scene specific fields
 		VkDescriptorPool descriptorPool;

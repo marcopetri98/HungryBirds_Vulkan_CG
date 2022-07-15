@@ -1065,8 +1065,12 @@ namespace graphics
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 			vkCmdBindIndexBuffer(commandBuffer, renderedObject->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &(renderedObject->descriptorSets[currentFrame]), 0, nullptr);
-			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
+			
+			for (int j = 0; j < renderedObject->getNumInstances(); j++)
+			{
+				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &(renderedObject->descriptorSets[j][currentFrame]), 0, nullptr);
+				vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
+			}
 		}
 
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipeline);
@@ -1078,8 +1082,12 @@ namespace graphics
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 			vkCmdBindIndexBuffer(commandBuffer, renderedObject->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipelineLayout, 0, 1, &(renderedObject->descriptorSets[currentFrame]), 0, nullptr);
-			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
+			
+			for (int j = 0; j < renderedObject->getNumInstances(); j++)
+			{
+				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipelineLayout, 0, 1, &(renderedObject->descriptorSets[j][currentFrame]), 0, nullptr);
+				vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
+			}
 		}
 
 		vkCmdEndRenderPass(commandBuffer);
@@ -1374,22 +1382,27 @@ namespace graphics
 		for (int i = 0; i < sceneLoader->getNumOfObjects(); i++)
 		{
 			ObjectLoader* renderedObject = sceneLoader->getIthObject(i);
-			GameObject* gameObject = activeScene->getAllGameObjects()[i];
+			vector<GameObject*> renderedGameObjects = activeScene->getAllGameObjectsByObjTexPaths(renderedObject->gameObject.getObjectPath(), renderedObject->gameObject.getTexturePath());
 
-			ubo.modelVertices = gameObject->getCurrentTransform();
-			ubo.modelNormal = glm::inverse(glm::transpose(gameObject->getCurrentTransform()));
+			for (int j = 0; j < renderedObject->getNumInstances(); j++)
+			{
+				GameObject* gameObject = renderedGameObjects[j];
 
-			uboLight.selectorDirectional = 1;
-			uboLight.selectorPoint = 1;
-			uboLight.selectorSpot = 1;
+				ubo.modelVertices = gameObject->getCurrentTransform();
+				ubo.modelNormal = glm::inverse(glm::transpose(gameObject->getCurrentTransform()));
 
-			vkMapMemory(device, renderedObject->objectUniformBuffersMemory[0][currentImage], 0, sizeof(ubo), 0, &data);
-			memcpy(data, &ubo, sizeof(ubo));
-			vkUnmapMemory(device, renderedObject->objectUniformBuffersMemory[0][currentImage]);
+				uboLight.selectorDirectional = 1;
+				uboLight.selectorPoint = 1;
+				uboLight.selectorSpot = 1;
 
-			vkMapMemory(device, renderedObject->objectUniformBuffersMemory[1][currentImage], 0, sizeof(uboLight), 0, &data);
-			memcpy(data, &uboLight, sizeof(uboLight));
-			vkUnmapMemory(device, renderedObject->objectUniformBuffersMemory[1][currentImage]);
+				vkMapMemory(device, renderedObject->objectUniformBuffersMemory[j][0][currentImage], 0, sizeof(ubo), 0, &data);
+				memcpy(data, &ubo, sizeof(ubo));
+				vkUnmapMemory(device, renderedObject->objectUniformBuffersMemory[j][0][currentImage]);
+
+				vkMapMemory(device, renderedObject->objectUniformBuffersMemory[j][1][currentImage], 0, sizeof(uboLight), 0, &data);
+				memcpy(data, &uboLight, sizeof(uboLight));
+				vkUnmapMemory(device, renderedObject->objectUniformBuffersMemory[j][1][currentImage]);
+			}
 		}
 
 		// if there is a background, we print its skybox model
@@ -1402,13 +1415,13 @@ namespace graphics
 			uboLight.selectorPoint = 0;
 			uboLight.selectorSpot = 0;
 
-			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][currentImage], 0, sizeof(ubo), 0, &data);
+			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][0][currentImage], 0, sizeof(ubo), 0, &data);
 			memcpy(data, &ubo, sizeof(ubo));
-			vkUnmapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][currentImage]);
+			vkUnmapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][0][currentImage]);
 
-			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[1][currentImage], 0, sizeof(uboLight), 0, &data);
+			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][1][currentImage], 0, sizeof(uboLight), 0, &data);
 			memcpy(data, &uboLight, sizeof(uboLight));
-			vkUnmapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[1][currentImage]);
+			vkUnmapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][1][currentImage]);
 		}
 	}
 

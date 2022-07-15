@@ -29,6 +29,8 @@ namespace graphics
 		int getNumBuffers();
 		int getNumSamplers();
 		int getNumDescriptorSets();
+		int getNumInstances();
+		void incrementInstanceCount();
 		void createModelAndBuffers();
 		void createOnlyDescriptorSets();
 		void cleanup();
@@ -41,6 +43,7 @@ namespace graphics
 		SceneLoader* sceneLoader;
 		VkDescriptorPool* descriptorPool;
 		int maximumFramesInFlight;
+		int numInstances;
 
 		// object specific values
 		vector<Vertex> vertices;
@@ -54,9 +57,9 @@ namespace graphics
 		VkDeviceMemory textureImageMemory;
 		VkImageView textureImageView;
 		VkSampler textureSampler;
-		vector<vector<VkBuffer>> objectUniformBuffers;
-		vector<vector<VkDeviceMemory>> objectUniformBuffersMemory;
-		vector<VkDescriptorSet> descriptorSets;
+		vector<vector<vector<VkBuffer>>> objectUniformBuffers;
+		vector<vector<vector<VkDeviceMemory>>> objectUniformBuffersMemory;
+		vector<vector<VkDescriptorSet>> descriptorSets;
 
 		void loadModel();
 		void createVertexBuffer();
@@ -64,8 +67,8 @@ namespace graphics
 		void createTextureImage();
 		void createTextureImageView();
 		void createTextureSampler();
-		void createUniformBuffers();
-		void createDescriptorSets();
+		void createUniformBuffers(int instance);
+		void createDescriptorSets(int instance);
 	};
 }
 
