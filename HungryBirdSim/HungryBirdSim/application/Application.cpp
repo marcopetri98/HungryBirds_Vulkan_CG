@@ -17,6 +17,12 @@
 #include "../graphics/engine/SphereCollider.hpp"
 #include "../graphics/engine/BoxCollider3D.hpp"
 #include "../graphics/engine/PlaneCollider3d.hpp"
+#include "../graphics/engine/DirectionalLight.hpp"
+#include "../graphics/engine/PointLight.hpp"
+#include "../graphics/engine/SpotLight.hpp"
+#include "../graphics/engine/AmbientLight.hpp"
+#include "../graphics/engine/HemisphericalLight.hpp"
+#include "../graphics/engine/SphericalLight.hpp"
 
 
 using Clock = std::chrono::high_resolution_clock;
@@ -29,7 +35,12 @@ using std::vector, std::to_string;
 using tags::Tag;
 using physics::PhysicsEngine;
 using glm::radians;
-
+using graphics::DirectionalLight;
+using graphics::PointLight;
+using graphics::SpotLight;
+using graphics::AmbientLight;
+using graphics::HemisphericalLight;
+using graphics::SphericalLight;
 
 namespace app
 {
@@ -114,6 +125,8 @@ namespace app
 		}
 		vector<Camera*> cameras = { camera, camera2 };
 		Scene* scene = new Scene(gameObjects, 0, cameras, background, "try", 0);
+		scene->setDirectionalLight(new DirectionalLight(vec3(0.5, -0.5, 0.5), vec3(1,1,1)));
+		scene->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0, 0, 0)));
 
 		graphicsEngine->addScenes({ scene });
 		graphicsEngine->selectScene("try");

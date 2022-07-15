@@ -15,7 +15,8 @@ namespace graphics
 	enum class SpecularModel
 	{
 		PHONG,
-		TOON
+		TOON,
+		BLINN
 	};
 }
 

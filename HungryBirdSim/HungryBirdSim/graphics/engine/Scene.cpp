@@ -20,7 +20,7 @@ namespace graphics
 
 	}
 
-	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background* background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight, DiffuseModel diffuseModel, SpecularModel specularModel)
+	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background* background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight, DiffuseModel diffuseModel, SpecularModel specularModel, AmbientLight* ambientLight, HemisphericalLight* hemisphericLight, SphericalLight* sphericalLight)
 	{
 
 		for (GameObject* gameObject : gameObjects)
@@ -47,6 +47,9 @@ namespace graphics
 		this->spotLight = spotLight;
 		this->diffuseModel = diffuseModel;
 		this->specularModel = specularModel;
+		this->ambientLight = ambientLight;
+		this->hemisphericalLight = hemisphericLight;
+		this->sphericalLight = sphericalLight;
 	}
 
 	GameObject* Scene::getGameObjectPointerByPos(unsigned int pos)
@@ -191,6 +194,40 @@ namespace graphics
 				}
 			}
 		}
+	}
+
+	void Scene::setDirectionalLight(DirectionalLight* directionalLight)
+	{
+		this->dirLight = directionalLight;
+	}
+
+	void Scene::setPointLight(PointLight* pointLight)
+	{
+		this->pointLight = pointLight;
+
+	}
+
+	void Scene::setSpotLight(SpotLight* spotLight)
+	{
+		this->spotLight = spotLight;
+
+	}
+
+	void Scene::setAmbientLight(AmbientLight* ambientLight)
+	{
+		this->ambientLight = ambientLight;
+
+	}
+
+	void Scene::setHemisphericLight(HemisphericalLight* hemisphericalLight)
+	{
+		this->hemisphericalLight = hemisphericalLight;
+
+	}
+
+	void Scene::setSphericalLight(SphericalLight* sphericalLight)
+	{
+		this->sphericalLight = sphericalLight;
 	}
 
 	void Scene::setCurrCameraIdx(int idx) {

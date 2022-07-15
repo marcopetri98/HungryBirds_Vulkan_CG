@@ -39,7 +39,7 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background* background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL, DiffuseModel diffuseModel = DiffuseModel::TOON, SpecularModel specularModel = SpecularModel::TOON);
+		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background* background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL, DiffuseModel diffuseModel = DiffuseModel::TOON, SpecularModel specularModel = SpecularModel::TOON, AmbientLight* ambientLight = NULL, HemisphericalLight* hemisphericLight = NULL, SphericalLight* sphericalLight = NULL);
 		/**
 		 * Get the pointer to the game object by its position.
 		 * 
@@ -114,6 +114,12 @@ namespace graphics
 		 * @param name The name of the GameObject.
 		 */
 		void setGameObjectByName(GameObject gameObject, string name);
+		void setDirectionalLight(DirectionalLight* directionalLight);
+		void setPointLight(PointLight* pointLight);
+		void setSpotLight(SpotLight* spotLight);
+		void setAmbientLight(AmbientLight* ambientLight);
+		void setHemisphericLight(HemisphericalLight* hemisphericalLight);
+		void setSphericalLight(SphericalLight* sphericalLight);
 		void setCurrCameraIdx(int idx);
 		/**
 		 * Set the camera for the scene.
