@@ -1346,7 +1346,7 @@ namespace graphics
 		// if there is a background, we print its skybox model
 		if (activeScene->getBackgroundPointer() != NULL)
 		{
-			ubo.modelVertices = mat4(1);
+			ubo.modelVertices = glm::scale(mat4(1), vec3(farPlane / 3.0f, farPlane / 3.0f, farPlane / 3.0f)) * glm::rotate(mat4(1), glm::radians(180.0f), vec3(1, 0, 0));
 			ubo.modelNormal = mat4(1);
 
 			uboLight.selectorDirectional = 0;

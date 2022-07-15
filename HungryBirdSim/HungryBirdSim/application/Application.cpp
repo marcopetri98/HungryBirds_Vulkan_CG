@@ -27,7 +27,7 @@ namespace app
 {
 	Application::Application(string title, int width, int height)
 	{
-		graphicsEngine = new GraphicsEngine(title, width, height);
+		graphicsEngine = new GraphicsEngine(title, width, height, 0.01f, 10000.0f);
 		physicsEngine = new PhysicsEngine(true);
 		graphicsEngine->setPhysicsEngine(physicsEngine);
 		graphicsEngine->setApplication(this);
@@ -103,7 +103,7 @@ namespace app
 	void Application::handleCommands(float deltaTime)
 	{
 		// TODO: handle key presses and high level commands with physics engine and eventually graphics engine API calls
-		float speed = 19.89;
+		float speed = 50;
 		float deltaT = deltaTime * speed;
 		Camera* camera = this->graphicsEngine->activeScene->getCamera();
 		vector<vec3> cameraDirsFRBL = camera->getMovingDirsFRBL();
