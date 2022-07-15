@@ -59,7 +59,7 @@ namespace app
 		GameObject* bird2 = new GameObject("bird2", vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/bird.obj", "textures/bird.png");
 		GameObject* bird4 = new GameObject("bird4", vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/bird.obj", "textures/bird.png");
 		GameObject* bird5 = new GameObject("bird5", vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/bird.obj", "textures/bird.png");
-		GameObject* floor = new GameObject("floor", vector<Tag>{Tag::GROUND}, "objects/floor.obj", "textures/floor.png");
+		GameObject* floor = new GameObject("floor", vector<Tag>{Tag::GROUND}, "objects/floor.obj", "textures/grassPlane.jpg");
 		this->arrow = new GameObject("arrow", vector<Tag>{}, "objects/arrow.obj", "textures/arrow.png");
 
 		physicsEngine->translateObjectInPlace(bird2, vec3(0, 5, -10));
@@ -124,12 +124,41 @@ namespace app
 			gameObjects.push_back(go);
 		}
 		vector<Camera*> cameras = { camera, camera2 };
-		Scene* scene = new Scene(gameObjects, 0, cameras, background, "try", 0);
-		scene->setDirectionalLight(new DirectionalLight(vec3(0.5, -0.5, 0.5), vec3(1,1,1)));
+		Scene* scene = new Scene(gameObjects, 0, cameras, background, "Nature", 0);
+		scene->setDirectionalLight(new DirectionalLight(vec3(0.5, -0.5, 0.5), vec3(1, 1, 1)));
 		scene->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0, 0, 0)));
 
-		graphicsEngine->addScenes({ scene });
-		graphicsEngine->selectScene("try");
+		/////////////////////// SCENE 2 /////////////////////
+		this->bird = new GameObject("bird", vector<Tag>{}, "objects/bird.obj", "textures/bird.png");
+		SphereCollider* birdCollider_2 = new SphereCollider(1.0f);
+		bird->setCollider(birdCollider_2);
+		birdCollider_2->setGameObject(bird);
+		this->arrow = new GameObject("arrow", vector<Tag>{}, "objects/arrow.obj", "textures/arrow.png");
+
+		Background* background_2 = new Background("objects/MountainSkyBox.obj", "textures/0-city-skybox.png");
+
+		GameObject* floor_2 = new GameObject("floor", vector<Tag>{Tag::GROUND}, "objects/floor.obj", "textures/city-ground.png");
+		physicsEngine->translateObjectInPlace(floor_2, vec3(0.f, -75.f, 0.f));
+		PlaneCollider3D* floorCollider_2 = new PlaneCollider3D(floor_2, 20000.f, 20000.f);
+		floor_2->setCollider(floorCollider_2);
+		floorCollider_2->setGameObject(floor_2);
+
+		GameObject* apple_2 = new GameObject("apple", vector<Tag>{Tag::GROUND}, "objects/apple.obj", "textures/apple.png");
+		PlaneCollider3D* appleCollider_2 = new PlaneCollider3D(apple_2, 20000.f, 20000.f);
+		apple_2->setCollider(appleCollider_2);
+		appleCollider_2->setGameObject(apple_2);
+
+		physicsEngine->scaleObjectInPlace(apple_2, vec3(2.f));
+		physicsEngine->translateObjectInPlace(apple_2, vec3(0.f, 15.f, 30.f));
+
+		vector<GameObject*> gameObjects_2 = { bird, floor_2, arrow, apple_2 };
+		Scene* scene_city = new Scene(gameObjects_2, 0, cameras, background_2, "City", 1);
+		// physicsEngine->rotateObjectInPlace(arrow, vec3(0, 90, 0));
+
+		/////////////////////// Final Call to Graphics Engine //////////////////////////
+
+		graphicsEngine->addScenes({ scene, scene_city});
+		graphicsEngine->selectScene("Nature");
 	}
 
 	int Application::start()
@@ -155,6 +184,9 @@ namespace app
 		float deltaT = deltaTime * speed;
 		Camera* camera = this->graphicsEngine->activeScene->getCamera();
 		vector<vec3> cameraDirsFRBL = camera->getMovingDirsFRBL();
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_1)) {
+			this->graphicsEngine->selectScene("City");
+		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_UP)) {
 			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[0]);
 		}
