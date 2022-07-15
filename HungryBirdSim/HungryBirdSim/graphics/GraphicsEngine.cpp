@@ -1424,9 +1424,7 @@ namespace graphics
 				ubo.modelVertices = gameObject->getCurrentTransform();
 				ubo.modelNormal = glm::inverse(glm::transpose(gameObject->getCurrentTransform()));
 
-				uboLight.selectorDirectional = 1;
-				uboLight.selectorPoint = 1;
-				uboLight.selectorSpot = 1;
+				uboLight.selectorBackground = 0;
 
 				vkMapMemory(device, renderedObject->objectUniformBuffersMemory[j][0][currentImage], 0, sizeof(ubo), 0, &data);
 				memcpy(data, &ubo, sizeof(ubo));
@@ -1444,9 +1442,7 @@ namespace graphics
 			ubo.modelVertices = glm::scale(mat4(1), vec3(farPlane / 3.0f, farPlane / 3.0f, farPlane / 3.0f)) * glm::rotate(mat4(1), glm::radians(180.0f), vec3(1, 0, 0));
 			ubo.modelNormal = glm::inverse(glm::transpose(ubo.modelVertices));
 
-			uboLight.selectorDirectional = 0;
-			uboLight.selectorPoint = 0;
-			uboLight.selectorSpot = 0;
+			uboLight.selectorBackground = 1;
 
 			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][0][currentImage], 0, sizeof(ubo), 0, &data);
 			memcpy(data, &ubo, sizeof(ubo));

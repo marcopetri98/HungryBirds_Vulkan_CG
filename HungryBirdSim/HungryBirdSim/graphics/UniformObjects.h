@@ -64,9 +64,7 @@ namespace graphics
 
 	struct UniformBufferObjectLight
 	{
-		alignas(4) int selectorDirectional;
-		alignas(4) int selectorPoint;
-		alignas(4) int selectorSpot;
+		alignas(4) int selectorBackground;
 	};
 }
 

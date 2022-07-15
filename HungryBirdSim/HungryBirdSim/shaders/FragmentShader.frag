@@ -39,9 +39,7 @@ layout(binding = 1) uniform GlobalUniformBufferObjectLight {
 layout(binding = 2) uniform sampler2D diffuseSampler;
 
 layout(binding = 4) uniform UniformBufferObjectLight {
-	int selectorDirectional;
-	int selectorPoint;
-	int selectorSpot;
+	int selectorBackground;
 } uboLight;
 
 layout(location = 0) in vec3 fragColor;
@@ -310,6 +308,7 @@ void main() {
 						guboLight.selectorPoint * point_light_color(fragPos) * Blinn_Specular_BRDF(point_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower) +  
 						guboLight.selectorSpot * spot_light_color(fragPos) * Blinn_Specular_BRDF(spot_light_dir(fragPos), fragNorm, fragViewDir, specColor, specPower));
 
+	vec3 finalColor = (1 - uboLight.selectorBackground) * (diffuseColor + specularColor + ambientLight) + uboLight.selectorBackground * diffColor;
 
-	outColor = vec4(diffuseColor + specularColor + ambientLight, 1.0f);
+	outColor = vec4(finalColor, 1.0f);
 }
