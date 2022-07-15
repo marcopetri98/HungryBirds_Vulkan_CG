@@ -96,6 +96,8 @@ namespace graphics
 		VkDescriptorSetLayout descriptorSetLayout;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
+		VkPipelineLayout backgroundPipelineLayout;
+		VkPipeline backgroundPipeline;
 		VkCommandPool commandPool;
 		uint32_t currentFrame = 0;
 		vector<VkCommandBuffer> commandBuffers;
@@ -231,8 +233,12 @@ namespace graphics
 		void createImageViews();
 		/**
 		 * Create the graphics pipeline
+		 * 
+		 * @param frontFace front face to be used for rendering object faces
+		 * @param pipelinePtr pointer to the pipeline to create
+		 * @param pipelineLayoutPtr pointer to the pipeline layout to fill
 		 */
-		void createGraphicsPipeline();
+		void createGraphicsPipeline(VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr);
 		/**
 		 * Helper function to load the binary data from a file.
 		 * 

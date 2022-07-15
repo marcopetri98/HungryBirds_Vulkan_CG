@@ -222,7 +222,8 @@ namespace graphics
 		// creation of the graphics pipeline with render passes
 		createRenderPass();
 		createFramebuffers();
-		createGraphicsPipeline();
+		createGraphicsPipeline(VK_FRONT_FACE_COUNTER_CLOCKWISE, &graphicsPipeline, &pipelineLayout);
+		createGraphicsPipeline(VK_FRONT_FACE_CLOCKWISE, &backgroundPipeline, &backgroundPipelineLayout);
 
 		// create uniform buffers to pass to the shaders
 		createSyncObjects();
@@ -765,7 +766,7 @@ namespace graphics
 		return shaderModule;
 	}
 
-	void GraphicsEngine::createGraphicsPipeline() {
+	void GraphicsEngine::createGraphicsPipeline(VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr) {
 		auto vertShaderCode = readFile(this->vertexShaderPath);
 		auto fragShaderCode = readFile(this->fragmentShaderPath);
 		VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
@@ -812,7 +813,7 @@ namespace graphics
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		rasterizer.frontFace = frontFace;
 		rasterizer.depthBiasEnable = VK_FALSE;
 
 
@@ -865,7 +866,7 @@ namespace graphics
 		pipelineLayoutInfo.setLayoutCount = 1;
 		pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
-		if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+		if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, pipelineLayoutPtr) != VK_SUCCESS) {
 			throw std::runtime_error(getErrorStr(Error::VULKAN_FAIL_CREATE_PIPELINE_LAYOUT));
 		}
 
@@ -886,7 +887,7 @@ namespace graphics
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+		if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, pipelinePtr) != VK_SUCCESS) {
 			throw std::runtime_error(getErrorStr(Error::VULKAN_FAIL_CREATE_GRAPHIC_PIPELINES));
 		}
 
@@ -1041,6 +1042,7 @@ namespace graphics
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipeline);
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -1076,7 +1078,7 @@ namespace graphics
 			VkDeviceSize offsets[] = { 0 };
 			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 			vkCmdBindIndexBuffer(commandBuffer, renderedObject->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &(renderedObject->descriptorSets[currentFrame]), 0, nullptr);
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, backgroundPipelineLayout, 0, 1, &(renderedObject->descriptorSets[currentFrame]), 0, nullptr);
 			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
 		}
 
@@ -1517,6 +1519,8 @@ namespace graphics
 
 		vkDestroyPipeline(device, graphicsPipeline, nullptr);
 		vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
+		vkDestroyPipeline(device, backgroundPipeline, nullptr);
+		vkDestroyPipelineLayout(device, backgroundPipelineLayout, nullptr);
 		vkDestroyRenderPass(device, renderPass, nullptr);
 
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
