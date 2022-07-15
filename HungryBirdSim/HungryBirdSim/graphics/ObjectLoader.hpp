@@ -11,8 +11,9 @@
 
 #include "engine/GameObject.hpp"
 #include "DummyRecursionSolver.hpp"
-#include "Vertex.h"
+#include "SceneLoader.hpp"
 #include "GraphicsEngine.h"
+#include "Vertex.h"
 
 using std::string;
 using std::vector;
@@ -23,6 +24,7 @@ namespace graphics
 	class ObjectLoader
 	{
 		public:
+		ObjectLoader();
 		ObjectLoader(GraphicsEngine* graphicsEngine, VkDescriptorPool* descriptorPool, SceneLoader* sceneLoader, int maximumFramesInFlight, GameObject gameObject);
 		int getNumBuffers();
 		int getNumSamplers();

@@ -41,11 +41,22 @@ namespace graphics
 			this->objectLoaders.push_back(objLoader);
 		}
 
+		if (this->scene.getBackgroundPointer() != NULL)
+		{
+			GameObject backgroundGameObject = GameObject("background", {}, this->scene.getBackground().getObjectPath(), this->scene.getBackground().getTexturePath());
+			backgroundLoader = new ObjectLoader(this->graphicsEngine, &(this->descriptorPool), this, this->maximumFramesInFlight, backgroundGameObject);
+			backgroundLoader->createModelAndBuffers();
+		}
+
 		createDescriptorPool();
 
 		for (int i = 0; i < this->objectLoaders.size(); i++)
 		{
 			this->objectLoaders[i].createOnlyDescriptorSets();
+		}
+		if (this->scene.getBackgroundPointer() != NULL)
+		{
+			backgroundLoader->createOnlyDescriptorSets();
 		}
 	}
 
@@ -65,6 +76,11 @@ namespace graphics
 		for (int i = 0; i < this->objectLoaders.size(); i++)
 		{
 			this->objectLoaders[i].cleanup();
+		}
+
+		if (this->scene.getBackgroundPointer() != NULL)
+		{
+			backgroundLoader->cleanup();
 		}
 	}
 
@@ -94,15 +110,15 @@ namespace graphics
 		// TODO: see why vulkan on some pcs is happy with 0 descriptorCount and in other pcs is happy with only at least double the required number
 		std::array<VkDescriptorPoolSize, 2> poolSizes{};
 		poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount = static_cast<uint32_t>((1 + objectLoaders.size()) * objectLoaders[0].getNumBuffers() * 2);
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(((this->scene.getBackgroundPointer() == NULL ? 1 : 2) + objectLoaders.size()) * objectLoaders[0].getNumBuffers() * 2);
 		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[1].descriptorCount = static_cast<uint32_t>(objectLoaders.size() * objectLoaders[0].getNumSamplers());
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(((this->scene.getBackgroundPointer() == NULL ? 0 : 1) + objectLoaders.size()) * objectLoaders[0].getNumSamplers());
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 		poolInfo.pPoolSizes = poolSizes.data();
-		poolInfo.maxSets = static_cast<uint32_t>(objectLoaders.size() * objectLoaders[0].getNumDescriptorSets());
+		poolInfo.maxSets = static_cast<uint32_t>(((this->scene.getBackgroundPointer() == NULL ? 0 : 1) + objectLoaders.size()) * objectLoaders[0].getNumDescriptorSets());
 
 		if (vkCreateDescriptorPool(graphicsEngine->device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 		{

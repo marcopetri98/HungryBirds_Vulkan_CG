@@ -12,6 +12,7 @@
 #include "engine/Scene.hpp"
 #include "DummyRecursionSolver.hpp"
 #include "GraphicsEngine.h"
+#include "ObjectLoader.hpp"
 
 using std::string;
 using std::vector;
@@ -35,6 +36,7 @@ namespace graphics
 		Scene scene;
 		GraphicsEngine* graphicsEngine;
 		vector<ObjectLoader> objectLoaders;
+		ObjectLoader* backgroundLoader;
 		int maximumFramesInFlight;
 
 		// scene specific fields

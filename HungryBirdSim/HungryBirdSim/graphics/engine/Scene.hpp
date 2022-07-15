@@ -36,7 +36,7 @@ namespace graphics
 		 * @param name Unique name of the scene.
 		 * @param id Unique id of the scene.
 		 */
-		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL, DiffuseModel diffuseModel = DiffuseModel::TOON, SpecularModel specularModel = SpecularModel::TOON);
+		Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background* background, string name, int id, DirectionalLight* dirLight = NULL, PointLight* pointLight = NULL, SpotLight* spotLight = NULL, DiffuseModel diffuseModel = DiffuseModel::TOON, SpecularModel specularModel = SpecularModel::TOON);
 		/**
 		 * Get the pointer to the game object by its position.
 		 * 
@@ -80,6 +80,7 @@ namespace graphics
 		 * @return All the available cameras for the scene.
 		 */
 		vector<Camera*> getAvailableCameras();
+		Background* getBackgroundPointer();
 		/**
 		 * Gets the background of the scene.
 		 * 
@@ -123,7 +124,7 @@ namespace graphics
 		 * 
 		 * @param background The background to be set.
 		 */
-		void setBackground(Background background);
+		void setBackground(Background* background);
 
 		private:
 		/**
@@ -154,7 +155,7 @@ namespace graphics
 		/**
 		 * The background for the scene.
 		 */
-		Background background;
+		Background* background;
 		/**
 		 * The name of the scene.
 		 */

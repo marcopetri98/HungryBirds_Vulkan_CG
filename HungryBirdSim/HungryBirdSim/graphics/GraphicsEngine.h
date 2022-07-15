@@ -14,12 +14,13 @@
 #include "../physics/PhysicsEngine.hpp"
 #include "engine/DummyRecursionSolver.hpp"
 #include "engine/Scene.hpp"
+#include "DummyRecursionSolver.hpp"
 #include "Queues.h"
 #include "SwapChainSupportDetails.h"
 #include "Vertex.h"
 #include "UniformObjects.h"
-#include "ObjectLoader.hpp"
 #include "SceneLoader.hpp"
+#include "ObjectLoader.hpp"
 
 using std::string;
 using std::vector;
@@ -61,7 +62,7 @@ namespace graphics
 		vector<int> sceneIds;
 		map<string, int> mapSceneNamesIds;
 		map<int, int> mapSceneIdsToPos;
-		SceneLoader sceneLoader;
+		SceneLoader* sceneLoader;
 		float nearPlane;
 		float farPlane;
 		float fovy;

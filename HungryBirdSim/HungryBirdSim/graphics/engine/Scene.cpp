@@ -17,7 +17,7 @@ namespace graphics
 
 	}
 
-	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight, DiffuseModel diffuseModel, SpecularModel specularModel)
+	Scene::Scene(vector<GameObject*> gameObjects, int camera, vector<Camera*> availableCameras, Background* background, string name, int id, DirectionalLight* dirLight, PointLight* pointLight, SpotLight* spotLight, DiffuseModel diffuseModel, SpecularModel specularModel)
 	{
 
 		for (GameObject* gameObject : gameObjects)
@@ -113,9 +113,14 @@ namespace graphics
 		return this->availableCameras;
 	}
 
-	Background Scene::getBackground()
+	Background* Scene::getBackgroundPointer()
 	{
 		return this->background;
+	}
+
+	Background Scene::getBackground()
+	{
+		return *this->background;
 	}
 
 	string Scene::getName()
@@ -164,7 +169,7 @@ namespace graphics
 		*this->availableCameras[pos] = camera;
 	}
 
-	void Scene::setBackground(Background background)
+	void Scene::setBackground(Background* background)
 	{
 		this->background = background;
 	}

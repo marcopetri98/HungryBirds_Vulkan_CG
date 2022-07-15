@@ -13,6 +13,11 @@ using errors::Error;
 
 namespace graphics
 {
+	ObjectLoader::ObjectLoader()
+	{
+
+	}
+
 	ObjectLoader::ObjectLoader(GraphicsEngine* graphicsEngine, VkDescriptorPool* descriptorPool, SceneLoader* sceneLoader, int maximumFramesInFlight, GameObject gameObject)
 	{
 		this->gameObject = gameObject;

@@ -131,15 +131,16 @@ namespace graphics
 			{
 				activeScene = allScenes[this->mapSceneIdsToPos[sceneId]];
 				this->updatePhysicsEngine();
-				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
+				sceneLoader = new SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
 			}
 			else
 			{
 				activeScene = allScenes[this->mapSceneIdsToPos[sceneId]];
 				this->updatePhysicsEngine();
-				sceneLoader.cleanup();
-				sceneLoader = SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
-				sceneLoader.createDescriptorPoolsAndObjects();
+				// TODO: deallocation, see how-to
+				sceneLoader->cleanup();
+				sceneLoader = new SceneLoader(this, MAX_FRAMES_IN_FLIGHT, *activeScene);
+				sceneLoader->createDescriptorPoolsAndObjects();
 			}
 		}
 	}
@@ -192,7 +193,7 @@ namespace graphics
 		// creation of models and their representation for shaders
 		createDescriptorSetLayout();
 
-		sceneLoader.createDescriptorPoolsAndObjects();
+		sceneLoader->createDescriptorPoolsAndObjects();
 
 		// creation of the graphics pipeline with render passes
 		createRenderPass();
@@ -1032,9 +1033,21 @@ namespace graphics
 		scissor.extent = swapChainExtent;
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-		for (int i = 0; i < sceneLoader.getNumOfObjects(); i++)
+		for (int i = 0; i < sceneLoader->getNumOfObjects(); i++)
 		{
-			ObjectLoader* renderedObject = sceneLoader.getIthObject(i);
+			ObjectLoader* renderedObject = sceneLoader->getIthObject(i);
+
+			VkBuffer vertexBuffers[] = { renderedObject->vertexBuffer };
+			VkDeviceSize offsets[] = { 0 };
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+			vkCmdBindIndexBuffer(commandBuffer, renderedObject->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &(renderedObject->descriptorSets[currentFrame]), 0, nullptr);
+			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(renderedObject->indices.size()), 1, 0, 0, 0);
+		}
+
+		if (activeScene->getBackgroundPointer() != NULL)
+		{
+			ObjectLoader* renderedObject = sceneLoader->backgroundLoader;
 
 			VkBuffer vertexBuffers[] = { renderedObject->vertexBuffer };
 			VkDeviceSize offsets[] = { 0 };
@@ -1265,9 +1278,9 @@ namespace graphics
 		gubo.proj = glm::perspective(glm::radians(fovy), swapChainExtent.width / (float)swapChainExtent.height, nearPlane, farPlane);
 		gubo.proj[1][1] *= -1;
 
-		vkMapMemory(device, sceneLoader.globalUniformBuffersMemory[0][currentImage], 0, sizeof(gubo), 0, &data);
+		vkMapMemory(device, sceneLoader->globalUniformBuffersMemory[0][currentImage], 0, sizeof(gubo), 0, &data);
 		memcpy(data, &gubo, sizeof(gubo));
-		vkUnmapMemory(device, sceneLoader.globalUniformBuffersMemory[0][currentImage]);
+		vkUnmapMemory(device, sceneLoader->globalUniformBuffersMemory[0][currentImage]);
 
 		// TODO: there are at most one light per type per scene
 		GlobalUniformBufferObjectLight guboLight{};
@@ -1303,15 +1316,15 @@ namespace graphics
 			guboLight.spotCosineInnerAngle = light->getCosineInnerAngle();
 		}
 
-		vkMapMemory(device, sceneLoader.globalUniformBuffersMemory[1][currentImage], 0, sizeof(gubo), 0, &data);
+		vkMapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage], 0, sizeof(gubo), 0, &data);
 		memcpy(data, &gubo, sizeof(gubo));
-		vkUnmapMemory(device, sceneLoader.globalUniformBuffersMemory[1][currentImage]);
+		vkUnmapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage]);
 
 		UniformBufferObject ubo{};
 		UniformBufferObjectLight uboLight{};
-		for (int i = 0; i < sceneLoader.getNumOfObjects(); i++)
+		for (int i = 0; i < sceneLoader->getNumOfObjects(); i++)
 		{
-			ObjectLoader* renderedObject = sceneLoader.getIthObject(i);
+			ObjectLoader* renderedObject = sceneLoader->getIthObject(i);
 			GameObject* gameObject = activeScene->getAllGameObjects()[i];
 
 			ubo.modelVertices = gameObject->getCurrentTransform();
@@ -1330,7 +1343,24 @@ namespace graphics
 			vkUnmapMemory(device, renderedObject->objectUniformBuffersMemory[1][currentImage]);
 		}
 
-		// TODO: manage background
+		// if there is a background, we print its skybox model
+		if (activeScene->getBackgroundPointer() != NULL)
+		{
+			ubo.modelVertices = mat4(1);
+			ubo.modelNormal = mat4(1);
+
+			uboLight.selectorDirectional = 0;
+			uboLight.selectorPoint = 0;
+			uboLight.selectorSpot = 0;
+
+			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][currentImage], 0, sizeof(ubo), 0, &data);
+			memcpy(data, &ubo, sizeof(ubo));
+			vkUnmapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][currentImage]);
+
+			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[1][currentImage], 0, sizeof(uboLight), 0, &data);
+			memcpy(data, &uboLight, sizeof(uboLight));
+			vkUnmapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[1][currentImage]);
+		}
 	}
 
 	void GraphicsEngine::createDepthResources()
@@ -1444,7 +1474,7 @@ namespace graphics
 
 		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
-		sceneLoader.cleanup();
+		sceneLoader->cleanup();
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
