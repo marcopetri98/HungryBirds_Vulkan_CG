@@ -37,6 +37,13 @@
 #include "../physics/PhysicsEngine.hpp"
 #include "DummyRecursionSolver.hpp"
 #include "SceneLoader.hpp"
+#include "engine/DummyRecursionSolver.hpp"
+#include "engine/DirectionalLight.hpp"
+#include "engine/PointLight.hpp"
+#include "engine/SpotLight.hpp"
+#include "engine/AmbientLight.hpp"
+#include "engine/HemisphericalLight.hpp"
+#include "engine/SphericalLight.hpp"
 #include "../utils/Errors.h"
 #include "../utils/CollectionUtils.hpp"
 
@@ -805,7 +812,7 @@ namespace graphics
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 
 
@@ -1305,6 +1312,9 @@ namespace graphics
 		guboLight.selectorDirectional = activeScene->getDirectionalLightPointer() == NULL ? 0 : 1;
 		guboLight.selectorPoint = activeScene->getPointLightPointer() == NULL ? 0 : 1;
 		guboLight.selectorSpot = activeScene->getSpotLightPointer() == NULL ? 0 : 1;
+		guboLight.selectorAmbient = activeScene->getAmbientLightPointer() == NULL ? 0 : 1;
+		guboLight.selectorHemispherical = activeScene->getHemisphericalLightPointer() == NULL ? 0 : 1;
+		guboLight.selectorSpherical = activeScene->getSphericalLightPointer() == NULL ? 0 : 1;
 		if (guboLight.selectorDirectional)
 		{
 			DirectionalLight* light = activeScene->getDirectionalLightPointer();
@@ -1329,6 +1339,28 @@ namespace graphics
 			guboLight.spotDistanceReduction = light->getDistanceReduction();
 			guboLight.spotCosineOuterAngle = light->getCosineOuterAngle();
 			guboLight.spotCosineInnerAngle = light->getCosineInnerAngle();
+		}
+		if (guboLight.selectorAmbient)
+		{
+			AmbientLight* light = activeScene->getAmbientLightPointer();
+			guboLight.ambientColor = light->getLightColor();
+			guboLight.ambientReflection = light->getLightReflection();
+		}
+		if (guboLight.selectorHemispherical)
+		{
+			HemisphericalLight* light = activeScene->getHemisphericalLightPointer();
+			guboLight.hemisphericalTopColor = light->getLightColor();
+			guboLight.hemisphericalBottomColor = light->getLightBottomColor();
+			guboLight.hemisphericalTopDir = light->getLightTopDir();
+			guboLight.hemisphericalReflection = light->getLightReflection();
+		}
+		if (guboLight.selectorSpherical)
+		{
+			SphericalLight* light = activeScene->getSphericalLightPointer();
+			guboLight.sphericalColorDeviationX = light->getLightColor();
+			guboLight.sphericalColorDeviationY = light->getLightDeviationYColor();
+			guboLight.sphericalColorDeviationZ = light->getLightDeviationZColor();
+			guboLight.sphericalReflection = light->getLightReflection();
 		}
 
 		vkMapMemory(device, sceneLoader->globalUniformBuffersMemory[1][currentImage], 0, sizeof(gubo), 0, &data);

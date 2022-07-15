@@ -27,9 +27,9 @@ layout(binding = 1) uniform GlobalUniformBufferObjectLight {
 	vec3 hemisphericalBottomColor;
 	vec3 hemisphericalTopDir;
 	vec3 hemisphericalReflection;
-	vec3 sphericalDeviationX;
-	vec3 sphericalDeviationY;
-	vec3 sphericalDeviationZ;
+	vec3 sphericalColorDeviationX;
+	vec3 sphericalColorDeviationY;
+	vec3 sphericalColorDeviationZ;
 	vec3 sphericalReflection;
     int selectorDiffuse;
     int selectorSpecular;

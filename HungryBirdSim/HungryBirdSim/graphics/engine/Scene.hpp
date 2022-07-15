@@ -15,6 +15,9 @@
 #include "PointLight.hpp"
 #include "SpotLight.hpp"
 #include "LightEnums.hpp"
+#include "AmbientLight.hpp"
+#include "HemisphericalLight.hpp"
+#include "SphericalLight.hpp"
 
 using std::string;
 using std::vector;
@@ -68,6 +71,9 @@ namespace graphics
 		SpotLight* getSpotLightPointer();
 		DiffuseModel getDiffuseModel();
 		SpecularModel getSpecularModel();
+		AmbientLight* getAmbientLightPointer();
+		HemisphericalLight* getHemisphericalLightPointer();
+		SphericalLight* getSphericalLightPointer();
 		/**
 		 * Gets the scene camera.
 		 * 
@@ -144,6 +150,9 @@ namespace graphics
 		SpotLight* spotLight;
 		DiffuseModel diffuseModel;
 		SpecularModel specularModel;
+		AmbientLight* ambientLight;
+		HemisphericalLight* hemisphericalLight;
+		SphericalLight* sphericalLight;
 		/**
 		 * The camera defining the view.
 		 */

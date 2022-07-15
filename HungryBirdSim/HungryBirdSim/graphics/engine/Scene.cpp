@@ -6,6 +6,9 @@
 #include "DirectionalLight.hpp"
 #include "PointLight.hpp"
 #include "SpotLight.hpp"
+#include "AmbientLight.hpp"
+#include "HemisphericalLight.hpp"
+#include "SphericalLight.hpp"
 #include "../../utils/CollectionUtils.hpp"
 
 using collectionutils::vectorContains;
@@ -101,6 +104,21 @@ namespace graphics
 	SpecularModel Scene::getSpecularModel()
 	{
 		return this->specularModel;
+	}
+
+	AmbientLight* Scene::getAmbientLightPointer()
+	{
+		return this->ambientLight;
+	}
+
+	HemisphericalLight* Scene::getHemisphericalLightPointer()
+	{
+		return this->hemisphericalLight;
+	}
+
+	SphericalLight* Scene::getSphericalLightPointer()
+	{
+		return this->sphericalLight;
 	}
 
 	Camera* Scene::getCamera()
