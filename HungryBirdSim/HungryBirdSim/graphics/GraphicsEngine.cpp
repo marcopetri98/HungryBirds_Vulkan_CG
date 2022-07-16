@@ -160,6 +160,7 @@ namespace graphics
 			}
 			else
 			{
+				physicsEngine->untrackAll();
 				activeScene = allScenes[this->mapSceneIdsToPos[sceneId]];
 				vkDeviceWaitIdle(device);
 				this->updatePhysicsEngine();
