@@ -71,6 +71,8 @@ namespace graphics
 		this->fovy = fovy;
 		this->vertexShaderPath = "shaders/vert.spv";
 		this->fragmentShaderPath = "shaders/frag.spv";
+		this->backgroundVertexShaderPath = "shaders/backVert.spv";
+		this->backgroundFragmentShaderPath = "shaders/backFrag.spv";
 		useValidationLayers = true;
 	}
 	
@@ -197,6 +199,16 @@ namespace graphics
 		// TODO: add runtime shader path change
 	}
 
+	void GraphicsEngine::setBackgroundVertexShaderPath(string path)
+	{
+		this->backgroundVertexShaderPath = path;
+	}
+
+	void GraphicsEngine::setBackgroundFragmentShaderPath(string path)
+	{
+		this->backgroundFragmentShaderPath = path;
+	}
+
 	void GraphicsEngine::initWindow()
 	{
 		glfwInit();
@@ -237,8 +249,8 @@ namespace graphics
 		// creation of the graphics pipeline with render passes
 		createRenderPass();
 		createFramebuffers();
-		createGraphicsPipeline(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, &graphicsPipeline, &pipelineLayout);
-		createGraphicsPipeline(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE, &backgroundPipeline, &backgroundPipelineLayout);
+		createGraphicsPipeline(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, &graphicsPipeline, &pipelineLayout, this->vertexShaderPath, this->fragmentShaderPath);
+		createGraphicsPipeline(VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE, &backgroundPipeline, &backgroundPipelineLayout, this->backgroundVertexShaderPath, this->backgroundFragmentShaderPath);
 
 		// create uniform buffers to pass to the shaders
 		createSyncObjects();
@@ -781,9 +793,9 @@ namespace graphics
 		return shaderModule;
 	}
 
-	void GraphicsEngine::createGraphicsPipeline(VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr) {
-		auto vertShaderCode = readFile(this->vertexShaderPath);
-		auto fragShaderCode = readFile(this->fragmentShaderPath);
+	void GraphicsEngine::createGraphicsPipeline(VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr, string vertexPath, string fragmentPath) {
+		auto vertShaderCode = readFile(vertexPath);
+		auto fragShaderCode = readFile(fragmentPath);
 		VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 		VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
@@ -1438,6 +1450,7 @@ namespace graphics
 				ubo.modelNormal = glm::inverse(glm::transpose(gameObject->getCurrentTransform()));
 
 				uboLight.selectorBackground = 0;
+				uboLight.selectorObject = 1;
 
 				vkMapMemory(device, renderedObject->objectUniformBuffersMemory[j][0][currentImage], 0, sizeof(ubo), 0, &data);
 				memcpy(data, &ubo, sizeof(ubo));
@@ -1456,6 +1469,7 @@ namespace graphics
 			ubo.modelNormal = glm::inverse(glm::transpose(ubo.modelVertices));
 
 			uboLight.selectorBackground = 1;
+			uboLight.selectorObject = 0;
 
 			vkMapMemory(device, sceneLoader->backgroundLoader->objectUniformBuffersMemory[0][0][currentImage], 0, sizeof(ubo), 0, &data);
 			memcpy(data, &ubo, sizeof(ubo));

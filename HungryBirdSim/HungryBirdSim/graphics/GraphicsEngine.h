@@ -52,6 +52,8 @@ namespace graphics
 		void selectScene(int sceneId);
 		void setVertexShaderPath(string path);
 		void setFragmentShaderPath(string path);
+		void setBackgroundVertexShaderPath(string path);
+		void setBackgroundFragmentShaderPath(string path);
 
 		private:
 		friend class ObjectLoader;
@@ -72,6 +74,8 @@ namespace graphics
 		float fovy;
 		string vertexShaderPath;
 		string fragmentShaderPath;
+		string backgroundVertexShaderPath;
+		string backgroundFragmentShaderPath;
 
 		void updatePhysicsEngine();
 
@@ -239,7 +243,7 @@ namespace graphics
 		 * @param pipelinePtr pointer to the pipeline to create
 		 * @param pipelineLayoutPtr pointer to the pipeline layout to fill
 		 */
-		void createGraphicsPipeline(VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr);
+		void createGraphicsPipeline(VkCullModeFlags cullMode, VkFrontFace frontFace, VkPipeline* pipelinePtr, VkPipelineLayout* pipelineLayoutPtr, string vertexPath, string fragmentPath);
 		/**
 		 * Helper function to load the binary data from a file.
 		 * 

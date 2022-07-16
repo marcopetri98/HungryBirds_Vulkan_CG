@@ -65,6 +65,7 @@ namespace graphics
 	struct UniformBufferObjectLight
 	{
 		alignas(4) int selectorBackground;
+		alignas(4) int selectorObject;
 	};
 }
 
