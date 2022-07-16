@@ -43,6 +43,8 @@ namespace app
 		 */
 		void handleCommands(float deltaTime);
 
+		void resetCoordinates();
+
 		private:
 		GraphicsEngine* graphicsEngine;
 		PhysicsEngine* physicsEngine;
