@@ -65,7 +65,7 @@ namespace app
 		physicsEngine->scaleObjectInPlace(main_bird, vec3(3));
 		physicsEngine->rotateObjectInPlace(main_arrow, vec3(0, 90, 180));
 		physicsEngine->translateObjectInPlace(main_arrow, vec3(0, 0, -11.5));
-		physicsEngine->translateObjectInPlace(floor, vec3(0, -20, 0));
+		physicsEngine->translateObjectInPlace(floor, vec3(0, -5, 0));
 		physicsEngine->translateObjectInPlace(apple, vec3(0, 3, -20));
 		physicsEngine->rotateObjectInPlace(main_bird, vec3(0, 180, 0));
 		main_arrow->setInitialTransform(main_arrow->getCurrentTransform());
@@ -199,7 +199,7 @@ namespace app
 		Background* background_2 = new Background("objects/MountainSkyBox.obj", "textures/0-city-skybox.png");
 
 		GameObject* floor_2 = new GameObject("floor", vector<Tag>{Tag::GROUND}, "objects/floor.obj", "textures/city-ground.png");
-		physicsEngine->translateObjectInPlace(floor_2, vec3(0.f, -150.f, 0.f));
+		physicsEngine->translateObjectInPlace(floor_2, vec3(0.f, -5.f, 0.f));
 		PlaneCollider3D* floorCollider_2 = new PlaneCollider3D(floor_2, 20000.f, 20000.f);
 		floor_2->setCollider(floorCollider_2);
 		floorCollider_2->setGameObject(floor_2);
@@ -229,7 +229,7 @@ namespace app
 		physicsEngine->translateObjectInPlace(main_arrow_3, vec3(0, 0, -11.5));
 		main_arrow_3->setInitialTransform(main_arrow_3->getCurrentTransform());
 
-		physicsEngine->scaleObjectInPlace(bird_3, vec3(3));
+		physicsEngine->scaleObjectInPlace(bird_3, vec3(5));
 		physicsEngine->rotateObjectInPlace(bird_3, vec3(0, 180, 0));
 		bird_3->setInitialTransform(bird_3->getCurrentTransform());
 		BoxCollider3D* arrowCollider_3 = new BoxCollider3D(main_arrow_3, 1.0f);
@@ -237,13 +237,13 @@ namespace app
 		arrowCollider_3->setGameObject(main_arrow_3);
 
 		GameObject* apple_3 = new GameObject("apple_sand", vector<Tag>{Tag::ENEMY_OBJ}, "objects/apple.obj", "textures/apple.png");
-		SphereCollider* appleCollider_3 = new SphereCollider(3.5f);
+		SphereCollider* appleCollider_3 = new SphereCollider(4.5f);
 		apple_3->setCollider(appleCollider_3);
 		appleCollider_3->setGameObject(apple_3);
 
 
 		physicsEngine->scaleObjectInPlace(apple_3, vec3(2.f));
-		physicsEngine->translateObjectInPlace(apple_3, vec3(0.f, 5.f, -30.f));
+		physicsEngine->translateObjectInPlace(apple_3, vec3(0.f, 11.f, -30.f));
 
 		Camera* camera_3 = new Camera();
 		camera_3->lookAtGameObject(bird_3, vec3(50, 0, 0), vec3(0, 1, 0));
@@ -257,15 +257,44 @@ namespace app
 		Background* background_3 = new Background("objects/MountainSkyBox.obj", "textures/Skybox.png");
 
 		GameObject* floor_3 = new GameObject("floor", vector<Tag>{Tag::GROUND}, "objects/floor.obj", "textures/sand_ground.jpg");
-		physicsEngine->translateObjectInPlace(floor_3, vec3(0.f, -150.f, 0.f));
+		physicsEngine->translateObjectInPlace(floor_3, vec3(0.f, -5.f, 0.f));
 		PlaneCollider3D* floorCollider_3 = new PlaneCollider3D(floor_3, 20000.f, 20000.f);
 		floor_3->setCollider(floorCollider_3);
 		floorCollider_3->setGameObject(floor_3);
 
-		vector<GameObject*> gameObjects_3 = { bird_3, floor_3, main_arrow_3, apple_3 };
-		Scene* scene_beach = new Scene(gameObjects_3, 1, cameras_3, background_3, "Sand", 2);
-		scene_beach->setDirectionalLight(new DirectionalLight(vec3(0.5, 15.5, 0.5), vec3(0.2, 0.2, 0.2)));
+		vector<GameObject*> walls_3;
+		for (int i = 0; i < 7; i++) { // number of stairs
+			for (int j = 0; j < 5; j++) {
+				GameObject* wall1 = new GameObject("wall_3_" + to_string(i * 5 + j), vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/wallBox.obj", "textures/wallBox.jpg");
+				physicsEngine->rotateObjectInPlace(wall1, vec3(90, 45, 90));
+				physicsEngine->translateObjectInPlace(wall1, vec3(-4 + j * 2, -3 + i, -(13 + 2 * i)));
+				BoxCollider3D* wallCollider1 = new BoxCollider3D(wall1, 2.0f);
+				wall1->setCollider(wallCollider1);
+				wallCollider1->setGameObject(wall1);
+				walls_3.push_back(wall1);
+			}
+		}
+
+		for (int i = 0; i < 7; i++) { // number of stairs
+			for (int j = 0; j < 5; j++) {
+				GameObject* wall1 = new GameObject("wall_31_" + to_string(i * 5 + j), vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/wallBox.obj", "textures/wallBox.jpg");
+				physicsEngine->rotateObjectInPlace(wall1, vec3(90, 45, 90));
+				physicsEngine->translateObjectInPlace(wall1, vec3(-4 + j * 2, 18 - i, -(13 + 2 * i)));
+				BoxCollider3D* wallCollider1 = new BoxCollider3D(wall1, 2.0f);
+				wall1->setCollider(wallCollider1);
+				wallCollider1->setGameObject(wall1);
+				walls_3.push_back(wall1);
+			}
+		}
+
+		vector<GameObject*> gameObjects_3 = { bird_3, floor_3, main_arrow_3, apple_3 };		
+		for (GameObject* go : walls_3) {
+			gameObjects_3.push_back(go);
+		}
+		Scene* scene_beach = new Scene(gameObjects_3, 0, cameras_3, background_3, "Sand", 2);
+		scene_beach->setDirectionalLight(new DirectionalLight(vec3(1, 1, 1), vec3(0.2, 0.2, 0.2)));
 		scene_beach->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0.3, 0, 0)));
+		scene_beach->setSpotLight(new SpotLight(glm::vec3(0.f, 20.f, 10.f), glm::vec3(0.f, 25.f, 10.f),glm::vec3(1.f,1.f,1.f)));
 		scene_beach->setSpecularModel(graphics::SpecularModel::TOON);
 		scene_beach->setDiffuseModel(graphics::DiffuseModel::TOON);
 		/////////////////////// Final Call to Graphics Engine //////////////////////////
