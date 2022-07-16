@@ -141,8 +141,8 @@ namespace app
 		Scene* scene = new Scene(gameObjects, 1, cameras, background, "Nature", 0);
 		scene->setDirectionalLight(new DirectionalLight(vec3(1.0, -15.0, -10.0), vec3(1.0, 1.0, 1.0)));
 		scene->setAmbientLight(new AmbientLight(vec3(0.4, 0.3, 0.3), vec3(0.3, 0.3, 0.3)));
-		// scene->setPointLight(new PointLight(vec3(0.f, -15.f, 0.f), vec3(0.1f, 0.1f, 0.1f), 0.2));
-		scene->setSpotLight(new SpotLight(vec3(1.f, 2.f, 1.f), vec3(1.f, 2.f+0.5f, 1.f ), vec3(5.0f, 5.0f, 5.0f), 1.0f, 0.8f, 15.0f, 5.0f));
+		scene->setPointLight(new PointLight(vec3(0.f, -15.f, 0.f), vec3(0.1f, 0.1f, 0.1f), 0.2));
+		//scene->setSpotLight(new SpotLight(vec3(1.f, 2.f, 1.f), vec3(1.f, 2.f+0.5f, 1.f ), vec3(5.0f, 5.0f, 5.0f), 1.0f, 0.8f, 15.0f, 5.0f));
 		scene->setSpecularModel(graphics::SpecularModel::BLINN);
 		scene->setDiffuseModel(graphics::DiffuseModel::OREN_NAYAR);
 		this->bird = main_bird;
@@ -350,17 +350,37 @@ namespace app
 			this->graphicsEngine->selectScene("Sand");
 			resetCoordinates();
 		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_P))
+		{   
+			DirectionalLight* dlPointer = this->graphicsEngine->activeScene->getDirectionalLightPointer();
+			if (dlPointer != NULL) {
+				dlPointer->setLightDir(dlPointer->getLightDir() + vec3(0.1, 0, 0));
+			}
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_O))
+		{
+			DirectionalLight* dlPointer = this->graphicsEngine->activeScene->getDirectionalLightPointer();
+			if (dlPointer != NULL) {
+				dlPointer->setLightDir(dlPointer->getLightDir() + vec3(-0.1, 0, 0));
+			}
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_E)) {
+			this->physicsEngine->rotateObjectInPlace(camera, vec3(0, 0.2f, 0));
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_Q)) {
+			this->physicsEngine->rotateObjectInPlace(camera, vec3(0, -0.2f, 0));
+		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_UP)) {
-			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[0]);
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0,0,1));
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_DOWN)) {
-			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[2]);
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, 0, -1));
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_LEFT)) {
-			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[3]);
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(1, 0, 0));
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_RIGHT)) {
-			this->physicsEngine->translateObjectInPlace(camera, deltaT * cameraDirsFRBL[1]);
+			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(-1, 0, 0));
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_SPACE)) {
 			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, -1, 0));
@@ -397,16 +417,16 @@ namespace app
 		if (!this->launched) {
 			//Arrow
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_W)) {
-				this->arrowAngle1 += 0.01f;
+				this->arrowAngle1 += 0.1f;
 			}
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_A)) {
-				this->arrowAngle2 += 0.01f;
+				this->arrowAngle2 += 0.1f;
 			}
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_S)) {
-				this->arrowAngle1 -= 0.01f;
+				this->arrowAngle1 -= 0.1f;
 			}
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_D)) {
-				this->arrowAngle2 -= 0.01f;
+				this->arrowAngle2 -= 0.1f;
 			}
 
 			if (this->arrowAngle1 >= 25) {

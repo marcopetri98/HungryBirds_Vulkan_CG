@@ -17,6 +17,8 @@ namespace graphics
 		DirectionalLight(vec3 direction, vec3 color);
 		vec3 getLightDir();
 		vec3 getLightColor();
+		void setLightDir(vec3 dir);
+		void setLightColor(vec3 color);
 
 		private:
 		vec3 direction;

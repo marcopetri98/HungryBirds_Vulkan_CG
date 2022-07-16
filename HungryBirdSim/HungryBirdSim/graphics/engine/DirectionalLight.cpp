@@ -21,4 +21,13 @@ namespace graphics
 	{
 		return this->color;
 	}
+
+	void DirectionalLight::setLightDir(vec3 dir)
+	{
+		this->direction = dir;
+	}
+	void DirectionalLight::setLightColor(vec3 color)
+	{
+		this->color = color;
+	}
 }
