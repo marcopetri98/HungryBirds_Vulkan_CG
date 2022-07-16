@@ -54,6 +54,7 @@ namespace graphics
 		 * @return The GameObject.
 		 */
 		GameObject getGameObjectByName(string name);
+		GameObject* getGameObjectPointerByName(string name);
 		vector<GameObject*> getAllGameObjectsByObjTexPaths(string objPath, string texPath);
 		/**
 		 * Gets all the game objects of the scene.
@@ -121,6 +122,8 @@ namespace graphics
 		void setHemisphericLight(HemisphericalLight* hemisphericalLight);
 		void setSphericalLight(SphericalLight* sphericalLight);
 		void setCurrCameraIdx(int idx);
+		void setDiffuseModel(DiffuseModel diffuseModel);
+		void setSpecularModel(SpecularModel specularModel);
 		/**
 		 * Set the camera for the scene.
 		 * 

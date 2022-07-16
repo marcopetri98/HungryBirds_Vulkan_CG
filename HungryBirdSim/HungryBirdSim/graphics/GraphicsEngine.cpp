@@ -132,6 +132,18 @@ namespace graphics
 		}
 	}
 
+	Scene* GraphicsEngine::getScene(string sceneName)
+	{
+		if (!vectorContains(this->sceneNames, sceneName))
+		{
+			throw std::runtime_error("There isn't a scene with name " + sceneName);
+		}
+		else
+		{
+			return allScenes[this->mapSceneNamesIds[sceneName]];
+		}
+	}
+
 	void GraphicsEngine::selectScene(int sceneId)
 	{
 		if (!vectorContains(this->sceneIds, sceneId))

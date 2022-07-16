@@ -48,6 +48,7 @@ namespace graphics
 		void setPhysicsEngine(PhysicsEngine* engine);
 		void addScenes(vector<Scene*> scenes);
 		void selectScene(string sceneName);
+		Scene* getScene(string sceneName);
 		void selectScene(int sceneId);
 		void setVertexShaderPath(string path);
 		void setFragmentShaderPath(string path);

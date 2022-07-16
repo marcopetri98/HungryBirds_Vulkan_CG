@@ -74,6 +74,18 @@ namespace graphics
 		}
 	}
 
+	GameObject* Scene::getGameObjectPointerByName(string name)
+	{
+		if (!vectorContains(this->gameObjectsNames, name))
+		{
+			throw std::runtime_error("There isn't a game object with name: " + name);
+		}
+		else
+		{
+			return this->mapNamesGameObjects[name];
+		}
+	}
+
 	int Scene::getNumOfGameObjects()
 	{
 		return this->gameObjects.size();
@@ -252,5 +264,13 @@ namespace graphics
 	void Scene::setBackground(Background* background)
 	{
 		this->background = background;
+	}
+
+	void Scene::setDiffuseModel(DiffuseModel diffuseModel) {
+		this->diffuseModel = diffuseModel;
+	}
+	
+	void Scene::setSpecularModel(SpecularModel specularModel) {
+		this->specularModel = specularModel;
 	}
 }
