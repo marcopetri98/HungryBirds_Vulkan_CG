@@ -43,6 +43,8 @@ namespace app
 		 */
 		void handleCommands(float deltaTime);
 
+		void handleAutomaticMovement(float deltaTime, int iteration);
+
 		void resetCoordinates();
 
 		private:

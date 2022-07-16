@@ -145,6 +145,10 @@ namespace graphics
 			return allScenes[this->mapSceneNamesIds[sceneName]];
 		}
 	}
+	Scene* GraphicsEngine::getCurrentScene()
+	{
+		return activeScene;
+	}
 
 	void GraphicsEngine::selectScene(int sceneId)
 	{
