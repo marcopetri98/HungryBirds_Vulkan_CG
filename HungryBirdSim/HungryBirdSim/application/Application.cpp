@@ -368,14 +368,14 @@ namespace app
 		{   
 			DirectionalLight* dlPointer = this->graphicsEngine->activeScene->getDirectionalLightPointer();
 			if (dlPointer != NULL) {
-				dlPointer->setLightDir(dlPointer->getLightDir() + vec3(0.1, 0, 0));
+				dlPointer->setLightDir(dlPointer->getLightDir() + vec3(0.001, 0, 0));
 			}
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_O))
 		{
 			DirectionalLight* dlPointer = this->graphicsEngine->activeScene->getDirectionalLightPointer();
 			if (dlPointer != NULL) {
-				dlPointer->setLightDir(dlPointer->getLightDir() + vec3(-0.1, 0, 0));
+				dlPointer->setLightDir(dlPointer->getLightDir() + vec3(-0.001, 0, 0));
 			}
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_E)) {

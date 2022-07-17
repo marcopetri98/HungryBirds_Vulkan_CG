@@ -182,6 +182,9 @@ namespace physics {
 						else if (tag & this->groundTags) {
 							go->setVelocity(vec3(0, 0, 0));
 							go->setAcceleration(vec3(0, 0, 0));
+							if (go->getTag() & this->movableTag) {
+								hideObject(go);
+							}
 						}
 						else if (tag & this->enemyTags) {
 							hideObject(collision.collidedObject);
