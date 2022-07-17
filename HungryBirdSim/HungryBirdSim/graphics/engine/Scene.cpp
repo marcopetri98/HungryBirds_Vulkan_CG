@@ -86,6 +86,31 @@ namespace graphics
 		}
 	}
 
+	void Scene::useDirectionalLight() {
+		DirectionalLight* buffer = lastdirLight;
+		lastdirLight = dirLight;
+		dirLight = buffer;
+	}
+
+
+	void Scene::usePointLight() {
+		PointLight* buffer = lastpointLight;
+		lastpointLight = pointLight;
+		pointLight = buffer;
+	}
+
+	void Scene::useSpotLight() {
+		SpotLight* buffer = lastspotLight;
+		lastspotLight = spotLight;
+		spotLight = buffer;
+	}
+
+	void Scene::useAmbientLight() {
+		AmbientLight* buffer = lastambientLight;
+		lastambientLight = ambientLight;
+		ambientLight = buffer;
+	}
+
 	int Scene::getNumOfGameObjects()
 	{
 		return this->gameObjects.size();

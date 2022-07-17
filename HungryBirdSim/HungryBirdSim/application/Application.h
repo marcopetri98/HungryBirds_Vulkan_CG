@@ -53,6 +53,7 @@ namespace app
 		GameObject* arrow;
 		GameObject* bird;
 		std::chrono::time_point<Clock> lastCameraChangeTime;
+		std::chrono::time_point<Clock> lastLightChangeTime;
 		float arrowAngle1, arrowAngle2;
 		bool launched;
 	};

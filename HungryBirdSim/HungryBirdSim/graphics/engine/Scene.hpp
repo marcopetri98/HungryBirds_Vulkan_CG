@@ -144,6 +144,14 @@ namespace graphics
 		 */
 		void setBackground(Background* background);
 
+		void useDirectionalLight();
+
+		void usePointLight();
+
+		void useSpotLight();
+
+		void useAmbientLight();
+
 		private:
 		/**
 		 * Vector of the names of the game objects.
@@ -165,6 +173,17 @@ namespace graphics
 		AmbientLight* ambientLight;
 		HemisphericalLight* hemisphericalLight;
 		SphericalLight* sphericalLight;
+
+		DirectionalLight* lastdirLight;
+		PointLight* lastpointLight;
+		SpotLight* lastspotLight;
+		DiffuseModel lastdiffuseModel;
+		SpecularModel lastspecularModel;
+		AmbientLight* lastambientLight;
+		HemisphericalLight* lasthemisphericalLight;
+		SphericalLight* lastsphericalLight;
+
+
 		int currCameraIdx = 0;
 		/**
 		 * The camera defining the view.

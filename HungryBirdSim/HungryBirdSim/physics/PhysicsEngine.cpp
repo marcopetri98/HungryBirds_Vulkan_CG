@@ -172,24 +172,12 @@ namespace physics {
 						if (tag & this->collisionTags) {
 							vec3 newVel;
 							if (tag & this->movableTag) {
-								//TODO non usare funziona male
-								float rand_x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-								float rand_y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-								float rand_z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-								newVel = velocity * 0.5f;
-								go->setVelocity(newVel+vec3(rand_x, rand_y, rand_z));
-							    rand_x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-								rand_y = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-								rand_z = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-								collision.collidedObject->setVelocity(newVel+vec3(rand_x, rand_y, rand_z));
+								vec3 oldVel = velocity;
+								collision.collidedObject->setVelocity(oldVel*(collisionDamping/2));
 								collision.collidedObject->getCollider()->setLastCollision(go->getName());
 							}
-							else {
-								newVel = (normalize(velocity) - collision.collisionDir) * length(velocity) * (1 - this->collisionDamping);
-								go->setVelocity(newVel);
-							}
-							
+							newVel = (normalize(velocity) - collision.collisionDir) * length(velocity) * (1 - this->collisionDamping);
+							go->setVelocity(newVel);
 						}
 						else if (tag & this->groundTags) {
 							go->setVelocity(vec3(0, 0, 0));

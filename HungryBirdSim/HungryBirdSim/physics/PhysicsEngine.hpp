@@ -23,7 +23,7 @@ namespace physics
 	class PhysicsEngine {
 		public:
 		PhysicsEngine();
-		PhysicsEngine(bool raycast3d, vec3 ambient_acc = vec3(0, -9.81f, 0), float collisionDamping = 0.1);
+		PhysicsEngine(bool raycast3d, vec3 ambient_acc = vec3(0, -9.81f, 0), float collisionDamping = 0.3);
 		/**
 		 * Translate an object by the given vector of displacements.
 		 * 

@@ -54,11 +54,12 @@ namespace app
 		this->arrowAngle2 = 0;
 		this->launched = false;
 		this->lastCameraChangeTime = std::chrono::high_resolution_clock::now();
+		this->lastLightChangeTime = std::chrono::high_resolution_clock::now();
 		//////////////////////////// SCENE 2 ///////////////////////////////////////
 		GameObject* main_bird = new GameObject("main_bird", vector<Tag>{}, "objects/chuck.obj", "textures/bird.png");
 		GameObject* floor = new GameObject("floor", vector<Tag>{Tag::GROUND}, "objects/floor.obj", "textures/grassPlane.jpg");
-		GameObject* pig = new GameObject("pig", vector<Tag>{Tag::ENEMY_OBJ}, "objects/pig.obj", "textures/bird.png");
-		GameObject* pig2 = new GameObject("pig-2", vector<Tag>{Tag::ENEMY_OBJ}, "objects/pig.obj", "textures/bird.png");
+		GameObject* pig = new GameObject("pig", vector<Tag>{Tag::MOVABLE_COLLIDABLE_OBJECT}, "objects/pig.obj", "textures/bird.png");
+		GameObject* pig2 = new GameObject("pig-2", vector<Tag>{Tag::MOVABLE_COLLIDABLE_OBJECT}, "objects/pig.obj", "textures/bird.png");
 		GameObject* apple = new GameObject("apple-nature", vector<Tag>{Tag::ENEMY_OBJ}, "objects/apple.obj", "textures/apple.png");
 		GameObject* main_arrow = new GameObject("arrow", vector<Tag>{}, "objects/arrow.obj", "textures/arrow.png");
 		physicsEngine->scaleObjectInPlace(main_arrow, vec3(0.5));
@@ -139,14 +140,14 @@ namespace app
 		}
 		vector<Camera*> cameras = { camera, camera2 };
 		Scene* scene = new Scene(gameObjects, 1, cameras, background, "Nature", 0);
-		scene->setDirectionalLight(new DirectionalLight(vec3(1.0, -15.0, -10.0), vec3(1.0, 1.0, 1.0)));
+		scene->setDirectionalLight(new DirectionalLight(vec3(1.0, 4.0, -10.0), vec3(1.0, 1.0, 1.0)));
 		scene->setAmbientLight(new AmbientLight(vec3(0.4, 0.3, 0.3), vec3(0.3, 0.3, 0.3)));
-		scene->setPointLight(new PointLight(vec3(0.f, -15.f, 0.f), vec3(0.1f, 0.1f, 0.1f), 0.2));
-		scene->setSpotLight(new SpotLight(vec3(1.f, 2.f, 1.f), vec3(1.f, 2.f + 0.5f, 1.f), vec3(5.0f, 5.0f, 5.0f), 1.0f, 0.8f, 15.0f, 5.0f));
+		scene->setPointLight(new PointLight(vec3(-2.f, 4.f, 8.f), vec3(1.f, 0.1f, 0.1f), 1.5f));
+		scene->setSpotLight(new SpotLight(vec3(5.f, 2.f, -3.f), vec3(-2.f, 3.5f, 1.f), vec3(0.2f, 0.4f, 0.5f), 15.0f, 0.8f, 15.0f, 5.0f));
 
 		//scene->setSpotLight(new SpotLight(vec3(1.f, 2.f, 1.f), vec3(1.f, 2.f+0.5f, 1.f ), vec3(5.0f, 5.0f, 5.0f), 1.0f, 0.8f, 15.0f, 5.0f));
 		scene->setSpecularModel(graphics::SpecularModel::BLINN);
-		scene->setDiffuseModel(graphics::DiffuseModel::OREN_NAYAR);
+		scene->setDiffuseModel(graphics::DiffuseModel::LAMBERT);
 		this->bird = main_bird;
 		this->arrow = main_arrow;
 
@@ -211,8 +212,11 @@ namespace app
 			gameObjects_2.push_back(go);
 		}
 		scene_city = new Scene(gameObjects_2, 1, cameras_2, background_2, "City", 1);
-		scene_city->setDirectionalLight(new DirectionalLight(vec3(0.5, 15.5, 0.5), vec3(0.2, 0.2, 0.2)));
+		scene_city->setDirectionalLight(new DirectionalLight(vec3(0.5, 2.5, 0.5), vec3(0.5, 0.3, 0.7)));
 		scene_city->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0.3, 0, 0)));
+		scene_city->setPointLight(new PointLight(vec3(10.f, 6.f, -8.f), vec3(0.f, 0.6f, 0.4f), 1.5f));
+		scene_city->setSpotLight(new SpotLight(vec3(-5.f, 4.f, 3.f), vec3(2.f, 0.f, 0.f), vec3(0.5f, 0.4f, 0.1f), 15.0f, 0.8f, 15.0f, 5.0f));
+
 		this->bird = bird_2;
 		this->arrow = main_arrow_2;
 		scene_city->setSpecularModel(graphics::SpecularModel::BLINN);
@@ -243,8 +247,8 @@ namespace app
 		apple_3->setCollider(appleCollider_3);
 		appleCollider_3->setGameObject(apple_3);
 
-		GameObject* pig_3 = new GameObject("pig_sand", vector<Tag>{Tag::ENEMY_OBJ}, "objects/pigking.obj", "textures/bird.png");
-		SphereCollider* pigCollider_3 = new SphereCollider(4.5f);
+		GameObject* pig_3 = new GameObject("pig_sand", vector<Tag>{Tag::RIGID_COLLIDABLE_OBJECT}, "objects/pigking.obj", "textures/bird.png");
+		SphereCollider* pigCollider_3 = new SphereCollider(4.f);
 		pig_3->setCollider(pigCollider_3);
 		pigCollider_3->setGameObject(pig_3);
 
@@ -303,7 +307,8 @@ namespace app
 		Scene* scene_beach = new Scene(gameObjects_3, 0, cameras_3, background_3, "Sand", 2);
 		scene_beach->setDirectionalLight(new DirectionalLight(vec3(1, 1, 1), vec3(0.2, 0.2, 0.2)));
 		scene_beach->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0.3, 0, 0)));
-		scene_beach->setSpotLight(new SpotLight(glm::vec3(0.f, 20.f, 10.f), glm::vec3(0.f, 25.f, 10.f), glm::vec3(1.f, 1.f, 1.f)));
+		scene_beach->setSpotLight(new SpotLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f, 25.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 30.f));
+		scene_beach->setPointLight(new PointLight(vec3(10.f, 6.f, -8.f), vec3(0.f, 0.6f, 0.4f), 1.5f));
 		scene_beach->setSpecularModel(graphics::SpecularModel::TOON);
 		scene_beach->setDiffuseModel(graphics::DiffuseModel::TOON);
 		/////////////////////// Final Call to Graphics Engine //////////////////////////
@@ -410,6 +415,66 @@ namespace app
 				this->lastCameraChangeTime = std::chrono::high_resolution_clock::now();
 			}
 		}
+
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F5)) {
+			this->graphicsEngine->activeScene->setDiffuseModel(graphics::DiffuseModel::LAMBERT);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F6)) {
+			this->graphicsEngine->activeScene->setDiffuseModel(graphics::DiffuseModel::TOON);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F7)) {
+			this->graphicsEngine->activeScene->setDiffuseModel(graphics::DiffuseModel::OREN_NAYAR);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F8)) {
+			this->graphicsEngine->activeScene->setSpecularModel(graphics::SpecularModel::BLINN);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F9)) {
+			this->graphicsEngine->activeScene->setSpecularModel(graphics::SpecularModel::PHONG);
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F10)) {
+			this->graphicsEngine->activeScene->setSpecularModel(graphics::SpecularModel::TOON);
+		}
+
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F1)) {
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>
+				(currentTime - this->lastLightChangeTime).count();
+			if (deltaTime > 0.5) {
+				this->graphicsEngine->activeScene->useDirectionalLight();
+				this->lastLightChangeTime = std::chrono::high_resolution_clock::now();
+			}
+			
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F2)) {
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>
+				(currentTime - this->lastLightChangeTime).count();
+			if (deltaTime > 0.5) {
+				this->graphicsEngine->activeScene->usePointLight();
+				this->lastLightChangeTime = std::chrono::high_resolution_clock::now();
+			}
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F3)) {
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>
+				(currentTime - this->lastLightChangeTime).count();
+			if (deltaTime > 0.5) {
+				this->graphicsEngine->activeScene->useSpotLight();
+				this->lastLightChangeTime = std::chrono::high_resolution_clock::now();
+			}
+		}
+		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_F4)) {
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>
+				(currentTime - this->lastLightChangeTime).count();
+			if (deltaTime > 0.5) {
+				this->graphicsEngine->activeScene->useAmbientLight();
+				this->lastLightChangeTime = std::chrono::high_resolution_clock::now();
+			}
+		}
+
+
+
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_R)) {
 			resetCoordinates();
 		}
@@ -426,16 +491,16 @@ namespace app
 		if (!this->launched) {
 			//Arrow
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_W)) {
-				this->arrowAngle1 += 0.1f;
+				this->arrowAngle1 += 0.01f;
 			}
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_A)) {
-				this->arrowAngle2 += 0.1f;
+				this->arrowAngle2 += 0.01f;
 			}
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_S)) {
-				this->arrowAngle1 -= 0.1f;
+				this->arrowAngle1 -= 0.01f;
 			}
 			if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_D)) {
-				this->arrowAngle2 -= 0.1f;
+				this->arrowAngle2 -= 0.01f;
 			}
 
 			if (this->arrowAngle1 >= 25) {
@@ -472,7 +537,7 @@ namespace app
 			GameObject* pig = currentScene->getGameObjectPointerByName("pig_sand");
 			// To implement this as a per-object field && put debounce
 			// In this case debounce is the number of frames instead of time
-			if (pig->getCurrentPos().y > 10.5f && iteration - debounce > 500) {
+			if (pig->getCurrentPos().y > 14.5f && iteration - debounce > 500) {
 				sign = -sign;
 				debounce = iteration;
 			}
