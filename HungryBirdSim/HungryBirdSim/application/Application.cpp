@@ -143,7 +143,7 @@ namespace app
 		scene->setDirectionalLight(new DirectionalLight(vec3(1.0, 4.0, -10.0), vec3(1.0, 1.0, 1.0)));
 		scene->setAmbientLight(new AmbientLight(vec3(0.4, 0.3, 0.3), vec3(0.3, 0.3, 0.3)));
 		scene->setPointLight(new PointLight(vec3(-2.f, 4.f, 8.f), vec3(1.f, 0.1f, 0.1f), 1.5f));
-		scene->setSpotLight(new SpotLight(vec3(5.f, 2.f, -3.f), vec3(-2.f, 3.5f, 1.f), vec3(0.2f, 0.4f, 0.5f), 15.0f, 0.8f, 15.0f, 5.0f));
+		scene->setSpotLight(new SpotLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f, 25.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 3.f, 0.9, 0.1));
 
 		//scene->setSpotLight(new SpotLight(vec3(1.f, 2.f, 1.f), vec3(1.f, 2.f+0.5f, 1.f ), vec3(5.0f, 5.0f, 5.0f), 1.0f, 0.8f, 15.0f, 5.0f));
 		scene->setSpecularModel(graphics::SpecularModel::BLINN);
@@ -215,7 +215,7 @@ namespace app
 		scene_city->setDirectionalLight(new DirectionalLight(vec3(0.5, 2.5, 0.5), vec3(0.5, 0.3, 0.7)));
 		scene_city->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0.3, 0, 0)));
 		scene_city->setPointLight(new PointLight(vec3(10.f, 6.f, -8.f), vec3(0.f, 0.6f, 0.4f), 1.5f));
-		scene_city->setSpotLight(new SpotLight(vec3(-5.f, 4.f, 3.f), vec3(2.f, 0.f, 0.f), vec3(0.5f, 0.4f, 0.1f), 15.0f, 0.8f, 15.0f, 5.0f));
+		scene_city->setSpotLight(new SpotLight(vec3(0.f, 4.f, 3.f), vec3(0.f, 0.f, 0.f), vec3(0.5f, 0.4f, 0.1f), 20.f, 3.f, 0.9, 0.1));
 
 		this->bird = bird_2;
 		this->arrow = main_arrow_2;
@@ -307,8 +307,8 @@ namespace app
 		Scene* scene_beach = new Scene(gameObjects_3, 0, cameras_3, background_3, "Sand", 2);
 		scene_beach->setDirectionalLight(new DirectionalLight(vec3(1, 1, 1), vec3(0.2, 0.2, 0.2)));
 		scene_beach->setAmbientLight(new AmbientLight(vec3(1, 1, 1), vec3(0.3, 0, 0)));
-		scene_beach->setSpotLight(new SpotLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f, 25.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 30.f));
-		scene_beach->setPointLight(new PointLight(vec3(10.f, 6.f, -8.f), vec3(0.f, 0.6f, 0.4f), 1.5f));
+		scene_beach->setSpotLight(new SpotLight(glm::vec3(0.f, 0.f, 0.f), glm::vec3(10.f, 25.f, 10.f), glm::vec3(1.f, 1.f, 1.f), 20.f, 3.f, 0.9, 0.1));
+		scene_beach->setPointLight(new PointLight(vec3(-10.f, 1.f, -8.f), vec3(0.f, 0.6f, 0.4f), 10.f));
 		scene_beach->setSpecularModel(graphics::SpecularModel::TOON);
 		scene_beach->setDiffuseModel(graphics::DiffuseModel::TOON);
 		/////////////////////// Final Call to Graphics Engine //////////////////////////
