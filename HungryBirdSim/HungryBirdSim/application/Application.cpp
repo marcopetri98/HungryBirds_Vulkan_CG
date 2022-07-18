@@ -7,6 +7,7 @@
 #include "Application.h"
 #include "../RecSolver.h"
 #include "glm/glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 #include "../physics/PhysicsEngine.hpp"
 #include "../graphics/engine/DummyRecursionSolver.hpp"
 #include "../graphics/engine/Scene.hpp"
@@ -34,7 +35,7 @@ using graphics::SphereCollider, graphics::BoxCollider3D, graphics::PlaneCollider
 using std::vector, std::to_string;
 using tags::Tag;
 using physics::PhysicsEngine;
-using glm::radians;
+using glm::radians, glm::inverse;
 using graphics::DirectionalLight;
 using graphics::PointLight;
 using graphics::SpotLight;
@@ -400,7 +401,9 @@ namespace app
 			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, -1, 0));
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_LEFT_SHIFT)) {
-			this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, 1, 0));
+			if (inverse(camera->getCurrentTransform())[3][1] > deltaT) {
+				this->physicsEngine->translateObjectInPlace(camera, deltaT * vec3(0, 1, 0));
+			}
 		}
 		if (glfwGetKey(this->graphicsEngine->window, GLFW_KEY_C)) {
 			//TODO parametrize this
